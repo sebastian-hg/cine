@@ -73,7 +73,7 @@ export class AutenticacionServicio {
     const cliente = this.supabase.cliente;
     if (!cliente) return this.registrarMock(datos);
 
-    const fila = {
+    const filaCamel = {
       email: datos.email.trim().toLowerCase(),
       password: datos.password,
       nombre: datos.nombre,
@@ -86,11 +86,29 @@ export class AutenticacionServicio {
       primeraCompraUsada: false,
     };
 
-    return from(cliente.from('usuarios_cine').insert(fila).select('*').single()).pipe(
+    const filaSnake = {
+      email: datos.email.trim().toLowerCase(),
+      password: datos.password,
+      nombre: datos.nombre,
+      apellido: datos.apellido,
+      fecha_nacimiento: datos.fechaNacimiento,
+      tipo_sangre: datos.tipoSangre,
+      color_ojos: datos.colorOjos,
+      dias_vacaciones: datos.diasVacaciones,
+      rol: 'cliente',
+      primera_compra_usada: false,
+    };
+
+    return from(this.insertarUsuarioConFallback(cliente, filaCamel, filaSnake)).pipe(
       mergeMap(({ data, error }) => {
         if (error) {
           if (error.code === '23505') {
             return throwError(() => new Error('Ya hay una cuenta registrada con ese email.'));
+          }
+          if (error.code === '42501') {
+            return throwError(
+              () => new Error('La policy RLS de usuarios_cine bloquea INSERT para la clave pública.'),
+            );
           }
           return throwError(() => new Error(error.message));
         }
@@ -130,14 +148,7 @@ export class AutenticacionServicio {
       });
     }
 
-    return from(
-      cliente
-        .from('usuarios_cine')
-        .update({ primeraCompraUsada: true })
-        .eq('id', idUsuario)
-        .select('*')
-        .maybeSingle(),
-    ).pipe(
+    return from(this.actualizarPrimeraCompraConFallback(cliente, idUsuario)).pipe(
       mergeMap(({ data, error }) => {
         if (error) return throwError(() => new Error(error.message));
 
@@ -218,6 +229,43 @@ export class AutenticacionServicio {
     return valor === 'cliente' || valor === 'empleado' || valor === 'administrador'
       ? valor
       : 'cliente';
+  }
+
+  private async insertarUsuarioConFallback(
+    cliente: NonNullable<SupabaseServicio['cliente']>,
+    filaCamel: Record<string, unknown>,
+    filaSnake: Record<string, unknown>,
+  ): Promise<{ data: unknown; error: { code?: string; message: string } | null }> {
+    const primerIntento = await cliente.from('usuarios_cine').insert(filaCamel).select('*').single();
+    if (!primerIntento.error) return primerIntento;
+
+    if (primerIntento.error.code !== 'PGRST204') {
+      return primerIntento;
+    }
+
+    return cliente.from('usuarios_cine').insert(filaSnake).select('*').single();
+  }
+
+  private async actualizarPrimeraCompraConFallback(
+    cliente: NonNullable<SupabaseServicio['cliente']>,
+    idUsuario: string,
+  ): Promise<{ data: unknown; error: { code?: string; message: string } | null }> {
+    const primerIntento = await cliente
+      .from('usuarios_cine')
+      .update({ primeraCompraUsada: true })
+      .eq('id', idUsuario)
+      .select('*')
+      .maybeSingle();
+
+    if (!primerIntento.error) return primerIntento;
+    if (primerIntento.error.code !== 'PGRST204') return primerIntento;
+
+    return cliente
+      .from('usuarios_cine')
+      .update({ primera_compra_usada: true })
+      .eq('id', idUsuario)
+      .select('*')
+      .maybeSingle();
   }
 
   private sinPassword(usuario: UsuarioMock): Usuario {

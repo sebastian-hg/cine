@@ -440,6 +440,28 @@ export class SupabaseServicio {
     const url = supabaseConfig.supabaseUrl?.trim();
     const key = supabaseConfig.supabaseKey?.trim();
     if (!url || !key) return null;
-    return createClient(url, key);
+
+    const fetchConApiKey: typeof fetch = async (input, init) => {
+      const objetivo =
+        typeof input === 'string' || input instanceof URL
+          ? new URL(String(input))
+          : new URL(input.url);
+
+      if (objetivo.origin === new URL(url).origin && !objetivo.searchParams.has('apikey')) {
+        objetivo.searchParams.set('apikey', key);
+      }
+
+      return fetch(objetivo.toString(), init);
+    };
+
+    return createClient(url, key, {
+      global: {
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+        },
+        fetch: fetchConApiKey,
+      },
+    });
   }
 }

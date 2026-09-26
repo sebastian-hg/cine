@@ -1,0 +1,90 @@
+<form [formGroup]="FormularioPelicula" (ngSubmit)="enviar()" novalidate>
+  <div class="campo" [class.campo--invalido]="invalido('nombre')">
+    <label for="peli-nombre">Nombre</label>
+    <input id="peli-nombre" type="text" formControlName="nombre" />
+    @if (invalido('nombre')) {
+      <p class="mensaje-campo">Ingresá el nombre de la película.</p>
+    }
+  </div>
+
+  <div class="campo" [class.campo--invalido]="invalido('sinopsis')">
+    <label for="peli-sinopsis">Sinopsis</label>
+    <textarea id="peli-sinopsis" formControlName="sinopsis" rows="3"></textarea>
+    @if (invalido('sinopsis')) {
+      <p class="mensaje-campo">Escribí al menos 20 caracteres.</p>
+    }
+  </div>
+
+  <div class="campo">
+    <label id="etiqueta-generos">Géneros</label>
+    <div class="fichas" role="group" aria-labelledby="etiqueta-generos">
+      @for (genero of generos(); track genero.id) {
+        <button
+          type="button"
+          class="ficha"
+          [class.ficha--activa]="estaElegido(genero.id)"
+          [attr.aria-pressed]="estaElegido(genero.id)"
+          (click)="alternarGenero(genero.id)"
+        >
+          {{ genero.nombre }}
+        </button>
+      }
+    </div>
+    @if (elegidos.size === 0 && FormularioPelicula.touched) {
+      <p class="mensaje-campo">Elegí al menos un género.</p>
+    }
+  </div>
+
+  <div class="rejilla-campos">
+    <div class="campo" [class.campo--invalido]="invalido('duracionMinutos')">
+      <label for="peli-duracion">Duración (minutos)</label>
+      <input id="peli-duracion" type="number" formControlName="duracionMinutos" min="1" max="400" />
+      @if (invalido('duracionMinutos')) {
+        <p class="mensaje-campo">Ingresá una duración válida.</p>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="peli-clasificacion">Clasificación</label>
+      <select id="peli-clasificacion" formControlName="clasificacion">
+        <option value="ATP">ATP</option>
+        <option value="+13">+13</option>
+        <option value="+18">+18</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="peli-estreno">Fecha de estreno</label>
+      <input id="peli-estreno" type="date" formControlName="fechaEstreno" />
+    </div>
+
+    <div class="campo">
+      <label for="peli-poster">Póster</label>
+      <select id="peli-poster" formControlName="poster">
+        @for (n of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track n) {
+          <option [value]="'posters/p' + n + '.svg'">Póster {{ n }}</option>
+        }
+      </select>
+      <p class="pista">Con Supabase acá iría la subida al bucket de Storage.</p>
+    </div>
+
+    <div class="campo">
+      <label for="peli-precio">Precio normal</label>
+      <input id="peli-precio" type="number" formControlName="precioNormal" min="1" step="100" />
+    </div>
+
+    <div class="campo">
+      <label for="peli-preventa">Precio de preventa</label>
+      <input id="peli-preventa" type="number" formControlName="precioPreventa" min="1" step="100" />
+    </div>
+  </div>
+
+  <div class="campo">
+    <label class="inline">
+      <input type="checkbox" formControlName="preventaActivada" class="casilla" />
+      Habilitar preventa (se activa 7 días antes del estreno)
+    </label>
+  </div>
+
+  <button type="submit" class="boton boton--primario">Crear película</button>
+</form>

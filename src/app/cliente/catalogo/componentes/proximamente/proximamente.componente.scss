@@ -1,0 +1,28 @@
+.cabecera {
+  border-bottom: 1px solid var(--borde);
+  background:
+    radial-gradient(80% 120% at 85% 0%, var(--rojo-tenue), transparent 60%),
+    var(--fondo-2);
+
+  &__interior {
+    padding-block: 40px 34px;
+    max-width: 660px;
+  }
+
+  &__bajada {
+    color: var(--texto-suave);
+    margin: 12px 0 0;
+  }
+}
+
+.lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 560px) {
+  .lista {
+    grid-template-columns: 1fr;
+  }
+}

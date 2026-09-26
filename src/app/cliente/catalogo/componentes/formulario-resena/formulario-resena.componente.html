@@ -1,0 +1,30 @@
+@if (puedeCalificar()) {
+  <form class="formulario-resena tarjeta" [formGroup]="FormularioResena" (ngSubmit)="enviar()">
+    <h3>Dejá tu reseña</h3>
+
+    <div class="campo">
+      <label id="etiqueta-estrellas">Tu calificación</label>
+      <app-calificacion-estrellas [valor]="estrellas()" (calificado)="elegirEstrellas($event)" />
+      @if (estrellas() === 0 && FormularioResena.touched) {
+        <p class="mensaje-campo">Elegí cuántas estrellas le ponés.</p>
+      }
+    </div>
+
+    <div class="campo" [class.campo--invalido]="comentarioInvalido">
+      <label for="comentario-resena">Comentario</label>
+      <textarea
+        id="comentario-resena"
+        formControlName="comentario"
+        maxlength="280"
+        placeholder="¿Qué te pareció?"
+      ></textarea>
+      @if (comentarioInvalido) {
+        <p class="mensaje-campo">Escribí al menos 4 caracteres.</p>
+      }
+    </div>
+
+    <button type="submit" class="boton boton--primario">Publicar reseña</button>
+  </form>
+} @else {
+  <p class="bloqueo">{{ motivoBloqueo() }}</p>
+}

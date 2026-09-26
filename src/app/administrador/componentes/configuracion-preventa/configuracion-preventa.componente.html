@@ -1,0 +1,71 @@
+<header class="seccion-cabecera">
+  <div>
+    <p class="etiqueta-seccion">Promociones</p>
+    <h1>Preventa</h1>
+  </div>
+</header>
+
+<p class="nota">
+  La preventa se habilita <strong>película por película</strong> y arranca 7 días antes del estreno.
+  Al llegar la fecha de estreno el precio vuelve solo al normal.
+</p>
+
+@if (filas$ | async; as filas) {
+  <div class="tabla-scroll">
+    <table>
+      <caption class="solo-lectores">Configuración de preventa por película</caption>
+      <thead>
+        <tr>
+          <th scope="col">Película</th>
+          <th scope="col">Estreno</th>
+          <th scope="col" class="numerico">Precio normal</th>
+          <th scope="col" class="numerico">Precio preventa</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Preventa</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (fila of filas; track fila.pelicula.id) {
+          <tr>
+            <td>{{ fila.pelicula.nombre }}</td>
+            <td>{{ fila.pelicula.fechaEstreno | date: 'd MMM y' }}</td>
+            <td class="numerico">{{ fila.pelicula.precioNormal | pipeMonedaArs }}</td>
+            <td class="numerico">
+              <label class="solo-lectores" [attr.for]="'preventa-' + fila.pelicula.id">
+                Precio de preventa de {{ fila.pelicula.nombre }}
+              </label>
+              <input
+                [id]="'preventa-' + fila.pelicula.id"
+                class="puntos"
+                type="number"
+                min="1"
+                step="100"
+                [value]="fila.pelicula.precioPreventa"
+                (change)="cambiarPrecio(fila.pelicula, $event)"
+              />
+            </td>
+            <td>
+              @if (fila.estado.activa) {
+                <span class="insignia insignia--ambar">En preventa</span>
+              } @else if (fila.estado.proximamente) {
+                <span class="insignia">Faltan {{ fila.estado.diasParaEstreno }} días</span>
+              } @else {
+                <span class="insignia insignia--ok">Estrenada</span>
+              }
+            </td>
+            <td>
+              <button
+                type="button"
+                class="boton boton--chico"
+                [class.boton--fantasma]="fila.pelicula.preventaActivada"
+                (click)="alternar(fila.pelicula)"
+              >
+                {{ fila.pelicula.preventaActivada ? 'Habilitada' : 'Deshabilitada' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

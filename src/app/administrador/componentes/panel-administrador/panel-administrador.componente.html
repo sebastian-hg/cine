@@ -1,0 +1,27 @@
+<div class="panel">
+  <aside class="panel__lateral">
+    <div class="panel__marca">
+      <p class="etiqueta-seccion">Administración</p>
+      @if (usuario$ | async; as usuario) {
+        <p class="panel__usuario">{{ usuario.nombre }} {{ usuario.apellido }}</p>
+      }
+    </div>
+
+    <nav aria-label="Secciones de administración">
+      @for (grupo of grupos; track grupo.nombre) {
+        <p class="panel__grupo">{{ grupo.nombre }}</p>
+        <ul>
+          @for (entrada of grupo.entradas; track entrada.ruta) {
+            <li>
+              <a [routerLink]="entrada.ruta" routerLinkActive="activo">{{ entrada.etiqueta }}</a>
+            </li>
+          }
+        </ul>
+      }
+    </nav>
+  </aside>
+
+  <div class="panel__contenido">
+    <router-outlet />
+  </div>
+</div>

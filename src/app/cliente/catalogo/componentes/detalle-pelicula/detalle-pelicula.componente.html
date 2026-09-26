@@ -1,0 +1,101 @@
+@if (pelicula$ | async; as pelicula) {
+  <article>
+    <header class="cabecera">
+      <div class="cabecera__fondo" [style.background-image]="'url(' + pelicula.poster + ')'"></div>
+
+      <div class="contenedor cabecera__interior">
+        <img class="cabecera__poster" [src]="pelicula.poster" [alt]="'Póster de ' + pelicula.nombre" />
+
+        <div class="cabecera__datos">
+          <h1>{{ pelicula.nombre }}</h1>
+
+          <div class="cabecera__meta">
+            <app-insignia-clasificacion [clasificacion]="pelicula.clasificacion" />
+            <span>{{ pelicula.duracionMinutos | pipeDuracion }}</span>
+            @if (nombresGenero$ | async; as generos) {
+              <span>{{ generos.join(' · ') }}</span>
+            }
+            @if (modalidades$ | async; as modalidades) {
+              @if (modalidades.length) {
+                <span>{{ modalidades.join(' / ') }}</span>
+              }
+            }
+            @if (idiomas$ | async; as idiomas) {
+              @if (idiomas.length) {
+                <span class="capitalizar">{{ idiomas.join(' / ') }}</span>
+              }
+            }
+          </div>
+
+          @if (resumen$ | async; as resumen) {
+            @if (resumen.cantidad > 0) {
+              <p class="cabecera__puntuacion">
+                <span class="cabecera__estrella" aria-hidden="true">★</span>
+                <strong>{{ resumen.promedio.toFixed(1) }}</strong>
+                <span class="cabecera__resenas">sobre {{ resumen.cantidad }} reseñas</span>
+              </p>
+            }
+          }
+
+          <p class="cabecera__sinopsis">{{ pelicula.sinopsis }}</p>
+
+          @if (preventa$ | async; as preventa) {
+            @if (preventa.activa) {
+              <div class="preventa">
+                <p class="preventa__titulo">Preventa abierta</p>
+                <p class="preventa__texto">
+                  Se estrena el {{ pelicula.fechaEstreno | date: 'd \'de\' MMMM' }} y las entradas
+                  están a {{ pelicula.precioPreventa | pipeMonedaArs }} en lugar de
+                  {{ pelicula.precioNormal | pipeMonedaArs }}. El precio vuelve al normal el día del
+                  estreno.
+                </p>
+              </div>
+            } @else if (preventa.proximamente) {
+              <div class="preventa preventa--cerrada">
+                <p class="preventa__titulo">Próximo estreno</p>
+                <p class="preventa__texto">
+                  Llega el {{ pelicula.fechaEstreno | date: 'd \'de\' MMMM' }}. Todavía no hay
+                  entradas a la venta.
+                </p>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </header>
+
+    <section class="contenedor seccion">
+      <div class="seccion-cabecera">
+        <div>
+          <p class="etiqueta-seccion">Funciones</p>
+          <h2>Elegí día y horario</h2>
+        </div>
+      </div>
+      <app-listado-funciones
+        [funciones]="(funciones$ | async) ?? []"
+        (funcionElegida)="irAButacas($event)"
+      />
+    </section>
+
+    <section class="contenedor seccion">
+      <div class="seccion-cabecera">
+        <div>
+          <p class="etiqueta-seccion">Opiniones</p>
+          <h2>Reseñas</h2>
+        </div>
+      </div>
+
+      <div class="resenas-cuerpo">
+        <app-listado-resenas [resenas]="(resenas$ | async) ?? []" [resumen]="resumen$ | async" />
+
+        <app-formulario-resena
+          [puedeCalificar]="(puedeResenar$ | async) ?? false"
+          [motivoBloqueo]="(motivoBloqueoResena$ | async) ?? ''"
+          (resenaEnviada)="publicarResena(pelicula.id, $event)"
+        />
+      </div>
+    </section>
+  </article>
+} @else {
+  <app-cargando mensaje="Cargando la película…" />
+}

@@ -1,0 +1,63 @@
+.graficos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.grafico {
+  padding: 18px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+
+  h2 {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+}
+
+.barras {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+
+  li {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  &__etiqueta {
+    font-size: 13px;
+    color: var(--texto-suave);
+  }
+
+  &__pista {
+    position: relative;
+    display: block;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--superficie-3);
+    overflow: hidden;
+  }
+
+  &__relleno {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--ambar), var(--ambar-fuerte));
+    min-width: 3px;
+  }
+
+  &__valor {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--texto-tenue);
+  }
+
+  &--candy .barras__relleno {
+    background: linear-gradient(90deg, var(--rojo), var(--rojo-fuerte));
+  }
+}

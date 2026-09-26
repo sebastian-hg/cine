@@ -1,0 +1,76 @@
+<section class="portada">
+  <div class="contenedor portada__interior">
+    <p class="etiqueta-seccion">En cartelera</p>
+    <h1>Elegí tu función</h1>
+    <p class="portada__bajada">
+      Butacas en tiempo real, Candy Bar y entradas con QR. Comprá sin registrarte, o creá una cuenta
+      y sumá puntos en cada compra.
+    </p>
+  </div>
+</section>
+
+@if (cartelera$ | async; as cartelera) {
+  @if (!(hayFiltro$ | async)) {
+    @if (masVendidas$ | async; as top) {
+      @if (top.length) {
+        <section class="contenedor seccion">
+          <div class="seccion-cabecera">
+            <div>
+              <p class="etiqueta-seccion">Lo más visto</p>
+              <h2>Las 3 más vendidas</h2>
+            </div>
+          </div>
+          <app-mas-vendidas
+            [peliculas]="top"
+            [nombresGenero]="(nombresGenero$ | async) ?? sinGeneros"
+            (peliculaElegida)="verDetalle($event)"
+          />
+        </section>
+      }
+    }
+  }
+
+  <section class="contenedor seccion">
+    <div class="seccion-cabecera">
+      <div>
+        <p class="etiqueta-seccion">Cartelera completa</p>
+        <h2>Todas las películas</h2>
+      </div>
+      <a routerLink="/proximamente" class="boton boton--fantasma boton--chico">
+        Ver próximos estrenos →
+      </a>
+    </div>
+
+    <div class="controles">
+      <app-buscador (textoBuscado)="buscar($event)" />
+      <app-filtro-generos
+        [generos]="(generos$ | async) ?? []"
+        [seleccionados]="(seleccionados$ | async) ?? []"
+        (generosSeleccionados)="filtrar($event)"
+      />
+    </div>
+
+    <app-cartelera
+      [peliculas]="cartelera"
+      [nombresGenero]="(nombresGenero$ | async) ?? sinGeneros"
+      (peliculaElegida)="verDetalle($event)"
+    />
+  </section>
+} @else {
+  <app-cargando mensaje="Cargando la cartelera…" />
+}
+
+@if (combosDestacados$ | async; as combos) {
+  @if (combos.length) {
+    <section class="contenedor seccion">
+      <div class="seccion-cabecera">
+        <div>
+          <p class="etiqueta-seccion">Candy Bar</p>
+          <h2>Combos destacados</h2>
+        </div>
+        <a routerLink="/candy" class="boton boton--fantasma boton--chico">Ver todo el Candy Bar →</a>
+      </div>
+      <app-combos-destacados [combos]="combos" (comboElegido)="agregarCombo($event)" />
+    </section>
+  }
+}

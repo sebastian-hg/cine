@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Caja de bombones">
+  <rect width="200" height="200" rx="18" fill="#241318"/>
+  <rect x="44" y="70" width="112" height="86" rx="10" fill="#7a3b2a"/><rect x="44" y="56" width="112" height="22" rx="8" fill="#a8523a"/><g fill="#3d1f16"><circle cx="72" cy="102" r="11"/><circle cx="72" cy="132" r="11"/><circle cx="100" cy="102" r="11"/><circle cx="100" cy="132" r="11"/><circle cx="128" cy="102" r="11"/><circle cx="128" cy="132" r="11"/></g>
+</svg>

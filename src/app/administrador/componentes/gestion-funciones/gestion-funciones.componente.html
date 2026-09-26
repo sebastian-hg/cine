@@ -1,0 +1,74 @@
+<header class="seccion-cabecera">
+  <div>
+    <p class="etiqueta-seccion">Programación</p>
+    <h1>Funciones</h1>
+  </div>
+</header>
+
+<div class="cuerpo">
+  <section class="bloque">
+    <h2>Programar nuevas funciones</h2>
+    <app-formulario-funcion
+      [peliculas]="(peliculas$ | async) ?? []"
+      [procesando]="procesando()"
+      (funcionSolicitada)="programar($event)"
+    />
+
+    @if (resultados().length) {
+      <div class="resultados">
+        <h3>Resultado de la última programación</h3>
+        <ul>
+          @for (resultado of resultados(); track $index) {
+            <li [class.resultados--ok]="resultado.asignada" [class.resultados--mal]="!resultado.asignada">
+              @if (resultado.asignada) {
+                <span aria-hidden="true">✓</span>
+                {{ resultado.funcion.inicio | date: 'EEE d MMM, HH:mm' }} →
+                <strong>{{ resultado.nombreSala }}</strong>
+              } @else {
+                <span aria-hidden="true">✕</span>
+                {{ resultado.motivo }}
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </section>
+
+  <section class="bloque">
+    <h2>Funciones programadas</h2>
+
+    @if (funciones$ | async; as funciones) {
+      @if (funciones.length) {
+        <p class="conteo">{{ funciones.length }} funciones en la grilla.</p>
+        <div class="tabla-scroll">
+          <table>
+            <caption class="solo-lectores">Funciones programadas</caption>
+            <thead>
+              <tr>
+                <th scope="col">Película</th>
+                <th scope="col">Fecha y hora</th>
+                <th scope="col">Sala</th>
+                <th scope="col">Formato</th>
+                <th scope="col" class="numerico">Precio</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (funcion of funciones; track funcion.id) {
+                <tr>
+                  <td>{{ funcion.nombrePelicula }}</td>
+                  <td>{{ funcion.inicio | date: 'EEE d MMM, HH:mm' }}</td>
+                  <td>{{ funcion.nombreSala }}</td>
+                  <td>{{ funcion | pipeModalidad }}</td>
+                  <td class="numerico">{{ funcion.precio | pipeMonedaArs }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="vacio">No hay funciones programadas.</p>
+      }
+    }
+  </section>
+</div>

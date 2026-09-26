@@ -1,0 +1,90 @@
+<form class="formulario" [formGroup]="FormularioFuncion" (ngSubmit)="enviar()" novalidate>
+  <div class="campo" [class.campo--invalido]="invalido('idPelicula')">
+    <label for="funcion-pelicula">Película</label>
+    <select id="funcion-pelicula" formControlName="idPelicula">
+      <option value="">Elegí una película…</option>
+      @for (pelicula of peliculas(); track pelicula.id) {
+        <option [value]="pelicula.id">
+          {{ pelicula.nombre }} ({{ pelicula.duracionMinutos }} min)
+        </option>
+      }
+    </select>
+    @if (invalido('idPelicula')) {
+      <p class="mensaje-campo">Elegí la película de la función.</p>
+    }
+  </div>
+
+  <div class="campo">
+    <label id="etiqueta-dias">Días de la semana</label>
+    <div class="dias" role="group" aria-labelledby="etiqueta-dias">
+      @for (dia of diasSemana; track dia.indice) {
+        <button
+          type="button"
+          class="dia"
+          [class.dia--activo]="estaElegido(dia.indice)"
+          [attr.aria-pressed]="estaElegido(dia.indice)"
+          (click)="alternarDia(dia.indice)"
+        >
+          {{ dia.nombre }}
+        </button>
+      }
+    </div>
+    <p class="pista">Se programan las próximas {{ semanas }} semanas.</p>
+    @if (diasElegidos().size === 0 && FormularioFuncion.touched) {
+      <p class="mensaje-campo">Elegí al menos un día.</p>
+    }
+  </div>
+
+  <div class="rejilla-campos">
+    <div class="campo" [class.campo--invalido]="invalido('horario')">
+      <label for="funcion-horario">Horario</label>
+      <input id="funcion-horario" type="time" formControlName="horario" />
+      @if (invalido('horario')) {
+        <p class="mensaje-campo">Usá el formato HH:mm.</p>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="funcion-modalidad">Modalidad</label>
+      <select id="funcion-modalidad" formControlName="modalidad">
+        <option value="2D">2D</option>
+        <option value="3D">3D</option>
+        <option value="4D">4D</option>
+        <option value="5D">5D</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="funcion-idioma">Idioma</label>
+      <select id="funcion-idioma" formControlName="idioma">
+        <option value="castellano">Castellano</option>
+        <option value="subtitulada">Subtitulada</option>
+      </select>
+    </div>
+
+    <div class="campo" [class.campo--invalido]="invalido('precio')">
+      <label for="funcion-precio">Precio</label>
+      <input id="funcion-precio" type="number" formControlName="precio" min="1" step="100" />
+      @if (invalido('precio')) {
+        <p class="mensaje-campo">Ingresá un precio mayor a cero.</p>
+      }
+    </div>
+  </div>
+
+  <div class="aviso-sala">
+    <span class="aviso-sala__icono" aria-hidden="true">🏛️</span>
+    <p>
+      <strong>La sala la asigna el sistema.</strong> Busca una libre contemplando la duración de la
+      película y dejando 30 minutos entre funciones. Si no hay ninguna disponible en ese horario, te
+      avisamos y no se crea la función.
+    </p>
+  </div>
+
+  <button type="submit" class="boton boton--primario" [disabled]="procesando()">
+    @if (procesando()) {
+      Programando…
+    } @else {
+      Programar funciones
+    }
+  </button>
+</form>

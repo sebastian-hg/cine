@@ -1,0 +1,33 @@
+<section class="cabecera">
+  <div class="contenedor cabecera__interior">
+    <p class="etiqueta-seccion">Próximamente</p>
+    <h1>Lo que se viene</h1>
+    <p class="cabecera__bajada">
+      Películas que todavía no se estrenaron. Cuando la preventa se habilita, podés comprar con
+      precio especial hasta el día del estreno.
+    </p>
+  </div>
+</section>
+
+<div class="contenedor seccion">
+  @if (proximas$ | async; as proximas) {
+    @if (proximas.length) {
+      <div class="lista">
+        @for (entrada of proximas; track entrada.pelicula.id) {
+          <app-tarjeta-proximamente
+            [pelicula]="entrada.pelicula"
+            [preventaActiva]="entrada.estado.activa"
+            [diasParaEstreno]="entrada.estado.diasParaEstreno"
+            [suscrito]="((suscritos$ | async) ?? sinSuscripciones).has(entrada.pelicula.id)"
+            [puedeSuscribirse]="(autenticado$ | async) ?? false"
+            (avisarme)="alternarAlerta($event)"
+          />
+        }
+      </div>
+    } @else {
+      <p class="vacio">No hay estrenos anunciados por ahora.</p>
+    }
+  } @else {
+    <app-cargando mensaje="Buscando próximos estrenos…" />
+  }
+</div>

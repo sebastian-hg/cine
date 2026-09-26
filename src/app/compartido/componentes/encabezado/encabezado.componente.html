@@ -1,0 +1,50 @@
+<header class="encabezado">
+  <div class="contenedor barra">
+    <a routerLink="/" class="marca" aria-label="Cine — ir al inicio">
+      <span class="marca__icono" aria-hidden="true">◗</span>
+      <span class="marca__texto">CINE</span>
+    </a>
+
+    <nav class="navegacion" aria-label="Navegación principal">
+      <a routerLink="/" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">
+        Cartelera
+      </a>
+      <a routerLink="/proximamente" routerLinkActive="activo">Próximamente</a>
+      <a routerLink="/candy" routerLinkActive="activo">Candy Bar</a>
+
+      @if (usuario(); as u) {
+        @if (u.rol === 'empleado') {
+          <a routerLink="/empleado" routerLinkActive="activo" class="navegacion__rol">Validar QR</a>
+        }
+        @if (u.rol === 'administrador') {
+          <a routerLink="/administrador" routerLinkActive="activo" class="navegacion__rol">
+            Administración
+          </a>
+        }
+      }
+    </nav>
+
+    <div class="acciones">
+      <a routerLink="/compra/carrito" class="carrito" aria-label="Ver carrito">
+        <span aria-hidden="true">🛒</span>
+        @if (itemsCarrito() > 0) {
+          <span class="carrito__cuenta">{{ itemsCarrito() }}</span>
+          <span class="solo-lectores">{{ itemsCarrito() }} artículos en el carrito</span>
+        }
+      </a>
+
+      @if (usuario(); as u) {
+        <a routerLink="/cuenta/perfil" class="usuario">
+          <span class="usuario__inicial" aria-hidden="true">{{ u.nombre.charAt(0) }}</span>
+          <span class="usuario__nombre">{{ u.nombre }}</span>
+        </a>
+        <button type="button" class="boton boton--fantasma boton--chico" (click)="cerrarSesion.emit()">
+          Salir
+        </button>
+      } @else {
+        <a routerLink="/ingresar" class="boton boton--fantasma boton--chico">Ingresar</a>
+        <a routerLink="/registrarse" class="boton boton--primario boton--chico">Crear cuenta</a>
+      }
+    </div>
+  </div>
+</header>

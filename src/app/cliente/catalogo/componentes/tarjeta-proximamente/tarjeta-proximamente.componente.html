@@ -1,0 +1,57 @@
+<article class="proxima">
+  <a [routerLink]="['/pelicula', pelicula().id]" class="proxima__poster">
+    <img [src]="pelicula().poster" [alt]="'Póster de ' + pelicula().nombre" loading="lazy" />
+  </a>
+
+  <div class="proxima__cuerpo">
+    <div class="proxima__encabezado">
+      <h3>
+        <a [routerLink]="['/pelicula', pelicula().id]">{{ pelicula().nombre }}</a>
+      </h3>
+      <app-insignia-clasificacion [clasificacion]="pelicula().clasificacion" />
+    </div>
+
+    <p class="proxima__estreno">
+      Estreno el {{ pelicula().fechaEstreno | date: 'd \'de\' MMMM' }}
+      <span class="proxima__cuenta">
+        @if (diasParaEstreno() === 1) {
+          · mañana
+        } @else {
+          · en {{ diasParaEstreno() }} días
+        }
+      </span>
+    </p>
+
+    <p class="proxima__sinopsis">{{ pelicula().sinopsis }}</p>
+
+    <div class="proxima__pie">
+      @if (preventaActiva()) {
+        <span class="insignia insignia--ambar">
+          Preventa · {{ pelicula().precioPreventa | pipeMonedaArs }}
+        </span>
+        <a [routerLink]="['/pelicula', pelicula().id]" class="boton boton--primario boton--chico">
+          Comprar en preventa
+        </a>
+      } @else {
+        <span class="insignia">Preventa no habilitada</span>
+        @if (puedeSuscribirse()) {
+          <button
+            type="button"
+            class="boton boton--chico"
+            [class.boton--fantasma]="!suscrito()"
+            [attr.aria-pressed]="suscrito()"
+            (click)="avisarme.emit(pelicula().id)"
+          >
+            @if (suscrito()) {
+              ✓ Te avisamos
+            } @else {
+              Avisarme
+            }
+          </button>
+        } @else {
+          <span class="proxima__nota">Ingresá para que te avisemos</span>
+        }
+      }
+    </div>
+  </div>
+</article>

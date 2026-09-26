@@ -1,0 +1,43 @@
+<article class="tarjeta-peli">
+  <a
+    [routerLink]="['/pelicula', pelicula().id]"
+    class="tarjeta-peli__enlace"
+    (click)="verDetalle.emit(pelicula().id)"
+  >
+    <div class="tarjeta-peli__poster">
+      <img [src]="pelicula().poster" [alt]="'Póster de ' + pelicula().nombre" loading="lazy" />
+      @if (posicion() !== null) {
+        <span class="tarjeta-peli__posicion" aria-hidden="true">{{ posicion() }}</span>
+      }
+      <span class="tarjeta-peli__clasificacion">
+        <app-insignia-clasificacion [clasificacion]="pelicula().clasificacion" />
+      </span>
+    </div>
+
+    <div class="tarjeta-peli__cuerpo">
+      <h3 class="tarjeta-peli__nombre">{{ pelicula().nombre }}</h3>
+
+      <p class="tarjeta-peli__meta">
+        {{ pelicula().duracionMinutos | pipeDuracion }}
+        @if (generos().length) {
+          <span aria-hidden="true"> · </span>{{ generos().join(', ') }}
+        }
+      </p>
+
+      <p class="tarjeta-peli__estrellas">
+        @if (pelicula().cantidadResenas > 0) {
+          <span class="estrellas" aria-hidden="true">
+            {{ pelicula().puntuacionPromedio | pipeEstrellas }}
+          </span>
+          <span class="solo-lectores">
+            Puntuación {{ pelicula().puntuacionPromedio.toFixed(1) }} de 5,
+            {{ pelicula().cantidadResenas }} reseñas
+          </span>
+          <span class="tarjeta-peli__conteo">({{ pelicula().cantidadResenas }})</span>
+        } @else {
+          <span class="tarjeta-peli__conteo">Sin reseñas todavía</span>
+        }
+      </p>
+    </div>
+  </a>
+</article>

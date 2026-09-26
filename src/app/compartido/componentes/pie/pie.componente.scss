@@ -1,0 +1,39 @@
+.pie {
+  margin-top: 64px;
+  border-top: 1px solid var(--borde);
+  background: var(--fondo-2);
+
+  &__interior {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 40px;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-block: 28px;
+  }
+
+  &__marca {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin: 0 0 4px;
+  }
+
+  &__nota {
+    color: var(--texto-tenue);
+    font-size: 13px;
+    margin: 0;
+  }
+
+  &__enlaces {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+
+    a {
+      color: var(--texto-suave);
+      font-size: 13.5px;
+    }
+  }
+}

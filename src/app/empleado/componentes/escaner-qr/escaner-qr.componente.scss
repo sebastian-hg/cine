@@ -1,0 +1,152 @@
+.escaner {
+  display: grid;
+  gap: 14px;
+}
+
+.visor {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radio);
+  background: #0a0908;
+  border: 1px solid var(--borde);
+  overflow: hidden;
+
+  &__texto {
+    margin: 0;
+    font-size: 13px;
+    color: var(--texto-tenue);
+    z-index: 1;
+  }
+
+  &__marco {
+    position: absolute;
+    inset: 18%;
+
+    span {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      border: 3px solid var(--borde-fuerte);
+
+      &:nth-child(1) {
+        top: 0;
+        left: 0;
+        border-right: 0;
+        border-bottom: 0;
+      }
+      &:nth-child(2) {
+        top: 0;
+        right: 0;
+        border-left: 0;
+        border-bottom: 0;
+      }
+      &:nth-child(3) {
+        bottom: 0;
+        left: 0;
+        border-right: 0;
+        border-top: 0;
+      }
+      &:nth-child(4) {
+        bottom: 0;
+        right: 0;
+        border-left: 0;
+        border-top: 0;
+      }
+    }
+  }
+
+  &--activo .visor__marco span {
+    border-color: var(--ambar);
+  }
+
+  &--activo::after {
+    content: '';
+    position: absolute;
+    left: 18%;
+    right: 18%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--ambar), transparent);
+    animation: barrer 2.2s ease-in-out infinite;
+  }
+}
+
+@keyframes barrer {
+  0%,
+  100% {
+    top: 20%;
+  }
+  50% {
+    top: 78%;
+  }
+}
+
+.simulador {
+  padding: 14px;
+  border-radius: var(--radio);
+  border: 1px dashed var(--borde-fuerte);
+  background: var(--superficie);
+
+  &__titulo {
+    margin: 0 0 3px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ambar);
+  }
+
+  &__nota,
+  &__vacio {
+    margin: 0 0 10px;
+    font-size: 12.5px;
+    color: var(--texto-tenue);
+  }
+
+  &__vacio {
+    margin-bottom: 0;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+
+  button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 11px;
+    background: var(--superficie-2);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-s);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+
+    &:hover {
+      border-color: var(--ambar);
+    }
+  }
+
+  &__qr {
+    font-family: var(--mono);
+    font-size: 12px;
+    word-break: break-all;
+  }
+
+  &__estado {
+    font-size: 11px;
+    color: var(--texto-tenue);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+}

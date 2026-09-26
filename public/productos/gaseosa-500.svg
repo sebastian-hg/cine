@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Gaseosa 500 ml">
+  <rect width="200" height="200" rx="18" fill="#141a2b"/>
+  
+  <path d="M68 54 L132 54 L122 160 Q121 168 113 168 L87 168 Q79 168 78 160 Z" fill="#b3391f" opacity="0.9"/>
+  <rect x="64" y="46" width="72" height="12" rx="6" fill="#ffffff" opacity="0.85"/>
+  <rect x="112" y="18" width="9" height="42" rx="4" fill="#ffffff" opacity="0.8" transform="rotate(14 116 39)"/>
+</svg>

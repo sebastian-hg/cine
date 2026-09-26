@@ -1,0 +1,93 @@
+@if (compra$ | async; as compra) {
+  <div class="contenedor seccion">
+    <div class="exito">
+      <span class="exito__marca" aria-hidden="true">✓</span>
+      <div>
+        <h1>¡Listo! Tu compra está confirmada</h1>
+        <p class="exito__texto">
+          Guardá este código. Sirve para entrar a la sala
+          @if ((itemsCandy$ | async)?.length) {
+            y para retirar lo que pediste en el Candy Bar.
+          } @else {
+            .
+          }
+        </p>
+      </div>
+    </div>
+
+    <div class="entrada">
+      <div class="entrada__qr">
+        <app-codigo-qr [contenido]="compra.idQr" [lado]="200" />
+        <p class="entrada__codigo">{{ compra.idQr }}</p>
+        <button type="button" class="boton boton--primario boton--bloque" (click)="descargarPdf()">
+          Descargar entrada en PDF
+        </button>
+      </div>
+
+      <div class="entrada__datos">
+        @if (pelicula$ | async; as pelicula) {
+          @if (funcion$ | async; as funcion) {
+            <h2>{{ pelicula.nombre }}</h2>
+            <dl class="datos">
+              <div>
+                <dt>Fecha</dt>
+                <dd>{{ funcion.inicio | date: 'EEEE d \'de\' MMMM' }}</dd>
+              </div>
+              <div>
+                <dt>Hora</dt>
+                <dd>{{ funcion.inicio | date: 'HH:mm' }}</dd>
+              </div>
+              <div>
+                <dt>Sala</dt>
+                <dd>{{ funcion.nombreSala }}</dd>
+              </div>
+              <div>
+                <dt>Formato</dt>
+                <dd>{{ funcion | pipeModalidad }}</dd>
+              </div>
+              <div>
+                <dt>Butacas</dt>
+                <dd>{{ compra.butacas.join(', ') }}</dd>
+              </div>
+              <div>
+                <dt>Clasificación</dt>
+                <dd>{{ pelicula.clasificacion }}</dd>
+              </div>
+            </dl>
+          }
+        }
+
+        @if (itemsCandy$ | async; as candy) {
+          @if (candy.length) {
+            <section class="candy">
+              <h3>Para retirar en el Candy Bar</h3>
+              <ul>
+                @for (item of candy; track $index) {
+                  <li>{{ item.cantidad }}× {{ item.nombre }}</li>
+                }
+              </ul>
+              <p class="candy__nota">
+                Mostrá el mismo código en el mostrador. El retiro se valida una sola vez, y es
+                independiente del ingreso a la sala.
+              </p>
+            </section>
+          }
+        }
+
+        <p class="entrada__total">
+          Pagaste <strong>{{ compra.desglose.aPagar | pipeMonedaArs }}</strong>
+          @if (compra.desglose.puntosGanados > 0) {
+            <span class="entrada__puntos">· sumaste {{ compra.desglose.puntosGanados }} puntos</span>
+          }
+        </p>
+      </div>
+    </div>
+
+    <div class="acciones">
+      <a routerLink="/" class="boton boton--fantasma">Volver a la cartelera</a>
+      <a routerLink="/cuenta/compras" class="boton boton--fantasma">Ver mis compras</a>
+    </div>
+  </div>
+} @else {
+  <app-cargando mensaje="Buscando tu compra…" />
+}

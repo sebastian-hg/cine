@@ -1,0 +1,92 @@
+.panel {
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  min-height: calc(100vh - var(--alto-encabezado));
+
+  &__lateral {
+    border-right: 1px solid var(--borde);
+    background: var(--fondo-2);
+    padding: 20px 12px;
+    position: sticky;
+    top: var(--alto-encabezado);
+    align-self: start;
+    max-height: calc(100vh - var(--alto-encabezado));
+    overflow-y: auto;
+  }
+
+  &__marca {
+    padding: 0 10px 14px;
+    border-bottom: 1px solid var(--borde);
+    margin-bottom: 14px;
+  }
+
+  &__usuario {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  &__grupo {
+    margin: 14px 0 5px;
+    padding: 0 10px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--texto-tenue);
+    font-weight: 700;
+  }
+
+  nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  nav a {
+    display: block;
+    padding: 6px 10px;
+    border-radius: var(--radio-s);
+    color: var(--texto-suave);
+    font-size: 13.5px;
+
+    &:hover {
+      background: var(--superficie-2);
+      color: var(--texto);
+      text-decoration: none;
+    }
+
+    &.activo {
+      background: var(--ambar-tenue);
+      color: var(--ambar-fuerte);
+      font-weight: 600;
+    }
+  }
+
+  &__contenido {
+    min-width: 0;
+    padding: 24px;
+  }
+}
+
+@media (max-width: 860px) {
+  .panel {
+    grid-template-columns: 1fr;
+
+    &__lateral {
+      position: static;
+      max-height: none;
+      border-right: 0;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    &__contenido {
+      padding: 20px 16px;
+    }
+  }
+}

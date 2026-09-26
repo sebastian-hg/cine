@@ -1,0 +1,129 @@
+.cabecera {
+  position: relative;
+  border-bottom: 1px solid var(--borde);
+  overflow: hidden;
+
+  &__fondo {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center 30%;
+    filter: blur(28px) saturate(1.3);
+    opacity: 0.28;
+    transform: scale(1.15);
+  }
+
+  &__interior {
+    position: relative;
+    display: flex;
+    gap: 28px;
+    padding-block: 36px;
+    align-items: flex-start;
+  }
+
+  &__poster {
+    flex-shrink: 0;
+    width: 210px;
+    aspect-ratio: 2 / 3;
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    object-fit: cover;
+  }
+
+  &__datos {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    margin-top: 12px;
+    font-size: 13.5px;
+    color: var(--texto-suave);
+  }
+
+  &__puntuacion {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    margin: 14px 0 0;
+    font-size: 15px;
+  }
+
+  &__estrella {
+    color: var(--ambar);
+    font-size: 18px;
+  }
+
+  &__resenas {
+    color: var(--texto-tenue);
+    font-size: 13px;
+  }
+
+  &__sinopsis {
+    margin: 16px 0 0;
+    max-width: 62ch;
+    color: var(--texto-suave);
+    font-size: 15.5px;
+  }
+}
+
+.capitalizar::first-letter {
+  text-transform: uppercase;
+}
+
+.preventa {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-radius: var(--radio);
+  background: var(--ambar-tenue);
+  border: 1px solid color-mix(in srgb, var(--ambar) 40%, transparent);
+  max-width: 60ch;
+
+  &__titulo {
+    margin: 0 0 4px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ambar-fuerte);
+  }
+
+  &__texto {
+    margin: 0;
+    font-size: 14px;
+    color: var(--texto-suave);
+  }
+
+  &--cerrada {
+    background: var(--superficie-2);
+    border-color: var(--borde-fuerte);
+
+    .preventa__titulo {
+      color: var(--texto-suave);
+    }
+  }
+}
+
+.resenas-cuerpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .cabecera__interior {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .cabecera__poster {
+    width: 148px;
+  }
+  .resenas-cuerpo {
+    grid-template-columns: 1fr;
+  }
+}

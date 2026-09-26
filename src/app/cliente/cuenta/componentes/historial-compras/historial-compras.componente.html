@@ -1,0 +1,44 @@
+<div class="contenedor seccion">
+  <header class="seccion-cabecera">
+    <div>
+      <p class="etiqueta-seccion">Tu cuenta</p>
+      <h1>Historial de compras</h1>
+    </div>
+    <a routerLink="/cuenta/perfil" class="boton boton--fantasma boton--chico">← Volver al perfil</a>
+  </header>
+
+  <p class="nota">
+    Podés cancelar hasta <strong>2 horas antes</strong> de la función. No hay devolución de dinero:
+    se genera crédito en tu cuenta, que podés usar en cualquier compra futura.
+  </p>
+
+  @if (compras$ | async; as compras) {
+    @if (compras.length) {
+      <div class="lista">
+        @for (compra of compras; track compra.id) {
+          <app-tarjeta-compra [compra]="compra" (cancelar)="pedirConfirmacion($event)" />
+        }
+      </div>
+    } @else {
+      <div class="vacio">
+        <p>Todavía no compraste nada.</p>
+        <a routerLink="/" class="boton boton--primario">Ver la cartelera</a>
+      </div>
+    }
+  }
+</div>
+
+@if (porCancelar(); as compra) {
+  <app-dialogo-confirmacion
+    titulo="¿Cancelar esta compra?"
+    [mensaje]="
+      'Se liberan tus butacas y te acreditamos ' +
+      (compra.desglose.aPagar + compra.desglose.creditoAplicado | pipeMonedaArs) +
+      ' como crédito. No hay devolución de dinero y la acción no se puede deshacer.'
+    "
+    textoConfirmar="Sí, cancelar la compra"
+    [peligroso]="true"
+    (confirmado)="confirmarCancelacion()"
+    (cancelado)="cerrarDialogo()"
+  />
+}

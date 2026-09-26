@@ -1,0 +1,20 @@
+<a class="saltar-al-contenido" href="#contenido">Saltar al contenido</a>
+
+<app-encabezado
+  [usuario]="usuario$ | async"
+  [itemsCarrito]="(itemsCarrito$ | async) ?? 0"
+  (cerrarSesion)="alCerrarSesion()"
+/>
+
+@if (cargando.cargando$ | async) {
+  <div class="barra-carga" role="status">
+    <span class="solo-lectores">Cargando</span>
+  </div>
+}
+
+<main id="contenido" tabindex="-1">
+  <router-outlet />
+</main>
+
+<app-pie />
+<app-avisos />

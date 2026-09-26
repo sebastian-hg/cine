@@ -1,0 +1,97 @@
+<section class="cabecera">
+  <div class="contenedor cabecera__interior">
+    <p class="etiqueta-seccion">Candy Bar</p>
+    <h1>Sumá algo para la función</h1>
+    <p class="cabecera__bajada">
+      Todo lo que agregues acá se cobra junto con tus entradas y se retira con el mismo código QR.
+    </p>
+  </div>
+</section>
+
+<div class="contenedor seccion">
+  @if (combos$ | async; as combos) {
+    @if (combos.length) {
+      <section class="bloque">
+        <div class="seccion-cabecera">
+          <div>
+            <p class="etiqueta-seccion">Conviene más</p>
+            <h2>Combos</h2>
+          </div>
+        </div>
+
+        <div class="rejilla">
+          @for (combo of combos; track combo.id) {
+            <article class="combo">
+              <img class="combo__imagen" [src]="combo.imagen" [alt]="combo.nombre" loading="lazy" />
+              <div class="combo__cuerpo">
+                <h3>{{ combo.nombre }}</h3>
+                <p class="combo__descripcion">{{ combo.descripcion }}</p>
+                @if (combo.incluyeEntrada) {
+                  <span class="insignia insignia--ambar">Incluye entrada</span>
+                }
+              </div>
+              <div class="combo__pie">
+                <span class="combo__precio">{{ combo.precioFijo | pipeMonedaArs }}</span>
+                <button
+                  type="button"
+                  class="boton boton--primario boton--chico"
+                  (click)="agregarCombo(combo)"
+                >
+                  @if (((cantidades$ | async) ?? sinCantidades).get(combo.id); as cantidad) {
+                    Agregar otro ({{ cantidad }})
+                  } @else {
+                    Agregar
+                  }
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
+  }
+
+  @if (catalogo$ | async; as catalogo) {
+    @for (categoria of catalogo; track categoria.id) {
+      <section class="bloque">
+        <div class="seccion-cabecera">
+          <h2>{{ categoria.nombre }}</h2>
+        </div>
+
+        <div class="rejilla">
+          @for (producto of categoria.productos; track producto.id) {
+            <app-tarjeta-producto
+              [producto]="producto"
+              [enCarrito]="((cantidades$ | async) ?? sinCantidades).get(producto.id) ?? 0"
+              (agregado)="agregarProducto($event)"
+              (cantidadCambiada)="cambiarCantidadProducto(producto, $event)"
+            />
+          }
+        </div>
+      </section>
+    }
+  } @else {
+    <app-cargando mensaje="Cargando el Candy Bar…" />
+  }
+</div>
+
+@if ((items$ | async)?.length) {
+  <div class="barra-inferior">
+    <div class="contenedor barra-inferior__interior">
+      <div>
+        <p class="barra-inferior__etiqueta">Total parcial</p>
+        <p class="barra-inferior__total">{{ (totalParcial$ | async) ?? 0 | pipeMonedaArs }}</p>
+      </div>
+      <div class="barra-inferior__acciones">
+        <a routerLink="/compra/carrito" class="boton boton--fantasma">Ver carrito</a>
+        <button type="button" class="boton boton--primario" (click)="continuar()">
+          @if ((tieneEntradas$ | async)) {
+            Ir a pagar
+          } @else {
+            Continuar
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

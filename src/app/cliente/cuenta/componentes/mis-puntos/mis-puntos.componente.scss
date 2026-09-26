@@ -1,0 +1,45 @@
+.saldo {
+  padding: 22px;
+  margin-bottom: 22px;
+  border-radius: var(--radio);
+  background:
+    radial-gradient(70% 140% at 10% 0%, var(--ambar-tenue), transparent 65%),
+    var(--superficie);
+  border: 1px solid color-mix(in srgb, var(--ambar) 30%, var(--borde));
+
+  &__valor {
+    font-family: var(--serif);
+    font-size: 46px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ambar-fuerte);
+  }
+
+  &__etiqueta {
+    margin-left: 8px;
+    color: var(--texto-suave);
+  }
+
+  &__nota {
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--texto-tenue);
+  }
+}
+
+.bloque {
+  padding: 20px;
+  margin-bottom: 18px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+
+  h2 {
+    font-size: 17px;
+    margin-bottom: 14px;
+  }
+}
+
+.positivo {
+  color: var(--ok);
+}

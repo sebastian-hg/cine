@@ -1,0 +1,66 @@
+.mapa {
+  display: grid;
+  gap: 16px;
+
+  /* En pantallas chicas el mapa se desplaza en vez de comprimir las butacas
+     hasta volverlas intocables. */
+  &__desplazable {
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scrollbar-width: thin;
+  }
+
+  &__interior {
+    min-width: 620px;
+    padding: 4px;
+  }
+}
+
+.pantalla {
+  margin: 0 auto 26px;
+  width: 78%;
+  padding: 7px 0 9px;
+  text-align: center;
+  font-size: 10.5px;
+  letter-spacing: 0.3em;
+  color: var(--texto-tenue);
+  background: linear-gradient(to bottom, var(--superficie-3), transparent);
+  border-top: 2px solid var(--ambar);
+  border-radius: 50% 50% 0 0 / 22px 22px 0 0;
+  box-shadow: 0 -14px 34px -14px var(--ambar-tenue);
+}
+
+.filas {
+  display: grid;
+  gap: 3px;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 18px auto auto auto 18px;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+
+  &__letra {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--texto-tenue);
+    text-align: center;
+  }
+}
+
+.sector {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 3px;
+
+  app-butaca {
+    display: block;
+    width: 18px;
+  }
+}
+
+.sector--centro app-butaca {
+  width: 18px;
+}

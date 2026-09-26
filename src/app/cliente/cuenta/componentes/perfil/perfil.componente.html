@@ -1,0 +1,127 @@
+@if (usuario$ | async; as usuario) {
+  <div class="contenedor seccion">
+    <header class="cabecera">
+      <span class="cabecera__inicial" aria-hidden="true">{{ usuario.nombre.charAt(0) }}</span>
+      <div>
+        <p class="etiqueta-seccion">Tu cuenta</p>
+        <h1>{{ usuario.nombre }} {{ usuario.apellido }}</h1>
+        <p class="cabecera__email">
+          {{ usuario.email }} · {{ edad(usuario.fechaNacimiento) }} años
+        </p>
+      </div>
+    </header>
+
+    @if (resumen$ | async; as resumen) {
+      <div class="tarjetas">
+        <a routerLink="/cuenta/puntos" class="tarjeta-dato">
+          <span class="tarjeta-dato__valor">{{ resumen.puntos }}</span>
+          <span class="tarjeta-dato__etiqueta">Puntos disponibles</span>
+        </a>
+        <a routerLink="/cuenta/credito" class="tarjeta-dato">
+          <span class="tarjeta-dato__valor">{{ resumen.credito | pipeMonedaArs }}</span>
+          <span class="tarjeta-dato__etiqueta">Crédito en cuenta</span>
+        </a>
+        <a routerLink="/cuenta/compras" class="tarjeta-dato">
+          <span class="tarjeta-dato__valor">{{ resumen.compras }}</span>
+          <span class="tarjeta-dato__etiqueta">Compras realizadas</span>
+        </a>
+        <a routerLink="/cuenta/mis-peliculas" class="tarjeta-dato">
+          <span class="tarjeta-dato__valor" aria-hidden="true">🎬</span>
+          <span class="tarjeta-dato__etiqueta">Mis películas</span>
+        </a>
+      </div>
+    }
+
+    @if (!usuario.primeraCompraUsada) {
+      <p class="bienvenida">
+        Todavía tenés disponible tu <strong>20% de descuento de bienvenida</strong>. Se aplica solo
+        en tu primera compra.
+      </p>
+    }
+
+    <section class="bloque">
+      <h2>Tus datos</h2>
+
+      <form [formGroup]="FormularioPerfil" (ngSubmit)="guardar()" novalidate>
+        <div class="rejilla-campos">
+          <div class="campo" [class.campo--invalido]="invalido('nombre')">
+            <label for="perfil-nombre">Nombre</label>
+            <input id="perfil-nombre" type="text" formControlName="nombre" />
+            @if (invalido('nombre')) {
+              <p class="mensaje-campo">Ingresá tu nombre.</p>
+            }
+          </div>
+
+          <div class="campo" [class.campo--invalido]="invalido('apellido')">
+            <label for="perfil-apellido">Apellido</label>
+            <input id="perfil-apellido" type="text" formControlName="apellido" />
+            @if (invalido('apellido')) {
+              <p class="mensaje-campo">Ingresá tu apellido.</p>
+            }
+          </div>
+
+          <div class="campo" [class.campo--invalido]="invalido('fechaNacimiento')">
+            <label for="perfil-nacimiento">Fecha de nacimiento</label>
+            <input
+              id="perfil-nacimiento"
+              type="date"
+              formControlName="fechaNacimiento"
+              [max]="maximaFecha"
+            />
+            @if (invalido('fechaNacimiento')) {
+              <p class="mensaje-campo">Ingresá tu fecha de nacimiento.</p>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="perfil-sangre">Tipo de sangre</label>
+            <select id="perfil-sangre" formControlName="tipoSangre">
+              @for (tipo of tiposSangre; track tipo) {
+                <option [value]="tipo">{{ tipo }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="perfil-ojos">Color de ojos</label>
+            <select id="perfil-ojos" formControlName="colorOjos">
+              @for (color of coloresOjos; track color) {
+                <option [value]="color">{{ color }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="campo" [class.campo--invalido]="invalido('diasVacaciones')">
+            <label for="perfil-vacaciones">Días de vacaciones anuales</label>
+            <input
+              id="perfil-vacaciones"
+              type="number"
+              formControlName="diasVacaciones"
+              min="0"
+              max="365"
+            />
+            @if (invalido('diasVacaciones')) {
+              <p class="mensaje-campo">Ingresá un número entre 0 y 365.</p>
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="boton boton--primario" [disabled]="guardando()">
+          @if (guardando()) {
+            Guardando…
+          } @else {
+            Guardar cambios
+          }
+        </button>
+      </form>
+    </section>
+
+    <nav class="accesos" aria-label="Secciones de tu cuenta">
+      <a routerLink="/cuenta/compras">Historial de compras →</a>
+      <a routerLink="/cuenta/puntos">Puntos y canjes →</a>
+      <a routerLink="/cuenta/credito">Movimientos de crédito →</a>
+      <a routerLink="/cuenta/mis-peliculas">Mis películas →</a>
+      <a routerLink="/cuenta/alertas">Mis alertas de estreno →</a>
+    </nav>
+  </div>
+}

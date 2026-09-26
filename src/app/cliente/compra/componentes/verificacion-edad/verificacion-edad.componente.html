@@ -1,0 +1,43 @@
+<div class="telon" (click)="cancelado.emit()"></div>
+
+<div
+  class="modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="titulo-edad"
+  (keydown.escape)="cancelado.emit()"
+>
+  <h2 id="titulo-edad">Verificación de edad</h2>
+
+  <p class="modal__texto">
+    Esta función es <strong>{{ clasificacion() }}</strong
+    >. Para continuar necesitamos saber tu fecha de nacimiento.
+  </p>
+
+  <form [formGroup]="FormularioEdad" (ngSubmit)="confirmar()">
+    <div class="campo">
+      <label for="fecha-nacimiento-declarada">Fecha de nacimiento</label>
+      <input
+        #campoFecha
+        id="fecha-nacimiento-declarada"
+        type="date"
+        formControlName="fechaNacimiento"
+        [max]="maximo"
+        required
+      />
+      @if (FormularioEdad.controls.fechaNacimiento.invalid && FormularioEdad.controls.fechaNacimiento.touched) {
+        <p class="mensaje-campo">Ingresá tu fecha de nacimiento para continuar.</p>
+      }
+    </div>
+
+    <p class="modal__nota">
+      Declarás que la información es verdadera. Puede solicitarse documento al ingresar a la sala.
+      Si tenés cuenta, <strong>iniciá sesión</strong> y usamos la fecha de tu perfil.
+    </p>
+
+    <div class="modal__acciones">
+      <button type="button" class="boton boton--fantasma" (click)="cancelado.emit()">Cancelar</button>
+      <button type="submit" class="boton boton--primario">Continuar</button>
+    </div>
+  </form>
+</div>

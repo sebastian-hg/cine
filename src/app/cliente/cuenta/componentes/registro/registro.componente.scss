@@ -1,0 +1,39 @@
+.registro {
+  max-width: 620px;
+
+  &__bajada {
+    color: var(--texto-suave);
+    margin: 10px 0 26px;
+  }
+
+  &__error {
+    margin: 0 0 16px;
+    padding: 11px 14px;
+    border-radius: var(--radio-s);
+    background: var(--error-tenue);
+    border: 1px solid color-mix(in srgb, var(--error) 40%, transparent);
+    font-size: 13.5px;
+  }
+
+  &__alternativa {
+    margin: 20px 0 0;
+    font-size: 14px;
+    color: var(--texto-suave);
+  }
+}
+
+fieldset {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 18px;
+  margin: 0 0 18px;
+
+  legend {
+    padding: 0 8px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ambar);
+  }
+}

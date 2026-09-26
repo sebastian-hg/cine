@@ -1,0 +1,51 @@
+<div class="mapa">
+  <div class="mapa__desplazable">
+    <div class="mapa__interior">
+      <div class="pantalla" aria-hidden="true">
+        <span>PANTALLA</span>
+      </div>
+
+      <div class="filas" role="group" aria-label="Mapa de butacas de la sala">
+        @for (fila of filas(); track fila.letra) {
+          <div class="fila">
+            <span class="fila__letra" aria-hidden="true">{{ fila.letra }}</span>
+
+            <div class="sector">
+              @for (butaca of fila.izquierda; track butaca.id) {
+                <app-butaca
+                  [butaca]="butaca"
+                  [seleccionada]="estaElegida(butaca.id)"
+                  (alternar)="butacaAlternada.emit($event)"
+                />
+              }
+            </div>
+
+            <div class="sector sector--centro">
+              @for (butaca of fila.centro; track butaca.id) {
+                <app-butaca
+                  [butaca]="butaca"
+                  [seleccionada]="estaElegida(butaca.id)"
+                  (alternar)="butacaAlternada.emit($event)"
+                />
+              }
+            </div>
+
+            <div class="sector">
+              @for (butaca of fila.derecha; track butaca.id) {
+                <app-butaca
+                  [butaca]="butaca"
+                  [seleccionada]="estaElegida(butaca.id)"
+                  (alternar)="butacaAlternada.emit($event)"
+                />
+              }
+            </div>
+
+            <span class="fila__letra" aria-hidden="true">{{ fila.letra }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <app-referencia-butacas />
+</div>

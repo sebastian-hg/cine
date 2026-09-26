@@ -1,0 +1,53 @@
+<div class="contenedor seccion">
+  <header class="seccion-cabecera">
+    <div>
+      <p class="etiqueta-seccion">Puesto de control</p>
+      <h1>Validar códigos</h1>
+    </div>
+    <a routerLink="/empleado/historial" class="boton boton--fantasma boton--chico">
+      Ver mis validaciones
+    </a>
+  </header>
+
+  <div class="selector-concepto" role="group" aria-label="¿Qué estás validando?">
+    <button
+      type="button"
+      class="concepto"
+      [class.concepto--activo]="concepto() === 'entrada'"
+      [attr.aria-pressed]="concepto() === 'entrada'"
+      (click)="elegirConcepto('entrada')"
+    >
+      <span class="concepto__icono" aria-hidden="true">🎟️</span>
+      <span class="concepto__nombre">Ingreso a la sala</span>
+      <span class="concepto__nota">Valida la entrada</span>
+    </button>
+
+    <button
+      type="button"
+      class="concepto"
+      [class.concepto--activo]="concepto() === 'candy'"
+      [attr.aria-pressed]="concepto() === 'candy'"
+      (click)="elegirConcepto('candy')"
+    >
+      <span class="concepto__icono" aria-hidden="true">🍿</span>
+      <span class="concepto__nombre">Retiro Candy Bar</span>
+      <span class="concepto__nota">Valida los productos</span>
+    </button>
+  </div>
+
+  @if (resultado(); as r) {
+    <app-resultado-validacion [resultado]="r" (continuar)="limpiar()" />
+  }
+
+  <div class="cuerpo">
+    <section class="bloque">
+      <h2>Lector</h2>
+      <app-escaner-qr (codigoLeido)="validar($event)" />
+    </section>
+
+    <section class="bloque">
+      <h2>Ingreso manual</h2>
+      <app-ingreso-manual [procesando]="procesando()" (codigoIngresado)="validar($event)" />
+    </section>
+  </div>
+</div>

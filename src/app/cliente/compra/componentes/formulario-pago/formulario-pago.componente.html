@@ -1,0 +1,73 @@
+<form [formGroup]="FormularioPago" (ngSubmit)="enviar()" novalidate>
+  @if (aPagar() > 0) {
+    <div class="campo" [class.campo--invalido]="invalido('titular')">
+      <label for="pago-titular">Titular de la tarjeta</label>
+      <input id="pago-titular" type="text" formControlName="titular" autocomplete="cc-name" />
+      @if (invalido('titular')) {
+        <p class="mensaje-campo">Ingresá el nombre como figura en la tarjeta.</p>
+      }
+    </div>
+
+    <div class="campo" [class.campo--invalido]="invalido('numero')">
+      <label for="pago-numero">Número de tarjeta</label>
+      <input
+        id="pago-numero"
+        type="text"
+        inputmode="numeric"
+        formControlName="numero"
+        [appSoloNumeros]="16"
+        placeholder="16 dígitos"
+        autocomplete="cc-number"
+      />
+      @if (invalido('numero')) {
+        <p class="mensaje-campo">El número debe tener 16 dígitos.</p>
+      }
+      <p class="pista">Para probar un rechazo, usá una tarjeta terminada en 0000.</p>
+    </div>
+
+    <div class="rejilla-campos">
+      <div class="campo" [class.campo--invalido]="invalido('vencimiento')">
+        <label for="pago-vencimiento">Vencimiento</label>
+        <input
+          id="pago-vencimiento"
+          type="text"
+          formControlName="vencimiento"
+          placeholder="MM/AA"
+          autocomplete="cc-exp"
+        />
+        @if (invalido('vencimiento')) {
+          <p class="mensaje-campo">Usá el formato MM/AA.</p>
+        }
+      </div>
+
+      <div class="campo" [class.campo--invalido]="invalido('codigoSeguridad')">
+        <label for="pago-cvv">Código de seguridad</label>
+        <input
+          id="pago-cvv"
+          type="text"
+          inputmode="numeric"
+          formControlName="codigoSeguridad"
+          [appSoloNumeros]="4"
+          autocomplete="cc-csc"
+        />
+        @if (invalido('codigoSeguridad')) {
+          <p class="mensaje-campo">Son 3 o 4 dígitos.</p>
+        }
+      </div>
+    </div>
+  } @else {
+    <p class="sin-cargo">
+      Tu crédito cubre el total de esta compra. No hace falta ingresar una tarjeta.
+    </p>
+  }
+
+  <button type="submit" class="boton boton--primario boton--bloque" [disabled]="procesando()">
+    @if (procesando()) {
+      Procesando…
+    } @else if (aPagar() > 0) {
+      Pagar {{ aPagar() | pipeMonedaArs }}
+    } @else {
+      Confirmar compra
+    }
+  </button>
+</form>

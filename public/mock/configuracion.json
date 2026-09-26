@@ -1,0 +1,55 @@
+{
+  "configuracion": {
+    "porcentajePrimeraCompra": 20,
+    "porcentajeMayores50": 15,
+    "multiplicadorVip": 1.6,
+    "puntosPorEntrada": 9000,
+    "puntosPorProductoCandy": 3500,
+    "diasAnticipacionPreventa": 7
+  },
+  "cupones": [
+    {
+      "id": "cu1",
+      "codigo": "BIENVENIDA",
+      "tipo": "primera-compra",
+      "porcentaje": 20,
+      "activo": true,
+      "descripcion": "20% de descuento en tu primera compra.",
+      "usosPorUsuario": 1
+    },
+    {
+      "id": "cu2",
+      "codigo": "PLATEA50",
+      "tipo": "mayores-50",
+      "porcentaje": 15,
+      "activo": true,
+      "descripcion": "15% para mayores de 50 años.",
+      "usosPorUsuario": 0
+    },
+    {
+      "id": "cu3",
+      "codigo": "MARTES2X1",
+      "tipo": "generico",
+      "porcentaje": 30,
+      "activo": true,
+      "descripcion": "30% de descuento, válido una vez por usuario.",
+      "usosPorUsuario": 1
+    },
+    {
+      "id": "cu4",
+      "codigo": "VERANO",
+      "tipo": "generico",
+      "porcentaje": 10,
+      "activo": false,
+      "descripcion": "Promoción de verano — desactivada.",
+      "usosPorUsuario": 0
+    }
+  ],
+  "recompensas": [
+    { "id": "r1", "tipo": "entrada", "nombre": "Entrada 2D", "puntosRequeridos": 9000, "activa": true },
+    { "id": "r2", "tipo": "entrada", "nombre": "Entrada 3D", "puntosRequeridos": 12000, "activa": true },
+    { "id": "r3", "tipo": "producto-candy", "nombre": "Pochoclo grande", "puntosRequeridos": 5400, "activa": true },
+    { "id": "r4", "tipo": "producto-candy", "nombre": "Gaseosa 500 ml", "puntosRequeridos": 2900, "activa": true },
+    { "id": "r5", "tipo": "producto-candy", "nombre": "Combo Clásico", "puntosRequeridos": 9900, "activa": true }
+  ]
+}

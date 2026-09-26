@@ -1,0 +1,62 @@
+<header class="seccion-cabecera">
+  <div>
+    <p class="etiqueta-seccion">Análisis</p>
+    <h1>Reportes</h1>
+  </div>
+  <div class="acciones">
+    <button type="button" class="boton boton--fantasma boton--chico" (click)="exportarPdf()">
+      Exportar a PDF
+    </button>
+    <button type="button" class="boton boton--fantasma boton--chico" (click)="exportarExcel()">
+      Exportar a Excel
+    </button>
+  </div>
+</header>
+
+@if (totales$ | async; as totales) {
+  <div class="tarjetas">
+    <div class="tarjeta-dato">
+      <span class="tarjeta-dato__valor">{{ totales.facturacion | pipeMonedaArs }}</span>
+      <span class="tarjeta-dato__etiqueta">Facturación (14 días)</span>
+    </div>
+    <div class="tarjeta-dato">
+      <span class="tarjeta-dato__valor">{{ totales.entradas }}</span>
+      <span class="tarjeta-dato__etiqueta">Entradas vendidas</span>
+    </div>
+    <div class="tarjeta-dato">
+      <span class="tarjeta-dato__valor">{{ totales.productos }}</span>
+      <span class="tarjeta-dato__etiqueta">Productos de Candy Bar</span>
+    </div>
+  </div>
+}
+
+<p class="nota">
+  Los reportes se calculan sobre las compras de esta sesión. Comprá algunas entradas desde la
+  cartelera para ver el movimiento reflejado acá.
+</p>
+
+@if (diarios$ | async; as diarios) {
+  <div class="tabla-scroll">
+    <table>
+      <caption class="solo-lectores">Facturación diaria de los últimos 14 días</caption>
+      <thead>
+        <tr>
+          <th scope="col">Fecha</th>
+          <th scope="col" class="numerico">Entradas</th>
+          <th scope="col" class="numerico">Productos</th>
+          <th scope="col" class="numerico">Facturación</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (reporte of diarios; track reporte.fecha) {
+          <tr [class.sin-movimiento]="reporte.facturacion === 0">
+            <td>{{ aFecha(reporte.fecha) | date: 'EEE d MMM' }}</td>
+            <td class="numerico">{{ reporte.entradasVendidas }}</td>
+            <td class="numerico">{{ reporte.productosVendidos }}</td>
+            <td class="numerico">{{ reporte.facturacion | pipeMonedaArs }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

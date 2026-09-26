@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900" width="600" height="900" role="img" aria-label="Póster de Órbita Cero">
+  <defs>
+    <linearGradient id="f" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#0a1832"/>
+      <stop offset="1" stop-color="#03060f"/>
+    </linearGradient>
+    <linearGradient id="v" x1="0" y1="0.45" x2="0" y2="1">
+      <stop offset="0" stop-color="#03060f" stop-opacity="0"/>
+      <stop offset="1" stop-color="#03060f" stop-opacity="0.95"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="900" fill="url(#f)"/>
+  <g opacity="0.5">
+    <circle cx="470" cy="200" r="150" fill="#5b8cff" opacity="0.18"/>
+    <circle cx="150" cy="420" r="220" fill="#5b8cff" opacity="0.10"/>
+  </g>
+  <g stroke="#5b8cff" stroke-opacity="0.22" stroke-width="2" fill="none">
+    <path d="M0 620 Q 150 560 300 620 T 600 620"/>
+    <path d="M0 660 Q 150 600 300 660 T 600 660"/>
+    <path d="M0 700 Q 150 640 300 700 T 600 700"/>
+  </g>
+  <rect width="600" height="900" fill="url(#v)"/>
+  <rect x="48" y="640" width="58" height="4" fill="#5b8cff"/>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#ffffff" font-size="40" font-weight="700" letter-spacing="1">
+    <text x="48" y="714">ÓRBITA CERO</text>
+  </g>
+  <text x="48" y="774" font-family="ui-sans-serif, Helvetica, Arial, sans-serif" font-size="19" fill="#5b8cff" letter-spacing="3">151 MIN · +13</text>
+</svg>

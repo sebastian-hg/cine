@@ -1,0 +1,80 @@
+<div class="contenedor seccion">
+  <header class="seccion-cabecera">
+    <div>
+      <p class="etiqueta-seccion">Fidelización</p>
+      <h1>Mis puntos</h1>
+    </div>
+    <a routerLink="/cuenta/perfil" class="boton boton--fantasma boton--chico">← Volver al perfil</a>
+  </header>
+
+  <div class="saldo">
+    <span class="saldo__valor">{{ (saldo$ | async) ?? 0 }}</span>
+    <span class="saldo__etiqueta">puntos disponibles</span>
+    <p class="saldo__nota">Sumás 1 punto por cada peso que gastás. Son personales y no se transfieren.</p>
+  </div>
+
+  <section class="bloque">
+    <h2>Canjeá tus puntos</h2>
+    <app-catalogo-recompensas
+      [recompensas]="(recompensas$ | async) ?? []"
+      [saldo]="(saldo$ | async) ?? 0"
+      (canjeSolicitado)="pedirConfirmacion($event)"
+    />
+  </section>
+
+  <section class="bloque">
+    <h2>Historial de canjes</h2>
+    <app-historial-canjes [canjes]="(canjes$ | async) ?? []" />
+  </section>
+
+  <section class="bloque">
+    <h2>Movimientos</h2>
+    @if (movimientos$ | async; as movimientos) {
+      @if (movimientos.length) {
+        <div class="tabla-scroll">
+          <table>
+            <caption class="solo-lectores">Movimientos de puntos</caption>
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Concepto</th>
+                <th scope="col" class="numerico">Puntos</th>
+                <th scope="col" class="numerico">Saldo</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (movimiento of movimientos; track movimiento.id) {
+                <tr>
+                  <td>{{ movimiento.fecha | date: 'd MMM y, HH:mm' }}</td>
+                  <td>{{ movimiento.detalle }}</td>
+                  <td class="numerico" [class.positivo]="movimiento.cantidad > 0">
+                    {{ movimiento.cantidad > 0 ? '+' : '' }}{{ movimiento.cantidad }}
+                  </td>
+                  <td class="numerico">{{ movimiento.saldoResultante }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="vacio">Todavía no tenés movimientos. Comprá una entrada y empezá a sumar.</p>
+      }
+    }
+  </section>
+</div>
+
+@if (porCanjear(); as recompensa) {
+  <app-dialogo-confirmacion
+    titulo="¿Canjear puntos?"
+    [mensaje]="
+      'Se descuentan ' +
+      recompensa.puntosRequeridos +
+      ' puntos de tu saldo a cambio de «' +
+      recompensa.nombre +
+      '». El canje no se puede deshacer.'
+    "
+    textoConfirmar="Sí, canjear"
+    (confirmado)="confirmarCanje()"
+    (cancelado)="cerrarDialogo()"
+  />
+}

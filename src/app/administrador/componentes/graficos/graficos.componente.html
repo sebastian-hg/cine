@@ -1,0 +1,76 @@
+<header class="seccion-cabecera">
+  <div>
+    <p class="etiqueta-seccion">Análisis</p>
+    <h1>Gráficos</h1>
+  </div>
+</header>
+
+<p class="nota">
+  Se calculan sobre las compras de esta sesión. Si todavía no compraste nada, los gráficos aparecen
+  vacíos.
+</p>
+
+<div class="graficos">
+  <section class="grafico">
+    <h2>Más vistas esta semana</h2>
+    @if (semana$ | async; as serie) {
+      @if (serie.length) {
+        <ul class="barras">
+          @for (punto of serie; track punto.etiqueta) {
+            <li>
+              <span class="barras__etiqueta">{{ punto.etiqueta }}</span>
+              <span class="barras__pista">
+                <span class="barras__relleno" [style.width.%]="proporcion(punto, serie)"></span>
+              </span>
+              <span class="barras__valor">{{ punto.valor }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="vacio">Sin datos todavía.</p>
+      }
+    }
+  </section>
+
+  <section class="grafico">
+    <h2>Más vistas este mes</h2>
+    @if (mes$ | async; as serie) {
+      @if (serie.length) {
+        <ul class="barras">
+          @for (punto of serie; track punto.etiqueta) {
+            <li>
+              <span class="barras__etiqueta">{{ punto.etiqueta }}</span>
+              <span class="barras__pista">
+                <span class="barras__relleno" [style.width.%]="proporcion(punto, serie)"></span>
+              </span>
+              <span class="barras__valor">{{ punto.valor }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="vacio">Sin datos todavía.</p>
+      }
+    }
+  </section>
+
+  <section class="grafico">
+    <h2>Candy Bar más vendido</h2>
+    @if (candy$ | async; as serie) {
+      @if (serie.length) {
+        <ul class="barras barras--candy">
+          @for (punto of serie; track punto.etiqueta) {
+            <li>
+              <span class="barras__etiqueta">{{ punto.etiqueta }}</span>
+              <span class="barras__pista">
+                <span class="barras__relleno" [style.width.%]="proporcion(punto, serie)"></span>
+              </span>
+              <span class="barras__valor">{{ punto.valor }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="vacio">Sin datos todavía.</p>
+      }
+    }
+  </section>
+</div>

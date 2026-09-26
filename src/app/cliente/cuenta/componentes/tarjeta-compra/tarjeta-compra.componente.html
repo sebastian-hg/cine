@@ -1,0 +1,58 @@
+<article class="compra" [class.compra--cancelada]="compra().estado === 'cancelada'">
+  <div class="compra__cabecera">
+    <div>
+      <h3>{{ compra().nombrePelicula ?? 'Compra de Candy Bar' }}</h3>
+      <p class="compra__fecha">
+        Comprada el {{ compra().fechaCompra | date: 'd MMM y, HH:mm' }}
+      </p>
+    </div>
+
+    <span
+      class="insignia"
+      [class.insignia--ok]="compra().estado === 'pagada'"
+      [class.insignia--info]="compra().estado === 'usada'"
+      [class.insignia--rojo]="compra().estado === 'cancelada'"
+    >
+      {{ compra().estado }}
+    </span>
+  </div>
+
+  @if (compra().inicioFuncion) {
+    <dl class="compra__datos">
+      <div>
+        <dt>Función</dt>
+        <dd>{{ compra().inicioFuncion | date: 'EEE d MMM, HH:mm' }}</dd>
+      </div>
+      <div>
+        <dt>Sala</dt>
+        <dd>{{ compra().nombreSala }}</dd>
+      </div>
+      <div>
+        <dt>Butacas</dt>
+        <dd>{{ compra().butacas.join(', ') }}</dd>
+      </div>
+    </dl>
+  }
+
+  <div class="compra__pie">
+    <span class="compra__total">{{ compra().desglose.aPagar | pipeMonedaArs }}</span>
+
+    <div class="compra__acciones">
+      <a [routerLink]="['/compra/entrada', compra().id]" class="boton boton--fantasma boton--chico">
+        Ver entrada
+      </a>
+
+      @if (compra().puedeCancelar) {
+        <button
+          type="button"
+          class="boton boton--peligro boton--chico"
+          (click)="cancelar.emit(compra())"
+        >
+          Cancelar
+        </button>
+      } @else if (compra().motivoBloqueoCancelacion; as motivo) {
+        <span class="compra__bloqueo" [title]="motivo">{{ motivo }}</span>
+      }
+    </div>
+  </div>
+</article>

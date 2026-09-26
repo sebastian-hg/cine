@@ -1,0 +1,72 @@
+<header class="seccion-cabecera">
+  <div>
+    <p class="etiqueta-seccion">Promociones</p>
+    <h1>Descuentos</h1>
+  </div>
+</header>
+
+<p class="nota">
+  Los descuentos <strong>no se acumulan</strong>: en cada compra se aplica el mayor de los
+  aplicables entre primera compra, mayores de 50 y el cupón que haya ingresado el cliente.
+</p>
+
+<form class="bloque" [formGroup]="FormularioDescuentos" (ngSubmit)="guardar()" novalidate>
+  <div class="campo">
+    <label for="desc-primera">Descuento de primera compra (%)</label>
+    <input
+      id="desc-primera"
+      type="number"
+      formControlName="porcentajePrimeraCompra"
+      min="0"
+      max="100"
+      step="1"
+    />
+    <p class="pista">
+      Se aplica una única vez, en la primera compra de cada usuario registrado. Valor inicial: 20%.
+    </p>
+  </div>
+
+  <div class="campo">
+    <label for="desc-mayores">Descuento para mayores de 50 (%)</label>
+    <input
+      id="desc-mayores"
+      type="number"
+      formControlName="porcentajeMayores50"
+      min="0"
+      max="100"
+      step="1"
+    />
+    <p class="pista">Se calcula a partir de la fecha de nacimiento del perfil.</p>
+  </div>
+
+  <div class="campo">
+    <label for="desc-vip">Multiplicador de butaca VIP</label>
+    <input
+      id="desc-vip"
+      type="number"
+      formControlName="multiplicadorVip"
+      min="1"
+      max="5"
+      step="0.1"
+    />
+    <p class="pista">
+      Recargo sobre el precio base en las filas R, S y T. Con 1.6, una entrada de $10.000 pasa a
+      $16.000.
+    </p>
+  </div>
+
+  <button type="submit" class="boton boton--primario" [disabled]="guardando()">
+    @if (guardando()) {
+      Guardando…
+    } @else {
+      Guardar cambios
+    }
+  </button>
+</form>
+
+@if (configuracion$ | async; as actual) {
+  <p class="vigente">
+    Vigente ahora: primera compra {{ actual.porcentajePrimeraCompra }}%, mayores de 50
+    {{ actual.porcentajeMayores50 }}%, VIP ×{{ actual.multiplicadorVip }}.
+  </p>
+}

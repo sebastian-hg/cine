@@ -1,0 +1,82 @@
+.compra {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+
+  &--cancelada {
+    opacity: 0.68;
+  }
+
+  &__cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+
+    h3 {
+      font-size: 17px;
+    }
+  }
+
+  &__fecha {
+    margin: 4px 0 0;
+    font-size: 12.5px;
+    color: var(--texto-tenue);
+  }
+
+  &__datos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 12px 0;
+    border-block: 1px solid var(--borde);
+
+    dt {
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--texto-tenue);
+      margin-bottom: 2px;
+    }
+
+    dd {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 500;
+
+      &::first-letter {
+        text-transform: uppercase;
+      }
+    }
+  }
+
+  &__pie {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  &__total {
+    font-size: 19px;
+    font-weight: 700;
+  }
+
+  &__acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__bloqueo {
+    font-size: 12px;
+    color: var(--texto-tenue);
+    max-width: 260px;
+  }
+}

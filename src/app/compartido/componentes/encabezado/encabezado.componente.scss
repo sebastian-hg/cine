@@ -1,0 +1,148 @@
+.encabezado {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--fondo) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--borde);
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: var(--alto-encabezado);
+}
+
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--texto);
+  text-decoration: none;
+  flex-shrink: 0;
+
+  &__icono {
+    color: var(--rojo-fuerte);
+    font-size: 22px;
+  }
+}
+
+.navegacion {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  a {
+    padding: 6px 12px;
+    border-radius: var(--radio-s);
+    color: var(--texto-suave);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    text-decoration: none;
+
+    &:hover {
+      background: var(--superficie-2);
+      color: var(--texto);
+    }
+    &.activo {
+      color: var(--ambar-fuerte);
+      background: var(--ambar-tenue);
+    }
+  }
+
+  &__rol {
+    border: 1px dashed var(--borde-fuerte);
+  }
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.carrito {
+  position: relative;
+  display: inline-flex;
+  padding: 7px 9px;
+  border-radius: var(--radio-s);
+  font-size: 17px;
+  text-decoration: none;
+
+  &:hover {
+    background: var(--superficie-2);
+  }
+
+  &__cuenta {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--rojo);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 17px;
+    text-align: center;
+  }
+}
+
+.usuario {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  background: var(--superficie-2);
+  color: var(--texto);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    background: var(--superficie-3);
+  }
+
+  &__inicial {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--ambar);
+    color: #17120c;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 860px) {
+  .barra {
+    flex-wrap: wrap;
+    padding-block: 10px;
+    gap: 10px;
+  }
+  .navegacion {
+    order: 3;
+    width: 100%;
+    flex: none;
+  }
+  .usuario__nombre {
+    display: none;
+  }
+}

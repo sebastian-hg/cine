@@ -1,0 +1,27 @@
+@if (dias().length) {
+  <app-selector-fecha
+    [fechasHabilitadas]="dias()"
+    [seleccionada]="diaActivo()"
+    etiqueta="Elegí el día de la función"
+    (fechaElegida)="elegirDia($event)"
+  />
+
+
+  <ul class="funciones">
+    @for (funcion of funcionesDelDia(); track funcion.id) {
+      <li>
+        <button type="button" class="funcion" (click)="funcionElegida.emit(funcion)">
+          <span class="funcion__hora">{{ funcion.inicio | date: 'HH:mm' }}</span>
+          <span class="funcion__datos">
+            <span class="funcion__modalidad">{{ funcion.modalidad }}</span>
+            <span class="funcion__idioma">{{ funcion.idioma }}</span>
+            <span class="funcion__sala">{{ funcion.nombreSala }}</span>
+          </span>
+          <span class="funcion__precio">{{ funcion.precio | pipeMonedaArs }}</span>
+        </button>
+      </li>
+    }
+  </ul>
+} @else {
+  <p class="vacio">No hay funciones programadas para esta película todavía.</p>
+}

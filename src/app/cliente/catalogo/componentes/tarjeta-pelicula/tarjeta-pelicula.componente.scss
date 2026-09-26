@@ -1,0 +1,92 @@
+.tarjeta-peli {
+  height: 100%;
+
+  &__enlace {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radio);
+    overflow: hidden;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    transition:
+      transform 0.16s ease,
+      border-color 0.16s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      border-color: var(--borde-fuerte);
+      text-decoration: none;
+    }
+  }
+
+  &__poster {
+    position: relative;
+    aspect-ratio: 2 / 3;
+    background: var(--superficie-2);
+    max-width: 100%;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__posicion {
+    position: absolute;
+    left: -6px;
+    bottom: 6px;
+    font-family: var(--serif);
+    font-size: 76px;
+    font-weight: 700;
+    line-height: 0.8;
+    color: var(--ambar);
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+  }
+
+  &__clasificacion {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+
+  &__cuerpo {
+    padding: 12px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  &__nombre {
+    font-size: 15.5px;
+    line-height: 1.25;
+  }
+
+  &__meta {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--texto-tenue);
+  }
+
+  &__estrellas {
+    margin: auto 0 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  &__conteo {
+    color: var(--texto-tenue);
+    font-size: 12.5px;
+  }
+}
+
+.estrellas {
+  color: var(--ambar);
+  letter-spacing: 1px;
+}

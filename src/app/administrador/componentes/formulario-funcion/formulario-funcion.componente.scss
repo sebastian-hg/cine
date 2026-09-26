@@ -1,0 +1,50 @@
+.dias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dia {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--borde-fuerte);
+  background: transparent;
+  color: var(--texto-suave);
+  cursor: pointer;
+  width: auto;
+
+  &:hover {
+    background: var(--superficie-2);
+  }
+
+  &--activo {
+    background: var(--ambar);
+    border-color: var(--ambar);
+    color: #17120c;
+    font-weight: 600;
+  }
+}
+
+.aviso-sala {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 15px;
+  margin-bottom: 18px;
+  border-radius: var(--radio);
+  background: var(--ambar-tenue);
+  border: 1px solid color-mix(in srgb, var(--ambar) 35%, transparent);
+
+  p {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--texto-suave);
+  }
+
+  &__icono {
+    font-size: 19px;
+    line-height: 1.1;
+  }
+}

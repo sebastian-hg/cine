@@ -1,0 +1,63 @@
+<header class="seccion-cabecera">
+  <div>
+    <p class="etiqueta-seccion">Promociones</p>
+    <h1>Puntos y recompensas</h1>
+  </div>
+</header>
+
+<p class="nota">
+  Los clientes registrados suman <strong>1 punto por cada peso</strong> efectivamente pagado. Acá se
+  define cuántos puntos cuesta cada recompensa.
+</p>
+
+@if (recompensas$ | async; as recompensas) {
+  <div class="tabla-scroll">
+    <table>
+      <caption class="solo-lectores">Recompensas canjeables por puntos</caption>
+      <thead>
+        <tr>
+          <th scope="col">Recompensa</th>
+          <th scope="col">Tipo</th>
+          <th scope="col" class="numerico">Puntos</th>
+          <th scope="col">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (recompensa of recompensas; track recompensa.id) {
+          <tr>
+            <td>{{ recompensa.nombre }}</td>
+            <td>
+              <span class="insignia">
+                {{ recompensa.tipo === 'entrada' ? 'Entrada' : 'Candy Bar' }}
+              </span>
+            </td>
+            <td class="numerico">
+              <label class="solo-lectores" [attr.for]="'puntos-' + recompensa.id">
+                Puntos para {{ recompensa.nombre }}
+              </label>
+              <input
+                [id]="'puntos-' + recompensa.id"
+                class="puntos"
+                type="number"
+                min="1"
+                step="100"
+                [value]="recompensa.puntosRequeridos"
+                (change)="cambiarPuntos(recompensa, $event)"
+              />
+            </td>
+            <td>
+              <button
+                type="button"
+                class="boton boton--chico"
+                [class.boton--fantasma]="recompensa.activa"
+                (click)="alternarActiva(recompensa)"
+              >
+                {{ recompensa.activa ? 'Activa' : 'Desactivada' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

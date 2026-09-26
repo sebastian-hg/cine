@@ -1,0 +1,79 @@
+<div class="contenedor seccion">
+  <header class="seccion-cabecera">
+    <div>
+      <p class="etiqueta-seccion">Último paso</p>
+      <h1>Confirmar compra</h1>
+    </div>
+    <a routerLink="/compra/carrito" class="boton boton--fantasma boton--chico">← Volver al carrito</a>
+  </header>
+
+  <div class="cuerpo">
+    <div class="columna">
+      @if (!(usuario$ | async)) {
+        <div class="invitacion">
+          <p class="invitacion__titulo">¿Tenés cuenta?</p>
+          <p class="invitacion__texto">
+            Iniciá sesión para usar tu crédito, sumar puntos y aprovechar el descuento de primera
+            compra. También podés seguir como invitado.
+          </p>
+          <a routerLink="/ingresar" [queryParams]="{ returnUrl: '/compra/checkout' }" class="boton boton--chico">
+            Iniciar sesión
+          </a>
+        </div>
+      }
+
+      <section class="bloque">
+        <h2>Descuentos</h2>
+        <app-formulario-cupon
+          [aplicado]="cuponActual()"
+          [error]="errorCupon()"
+          (cuponAplicado)="aplicarCupon($event)"
+          (cuponQuitado)="quitarCupon()"
+        />
+
+        <app-aplicar-credito
+          [disponible]="creditoDisponible()"
+          [aplicado]="creditoAplicado()"
+          (creditoAplicado)="aplicarCredito($event)"
+        />
+      </section>
+
+      <section class="bloque">
+        <h2>Pago</h2>
+        <app-formulario-pago
+          [aPagar]="desglose()?.aPagar ?? 0"
+          [procesando]="procesando()"
+          (pagoConfirmado)="confirmar($event)"
+        />
+      </section>
+    </div>
+
+    <aside class="resumen" aria-label="Resumen de la compra">
+      <h2>Tu compra</h2>
+
+      @if (items$ | async; as items) {
+        <ul class="lista">
+          @for (item of items; track $index) {
+            <li>
+              <span class="lista__nombre">
+                @switch (item.tipo) {
+                  @case ('entrada') {
+                    Butaca {{ item.etiquetaButaca }}
+                  }
+                  @default {
+                    {{ item.cantidad }}× {{ item.nombre }}
+                  }
+                }
+              </span>
+              <span class="lista__precio">
+                {{ item.precioUnitario * item.cantidad | pipeMonedaArs }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+
+      <app-resumen-totales [desglose]="desglose$ | async" />
+    </aside>
+  </div>
+</div>

@@ -1,0 +1,11 @@
+[
+  { "id": "re1", "idPelicula": "p1", "idUsuario": "u1", "nombreUsuario": "Lucía F.", "estrellas": 5, "comentario": "El plano final del andén me dejó sin aire. La mejor del año.", "diasAtras": 12, "idCompraVerificada": "seed-1" },
+  { "id": "re2", "idPelicula": "p1", "idUsuario": "u4", "nombreUsuario": "Héctor S.", "estrellas": 4, "comentario": "Muy buena, aunque el segundo acto se estira de más.", "diasAtras": 8, "idCompraVerificada": "seed-2" },
+  { "id": "re3", "idPelicula": "p1", "idUsuario": "u3", "nombreUsuario": "Renata O.", "estrellas": 4, "comentario": "La fotografía de la Patagonia vale la entrada sola.", "diasAtras": 3, "idCompraVerificada": "seed-3" },
+  { "id": "re4", "idPelicula": "p2", "idUsuario": "u1", "nombreUsuario": "Lucía F.", "estrellas": 3, "comentario": "Visualmente impecable, el guion no la acompaña.", "diasAtras": 6, "idCompraVerificada": "seed-4" },
+  { "id": "re5", "idPelicula": "p2", "idUsuario": "u4", "nombreUsuario": "Héctor S.", "estrellas": 5, "comentario": "La vi en 4D y valió cada peso.", "diasAtras": 2, "idCompraVerificada": "seed-5" },
+  { "id": "re6", "idPelicula": "p3", "idUsuario": "u4", "nombreUsuario": "Héctor S.", "estrellas": 2, "comentario": "Mucho ruido y poco miedo.", "diasAtras": 21, "idCompraVerificada": "seed-6" },
+  { "id": "re7", "idPelicula": "p4", "idUsuario": "u1", "nombreUsuario": "Lucía F.", "estrellas": 5, "comentario": "Fui con mis sobrinos y salimos los tres cantando.", "diasAtras": 15, "idCompraVerificada": "seed-7" },
+  { "id": "re8", "idPelicula": "p4", "idUsuario": "u3", "nombreUsuario": "Renata O.", "estrellas": 4, "comentario": "Mucho mejor de lo que esperaba de una de hormigas.", "diasAtras": 9, "idCompraVerificada": "seed-8" },
+  { "id": "re9", "idPelicula": "p5", "idUsuario": "u4", "nombreUsuario": "Héctor S.", "estrellas": 5, "comentario": "Mi viejo era arriero. Lloré las ocho cuadras hasta casa.", "diasAtras": 4, "idCompraVerificada": "seed-9" }
+]

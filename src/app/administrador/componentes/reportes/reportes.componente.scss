@@ -1,0 +1,37 @@
+.acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.tarjeta-dato {
+  display: grid;
+  gap: 3px;
+  padding: 16px;
+  border-radius: var(--radio);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+
+  &__valor {
+    font-family: var(--serif);
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  &__etiqueta {
+    font-size: 12px;
+    color: var(--texto-tenue);
+  }
+}
+
+.sin-movimiento {
+  color: var(--texto-tenue);
+}

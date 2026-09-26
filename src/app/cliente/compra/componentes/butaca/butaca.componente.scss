@@ -1,0 +1,111 @@
+.butaca {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  min-width: 18px;
+  padding: 0;
+  border: 1px solid var(--butaca-libre-borde);
+  border-radius: 4px 4px 2px 2px;
+  background: var(--butaca-libre);
+  color: var(--texto-tenue);
+  font: inherit;
+  font-size: 9px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.1s,
+    border-color 0.1s,
+    transform 0.08s;
+
+  &:hover:not(:disabled) {
+    border-color: var(--ambar);
+    transform: translateY(-1px);
+  }
+
+  &__numero {
+    opacity: 0.55;
+  }
+
+  &__icono {
+    position: absolute;
+    font-size: 8px;
+    line-height: 1;
+  }
+}
+
+/* Forma propia por tipo: no alcanza con el color (§22). */
+.butaca.es-accesible {
+  background: var(--butaca-accesible);
+  border-color: color-mix(in srgb, var(--butaca-accesible) 70%, #fff);
+  border-radius: 50%;
+  color: #fff;
+
+  .butaca__numero {
+    display: none;
+  }
+  .butaca__icono {
+    font-size: 10px;
+    opacity: 0.95;
+  }
+}
+
+.butaca.es-vip {
+  background: var(--butaca-vip);
+  border-color: color-mix(in srgb, var(--butaca-vip) 70%, #fff);
+  border-radius: 7px 7px 2px 2px;
+  color: #fff;
+
+  .butaca__numero {
+    opacity: 0.75;
+  }
+  .butaca__icono {
+    top: 1px;
+    right: 1px;
+    font-size: 7px;
+    color: var(--ambar-fuerte);
+  }
+}
+
+.butaca--elegida,
+.butaca--elegida.es-vip,
+.butaca--elegida.es-accesible {
+  background: var(--ambar);
+  border-color: var(--ambar-fuerte);
+  color: #17120c;
+  transform: translateY(-1px);
+
+  .butaca__numero {
+    opacity: 1;
+    font-weight: 700;
+  }
+  .butaca__icono {
+    color: #17120c;
+  }
+}
+
+.butaca--ocupada,
+.butaca--ocupada.es-vip,
+.butaca--ocupada.es-accesible {
+  background: var(--butaca-ocupada);
+  border-color: var(--borde);
+  color: var(--borde-fuerte);
+  cursor: not-allowed;
+  transform: none;
+
+  /* Cruz diagonal: distingue la butaca ocupada sin depender del color. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 22%;
+    background:
+      linear-gradient(45deg, transparent 44%, var(--borde-fuerte) 44%, var(--borde-fuerte) 56%, transparent 56%),
+      linear-gradient(-45deg, transparent 44%, var(--borde-fuerte) 44%, var(--borde-fuerte) 56%, transparent 56%);
+  }
+
+  .butaca__numero,
+  .butaca__icono {
+    opacity: 0;
+  }
+}

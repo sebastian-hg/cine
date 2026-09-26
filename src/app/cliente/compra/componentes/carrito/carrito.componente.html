@@ -1,0 +1,87 @@
+<div class="contenedor seccion">
+  <header class="seccion-cabecera">
+    <div>
+      <p class="etiqueta-seccion">Tu compra</p>
+      <h1>Carrito</h1>
+    </div>
+    @if ((items$ | async)?.length) {
+      <button type="button" class="boton boton--fantasma boton--chico" (click)="vaciar()">
+        Vaciar carrito
+      </button>
+    }
+  </header>
+
+  @if (items$ | async; as items) {
+    @if (items.length) {
+      <div class="cuerpo">
+        <ul class="items">
+          @for (item of items; track clave(item)) {
+            <li class="item">
+              <div class="item__datos">
+                @switch (item.tipo) {
+                  @case ('entrada') {
+                    <span class="item__tipo">Entrada</span>
+                    <span class="item__nombre">
+                      Butaca {{ item.etiquetaButaca }}
+                      @if (item.esVip) {
+                        <span class="insignia insignia--rojo">VIP</span>
+                      }
+                    </span>
+                  }
+                  @case ('producto') {
+                    <span class="item__tipo">Candy Bar</span>
+                    <span class="item__nombre">{{ item.nombre }}</span>
+                  }
+                  @case ('combo') {
+                    <span class="item__tipo">Combo</span>
+                    <span class="item__nombre">{{ item.nombre }}</span>
+                  }
+                }
+              </div>
+
+              <div class="item__cantidad">
+                @if (item.tipo === 'entrada') {
+                  <span class="item__unidad">1 butaca</span>
+                } @else {
+                  <app-selector-cantidad
+                    [cantidad]="item.cantidad"
+                    [minimo]="1"
+                    [etiqueta]="'Cantidad de ' + item.nombre"
+                    (cantidadCambiada)="cambiarCantidad(item, $event)"
+                  />
+                }
+              </div>
+
+              <span class="item__precio">
+                {{ item.precioUnitario * item.cantidad | pipeMonedaArs }}
+              </span>
+
+              <button
+                type="button"
+                class="item__quitar"
+                aria-label="Quitar del carrito"
+                (click)="quitar(item)"
+              >
+                ×
+              </button>
+            </li>
+          }
+        </ul>
+
+        <aside class="resumen" aria-label="Resumen de la compra">
+          <h2>Resumen</h2>
+          <app-resumen-totales [desglose]="desglose$ | async" />
+          <button type="button" class="boton boton--primario boton--bloque" (click)="irAPagar()">
+            Continuar al pago
+          </button>
+          <a routerLink="/candy" class="boton boton--fantasma boton--bloque">Seguir comprando</a>
+        </aside>
+      </div>
+    } @else {
+      <div class="vacio">
+        <p>Todavía no agregaste nada.</p>
+        <a routerLink="/" class="boton boton--primario">Ver la cartelera</a>
+      </div>
+    }
+  }
+</div>

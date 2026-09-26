@@ -1,0 +1,179 @@
+[
+  {
+    "id": "p1",
+    "nombre": "El Último Tren a Ushuaia",
+    "poster": "posters/p1.svg",
+    "sinopsis": "Una maquinista retirada acepta un último viaje por la Patagonia y descubre que el pasajero del vagón siete lleva cuarenta años esperando ese tren.",
+    "duracionMinutos": 128,
+    "generos": [
+      "g-drama",
+      "g-thriller"
+    ],
+    "clasificacion": "+13",
+    "diasHastaEstreno": -37,
+    "disponible": true,
+    "preventaActivada": false,
+    "precioPreventa": 7200,
+    "precioNormal": 9500,
+    "ventasPrevias": 4820
+  },
+  {
+    "id": "p2",
+    "nombre": "Neón Profundo",
+    "poster": "posters/p2.svg",
+    "sinopsis": "En una Buenos Aires sumergida bajo el agua, una buzo urbana recupera objetos del pasado hasta que encuentra algo que todavía respira.",
+    "duracionMinutos": 142,
+    "generos": [
+      "g-scifi",
+      "g-accion"
+    ],
+    "clasificacion": "+13",
+    "diasHastaEstreno": -16,
+    "disponible": true,
+    "preventaActivada": false,
+    "precioPreventa": 7800,
+    "precioNormal": 10500,
+    "ventasPrevias": 6135
+  },
+  {
+    "id": "p3",
+    "nombre": "La Casa de los Vientos",
+    "poster": "posters/p3.svg",
+    "sinopsis": "Tres hermanos vuelven a la casa familiar para venderla. El viento del sur trae de vuelta lo que enterraron en el patio.",
+    "duracionMinutos": 104,
+    "generos": [
+      "g-terror"
+    ],
+    "clasificacion": "+18",
+    "diasHastaEstreno": -51,
+    "disponible": true,
+    "preventaActivada": false,
+    "precioPreventa": 7000,
+    "precioNormal": 9000,
+    "ventasPrevias": 1740
+  },
+  {
+    "id": "p4",
+    "nombre": "Pequeños Gigantes",
+    "poster": "posters/p4.svg",
+    "sinopsis": "Un equipo de hormigas cortadoras pierde a su reina y cruza el jardín entero para traerla de vuelta antes de la primera lluvia.",
+    "duracionMinutos": 96,
+    "generos": [
+      "g-animacion",
+      "g-comedia"
+    ],
+    "clasificacion": "ATP",
+    "diasHastaEstreno": -23,
+    "disponible": true,
+    "preventaActivada": false,
+    "precioPreventa": 6500,
+    "precioNormal": 8500,
+    "ventasPrevias": 5290
+  },
+  {
+    "id": "p5",
+    "nombre": "Cordillera",
+    "poster": "posters/p5.svg",
+    "sinopsis": "Durante un año, una cámara acompaña a los últimos arrieros que cruzan los Andes a caballo con el deshielo.",
+    "duracionMinutos": 88,
+    "generos": [
+      "g-documental",
+      "g-drama"
+    ],
+    "clasificacion": "ATP",
+    "diasHastaEstreno": -9,
+    "disponible": true,
+    "preventaActivada": false,
+    "precioPreventa": 6000,
+    "precioNormal": 8000,
+    "ventasPrevias": 980
+  },
+  {
+    "id": "p6",
+    "nombre": "Órbita Cero",
+    "poster": "posters/p6.svg",
+    "sinopsis": "La última estación espacial habitada pierde contacto con la Tierra. Seis tripulantes deben decidir si el silencio significa que ya no queda nadie abajo.",
+    "duracionMinutos": 151,
+    "generos": [
+      "g-scifi",
+      "g-thriller"
+    ],
+    "clasificacion": "+13",
+    "diasHastaEstreno": 5,
+    "disponible": true,
+    "preventaActivada": true,
+    "precioPreventa": 8200,
+    "precioNormal": 11000,
+    "ventasPrevias": 310
+  },
+  {
+    "id": "p7",
+    "nombre": "Verano del 98",
+    "poster": "posters/p7.svg",
+    "sinopsis": "Dos primas pasan enero en Mar del Plata vendiendo churros y se enamoran del mismo guardavidas, que no sabe nadar.",
+    "duracionMinutos": 112,
+    "generos": [
+      "g-romance",
+      "g-comedia"
+    ],
+    "clasificacion": "ATP",
+    "diasHastaEstreno": 3,
+    "disponible": true,
+    "preventaActivada": true,
+    "precioPreventa": 6800,
+    "precioNormal": 9000,
+    "ventasPrevias": 145
+  },
+  {
+    "id": "p8",
+    "nombre": "El Protocolo Silencio",
+    "poster": "posters/p8.svg",
+    "sinopsis": "Una traductora de la cancillería descubre que lleva diez años poniendo palabras a un acuerdo que nunca existió.",
+    "duracionMinutos": 134,
+    "generos": [
+      "g-accion",
+      "g-thriller"
+    ],
+    "clasificacion": "+18",
+    "diasHastaEstreno": 26,
+    "disponible": true,
+    "preventaActivada": false,
+    "precioPreventa": 8000,
+    "precioNormal": 10500,
+    "ventasPrevias": 0
+  },
+  {
+    "id": "p9",
+    "nombre": "Manos de Barro",
+    "poster": "posters/p9.svg",
+    "sinopsis": "Un alfarero de Catamarca recibe el encargo de su vida justo cuando empieza a perder el pulso.",
+    "duracionMinutos": 119,
+    "generos": [
+      "g-drama"
+    ],
+    "clasificacion": "+13",
+    "diasHastaEstreno": 47,
+    "disponible": true,
+    "preventaActivada": false,
+    "precioPreventa": 7000,
+    "precioNormal": 9500,
+    "ventasPrevias": 0
+  },
+  {
+    "id": "p10",
+    "nombre": "Krill: La Aventura Submarina",
+    "poster": "posters/p10.svg",
+    "sinopsis": "El krill más pequeño del cardumen se separa de su banco y tiene que cruzar el mar argentino para volver a casa.",
+    "duracionMinutos": 92,
+    "generos": [
+      "g-animacion"
+    ],
+    "clasificacion": "ATP",
+    "diasHastaEstreno": 12,
+    "disponible": true,
+    "preventaActivada": false,
+    "precioPreventa": 6500,
+    "precioNormal": 8500,
+    "ventasPrevias": 0
+  }
+]

@@ -1,0 +1,71 @@
+<header class="seccion-cabecera">
+  <div>
+    <p class="etiqueta-seccion">Auditoría</p>
+    <h1>Log de actividad</h1>
+  </div>
+  <button type="button" class="boton boton--fantasma boton--chico" (click)="limpiar()">
+    Limpiar filtros
+  </button>
+</header>
+
+<form class="filtros" [formGroup]="FormularioFiltro">
+  <div class="campo">
+    <label for="filtro-texto">Buscar</label>
+    <input id="filtro-texto" type="search" formControlName="texto" placeholder="Usuario o detalle" />
+  </div>
+
+  <div class="campo">
+    <label for="filtro-accion">Acción</label>
+    <select id="filtro-accion" formControlName="accion">
+      <option value="">Todas</option>
+      @for (accion of acciones; track accion[0]) {
+        <option [value]="accion[0]">{{ accion[1] }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="campo">
+    <label for="filtro-desde">Desde</label>
+    <input id="filtro-desde" type="date" formControlName="desde" />
+  </div>
+
+  <div class="campo">
+    <label for="filtro-hasta">Hasta</label>
+    <input id="filtro-hasta" type="date" formControlName="hasta" />
+  </div>
+</form>
+
+@if (registros$ | async; as registros) {
+  @if (registros.length) {
+    <div class="tabla-scroll">
+      <table>
+        <caption class="solo-lectores">Registro de actividad del sistema</caption>
+        <thead>
+          <tr>
+            <th scope="col">Fecha</th>
+            <th scope="col">Hora</th>
+            <th scope="col">Usuario</th>
+            <th scope="col">Acción</th>
+            <th scope="col">Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (registro of registros; track registro.id) {
+            <tr>
+              <td>{{ registro.fechaHora | date: 'dd/MM/y' }}</td>
+              <td>{{ registro.fechaHora | date: 'HH:mm:ss' }}</td>
+              <td>{{ registro.usuario }}</td>
+              <td><span class="insignia">{{ etiqueta(registro.accion) }}</span></td>
+              <td>{{ registro.detalle }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <p class="vacio">
+      No hay actividad registrada con esos filtros. El log se llena a medida que se usa el sistema:
+      probá crear una función, validar un QR o confirmar una compra.
+    </p>
+  }
+}

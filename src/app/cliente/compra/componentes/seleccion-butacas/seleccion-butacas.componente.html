@@ -1,0 +1,103 @@
+@if (funcion$ | async; as funcion) {
+  @if (pelicula$ | async; as pelicula) {
+    <div class="contenedor seccion">
+      <a [routerLink]="['/pelicula', pelicula.id]" class="volver">← Volver a {{ pelicula.nombre }}</a>
+
+      <header class="cabecera">
+        <div>
+          <p class="etiqueta-seccion">Elegí tus butacas</p>
+          <h1>{{ pelicula.nombre }}</h1>
+          <p class="cabecera__funcion">
+            {{ funcion.inicio | date: 'EEEE d \'de\' MMMM, HH:mm' }}
+            <span aria-hidden="true">·</span> {{ funcion | pipeModalidad }}
+            <span aria-hidden="true">·</span> {{ funcion.nombreSala }}
+          </p>
+        </div>
+        <div class="cabecera__derecha">
+          <app-insignia-clasificacion [clasificacion]="pelicula.clasificacion" />
+          <p class="cabecera__libres">{{ libres() }} butacas libres</p>
+        </div>
+      </header>
+
+      @if (bloqueoEdad$ | async; as bloqueo) {
+        <div class="bloqueo" role="alert">
+          <strong>No podés comprar esta función.</strong>
+          <span>{{ bloqueo }}</span>
+        </div>
+      }
+
+      @if (avisoEdad$ | async; as aviso) {
+        <div class="aviso-acompanante" role="note">{{ aviso }}</div>
+      }
+
+      <div class="cuerpo">
+        <div class="cuerpo__mapa">
+          <app-mapa-butacas
+            [butacas]="butacas()"
+            [seleccionadas]="idsElegidos()"
+            (butacaAlternada)="alternarButaca($event)"
+          />
+          <p class="nota-vivo">
+            <span class="nota-vivo__punto" aria-hidden="true"></span>
+            Las butacas ocupadas se actualizan en vivo. Si alguien compra la que elegiste, te
+            avisamos antes de cobrar.
+          </p>
+        </div>
+
+        <aside class="resumen" aria-label="Resumen de tu selección">
+          <h2 class="resumen__titulo">Tu selección</h2>
+
+          @if (elegidas().length) {
+            <ul class="resumen__butacas">
+              @for (butaca of elegidas(); track butaca.id) {
+                <li>
+                  <span class="resumen__etiqueta">{{ butaca.fila }}{{ butaca.numero }}</span>
+                  <span class="resumen__tipo">{{ butaca.tipo }}</span>
+                  <span class="resumen__precio">{{ butaca.precio | pipeMonedaArs }}</span>
+                  <button
+                    type="button"
+                    class="resumen__quitar"
+                    [attr.aria-label]="'Quitar butaca ' + butaca.fila + butaca.numero"
+                    (click)="alternarButaca(butaca)"
+                  >
+                    ×
+                  </button>
+                </li>
+              }
+            </ul>
+
+            <app-aviso-vip [cantidad]="cantidadVip()" [recargo]="recargoVip()" />
+
+            <p class="resumen__total">
+              <span>Total</span>
+              <strong>{{ total() | pipeMonedaArs }}</strong>
+            </p>
+
+            <button
+              type="button"
+              class="boton boton--primario boton--bloque"
+              [disabled]="!!(bloqueoEdad$ | async)"
+              (click)="continuar(pelicula.clasificacion, pelicula.id)"
+            >
+              Continuar al Candy Bar
+            </button>
+          } @else {
+            <p class="resumen__vacio">
+              Tocá las butacas del mapa para elegirlas. Podés seleccionar todas las que necesites.
+            </p>
+          }
+        </aside>
+      </div>
+    </div>
+
+    @if (pideEdad()) {
+      <app-verificacion-edad
+        [clasificacion]="clasificacionPendiente()"
+        (fechaNacimientoDeclarada)="alDeclararEdad($event, pelicula.id)"
+        (cancelado)="cancelarVerificacion()"
+      />
+    }
+  }
+} @else {
+  <app-cargando mensaje="Cargando la sala…" />
+}

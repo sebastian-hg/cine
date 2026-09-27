@@ -4,14 +4,14 @@
       <p class="etiqueta-seccion">Tu compra</p>
       <h1>Carrito</h1>
     </div>
-    @if ((items$ | async)?.length) {
+    @if ((items() ?? []).length) {
       <button type="button" class="boton boton--fantasma boton--chico" (click)="vaciar()">
         Vaciar carrito
       </button>
     }
   </header>
 
-  @if (items$ | async; as items) {
+  @if (items(); as items) {
     @if (items.length) {
       <div class="cuerpo">
         <ul class="items">
@@ -70,7 +70,7 @@
 
         <aside class="resumen" aria-label="Resumen de la compra">
           <h2>Resumen</h2>
-          <app-resumen-totales [desglose]="desglose$ | async" />
+          <app-resumen-totales [desglose]="desglose()" />
           <button type="button" class="boton boton--primario boton--bloque" (click)="irAPagar()">
             Continuar al pago
           </button>

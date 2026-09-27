@@ -1,4 +1,4 @@
-@if (pelicula$ | async; as pelicula) {
+@if (pelicula(); as pelicula) {
   <article>
     <header class="cabecera">
       <div class="cabecera__fondo" [style.background-image]="'url(' + pelicula.poster + ')'"></div>
@@ -12,22 +12,22 @@
           <div class="cabecera__meta">
             <app-insignia-clasificacion [clasificacion]="pelicula.clasificacion" />
             <span>{{ pelicula.duracionMinutos | pipeDuracion }}</span>
-            @if (nombresGenero$ | async; as generos) {
+            @if (nombresGenero(); as generos) {
               <span>{{ generos.join(' · ') }}</span>
             }
-            @if (modalidades$ | async; as modalidades) {
+            @if (modalidades(); as modalidades) {
               @if (modalidades.length) {
                 <span>{{ modalidades.join(' / ') }}</span>
               }
             }
-            @if (idiomas$ | async; as idiomas) {
+            @if (idiomas(); as idiomas) {
               @if (idiomas.length) {
                 <span class="capitalizar">{{ idiomas.join(' / ') }}</span>
               }
             }
           </div>
 
-          @if (resumen$ | async; as resumen) {
+          @if (resumen(); as resumen) {
             @if (resumen.cantidad > 0) {
               <p class="cabecera__puntuacion">
                 <span class="cabecera__estrella" aria-hidden="true">★</span>
@@ -39,7 +39,7 @@
 
           <p class="cabecera__sinopsis">{{ pelicula.sinopsis }}</p>
 
-          @if (preventa$ | async; as preventa) {
+          @if (preventa(); as preventa) {
             @if (preventa.activa) {
               <div class="preventa">
                 <p class="preventa__titulo">Preventa abierta</p>
@@ -72,7 +72,7 @@
         </div>
       </div>
       <app-listado-funciones
-        [funciones]="(funciones$ | async) ?? []"
+        [funciones]="funciones() ?? []"
         (funcionElegida)="irAButacas($event)"
       />
     </section>
@@ -86,11 +86,11 @@
       </div>
 
       <div class="resenas-cuerpo">
-        <app-listado-resenas [resenas]="(resenas$ | async) ?? []" [resumen]="resumen$ | async" />
+        <app-listado-resenas [resenas]="resenas() ?? []" [resumen]="resumen() ?? null" />
 
         <app-formulario-resena
-          [puedeCalificar]="(puedeResenar$ | async) ?? false"
-          [motivoBloqueo]="(motivoBloqueoResena$ | async) ?? ''"
+          [puedeCalificar]="puedeResenar() ?? false"
+          [motivoBloqueo]="motivoBloqueoResena() ?? ''"
           (resenaEnviada)="publicarResena(pelicula.id, $event)"
         />
       </div>

@@ -1,16 +1,18 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { of, switchMap } from 'rxjs';
 
 import { CreditoServicio } from '../../../../compartido/servicios/credito.servicio';
 import { AutenticacionServicio } from '../../../../nucleo/servicios/autenticacion.servicio';
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
+import { MovimientoCredito } from '../../../../compartido/interfaces/credito.interfaz';
 
 /** Crédito por cancelaciones (§19). */
 @Component({
   selector: 'app-mi-credito',
-  imports: [AsyncPipe, DatePipe, RouterLink, PipeMonedaArs],
+  imports: [DatePipe, RouterLink, PipeMonedaArs],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="contenedor seccion">
@@ -25,14 +27,14 @@ import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
       </header>
 
       <div class="saldo">
-        <span class="saldo__valor">{{ (saldo$ | async) ?? 0 | pipeMonedaArs }}</span>
+        <span class="saldo__valor">{{ saldo() | pipeMonedaArs }}</span>
         <p class="saldo__nota">
           El crédito se genera cuando cancelás una compra. Podés usarlo en cualquier compra futura y
           combinarlo con otros medios de pago.
         </p>
       </div>
 
-      @if (movimientos$ | async; as movimientos) {
+      @if (movimientos(); as movimientos) {
         @if (movimientos.length) {
           <div class="tabla-scroll">
             <table>
@@ -103,11 +105,15 @@ export class MiCreditoComponente {
   private readonly credito = inject(CreditoServicio);
   private readonly auth = inject(AutenticacionServicio);
 
-  protected readonly saldo$ = this.auth.usuarioActual$.pipe(
-    switchMap((usuario) => (usuario ? this.credito.saldo(usuario.id) : of(0))),
+  protected readonly saldo = toSignal<number, number>(
+    this.auth.usuarioActual$.pipe(switchMap((usuario) => (usuario ? this.credito.saldo(usuario.id) : of(0)))),
+    { initialValue: 0 },
   );
 
-  protected readonly movimientos$ = this.auth.usuarioActual$.pipe(
-    switchMap((usuario) => (usuario ? this.credito.movimientos(usuario.id) : of([]))),
+  protected readonly movimientos = toSignal<MovimientoCredito[], MovimientoCredito[]>(
+    this.auth.usuarioActual$.pipe(
+      switchMap((usuario) => (usuario ? this.credito.movimientos(usuario.id) : of<MovimientoCredito[]>([]))),
+    ),
+    { initialValue: [] },
   );
 }

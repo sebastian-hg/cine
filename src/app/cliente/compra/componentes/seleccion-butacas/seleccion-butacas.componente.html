@@ -1,5 +1,5 @@
-@if (funcion$ | async; as funcion) {
-  @if (pelicula$ | async; as pelicula) {
+@if (funcion(); as funcion) {
+  @if (pelicula(); as pelicula) {
     <div class="contenedor seccion">
       <a [routerLink]="['/pelicula', pelicula.id]" class="volver">← Volver a {{ pelicula.nombre }}</a>
 
@@ -19,14 +19,14 @@
         </div>
       </header>
 
-      @if (bloqueoEdad$ | async; as bloqueo) {
+      @if (bloqueoEdad(); as bloqueo) {
         <div class="bloqueo" role="alert">
           <strong>No podés comprar esta función.</strong>
           <span>{{ bloqueo }}</span>
         </div>
       }
 
-      @if (avisoEdad$ | async; as aviso) {
+      @if (avisoEdad(); as aviso) {
         <div class="aviso-acompanante" role="note">{{ aviso }}</div>
       }
 
@@ -76,7 +76,7 @@
             <button
               type="button"
               class="boton boton--primario boton--bloque"
-              [disabled]="!!(bloqueoEdad$ | async)"
+              [disabled]="!!bloqueoEdad()"
               (click)="continuar(pelicula.clasificacion, pelicula.id)"
             >
               Continuar al Candy Bar

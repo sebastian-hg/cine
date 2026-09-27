@@ -1,12 +1,22 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AutenticacionServicio } from '../../../../nucleo/servicios/autenticacion.servicio';
 import { NotificacionServicio } from '../../../../nucleo/servicios/notificacion.servicio';
 
+interface CuentaDemo {
+  email: string;
+  rol: string;
+}
+
+type FormularioLogin = FormGroup<{
+  email: FormControl<string>;
+  password: FormControl<string>;
+}>;
+
 /** Cuentas de prueba, para no tener que adivinarlas al revisar la demo. */
-const CUENTAS_DEMO = [
+const CUENTAS_DEMO: readonly CuentaDemo[] = [
   { email: 'cliente@cine.test', rol: 'Cliente sin compras (20% de bienvenida)' },
   { email: 'mayor@cine.test', rol: 'Cliente mayor de 50' },
   { email: 'adolescente@cine.test', rol: 'Cliente de 15 años' },
@@ -29,34 +39,36 @@ export class LoginComponente {
   private readonly ruta = inject(ActivatedRoute);
   private readonly avisos = inject(NotificacionServicio);
 
-  protected readonly cuentasDemo = CUENTAS_DEMO;
+  protected readonly cuentasDemo = signal<readonly CuentaDemo[]>(CUENTAS_DEMO);
   protected readonly error = signal<string | null>(null);
-  protected readonly enviando = signal(false);
+  protected readonly enviando = signal<boolean>(false);
 
-  protected readonly FormularioLogin = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required]],
-  });
+  protected readonly formularioLogin = signal<FormularioLogin>(
+    this.fb.nonNullable.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required]],
+    }),
+  );
 
   protected invalido(campo: 'email' | 'password'): boolean {
-    const control = this.FormularioLogin.controls[campo];
+    const control = this.formularioLogin().controls[campo];
     return control.invalid && control.touched;
   }
 
   protected usarCuenta(email: string): void {
-    this.FormularioLogin.patchValue({ email, password: 'cine1234' });
+    this.formularioLogin().patchValue({ email, password: 'cine1234' });
   }
 
   protected enviar(): void {
-    if (this.FormularioLogin.invalid) {
-      this.FormularioLogin.markAllAsTouched();
+    if (this.formularioLogin().invalid) {
+      this.formularioLogin().markAllAsTouched();
       return;
     }
 
     this.enviando.set(true);
     this.error.set(null);
 
-    this.auth.ingresar(this.FormularioLogin.getRawValue()).subscribe({
+    this.auth.ingresar(this.formularioLogin().getRawValue()).subscribe({
       next: (usuario) => {
         this.enviando.set(false);
         this.avisos.mostrar(`Hola, ${usuario.nombre}.`, 'exito');

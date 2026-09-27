@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
@@ -23,7 +23,7 @@ import { TarjetaProductoComponente } from '../tarjeta-producto/tarjeta-producto.
  */
 @Component({
   selector: 'app-candy-bar',
-  imports: [AsyncPipe, RouterLink, CargandoComponente, TarjetaProductoComponente, PipeMonedaArs],
+  imports: [RouterLink, CargandoComponente, TarjetaProductoComponente, PipeMonedaArs],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './candy-bar.componente.html',
   styleUrl: './candy-bar.componente.scss',
@@ -35,31 +35,46 @@ export class CandyBarComponente {
   private readonly avisos = inject(NotificacionServicio);
   private readonly router = inject(Router);
 
-  protected readonly catalogo$ = this.candy.catalogo();
-  protected readonly combos$ = this.combos.activos();
-  protected readonly items$ = this.carrito.items$;
+  private readonly items$ = this.carrito.items$;
+
+  protected readonly catalogo = toSignal(this.candy.catalogo(), {
+    initialValue: [],
+  });
+  protected readonly combosActivos = toSignal(this.combos.activos(), {
+    initialValue: [],
+  });
+  protected readonly items = toSignal<ItemCarrito[], ItemCarrito[]>(this.items$, {
+    initialValue: [],
+  });
 
   /** Cuántas unidades de cada producto hay ya en el carrito. */
-  protected readonly cantidades$ = this.items$.pipe(
-    map((items) => {
-      const mapa = new Map<string, number>();
-      for (const item of items) {
-        if (item.tipo === 'producto') mapa.set(item.idProducto, item.cantidad);
-        if (item.tipo === 'combo') mapa.set(item.idCombo, item.cantidad);
-      }
-      return mapa;
-    }),
+  protected readonly cantidades = toSignal(
+    this.items$.pipe(
+      map((items) => {
+        const mapa = new Map<string, number>();
+        for (const item of items) {
+          if (item.tipo === 'producto') mapa.set(item.idProducto, item.cantidad);
+          if (item.tipo === 'combo') mapa.set(item.idCombo, item.cantidad);
+        }
+        return mapa;
+      }),
+    ),
+    { initialValue: new Map<string, number>() },
   );
 
-  protected readonly totalParcial$ = this.items$.pipe(
-    map((items) => items.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0)),
+  protected readonly totalParcial = toSignal(
+    this.items$.pipe(
+      map((items) => items.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0)),
+    ),
+    { initialValue: 0 },
   );
 
-  protected readonly tieneEntradas$ = this.items$.pipe(
-    map((items) => items.some((item) => item.tipo === 'entrada')),
+  protected readonly tieneEntradas = toSignal(
+    this.items$.pipe(map((items) => items.some((item) => item.tipo === 'entrada'))),
+    { initialValue: false },
   );
 
-  protected readonly sinCantidades = new Map<string, number>();
+  protected readonly sinCantidades = signal(new Map<string, number>());
 
   protected agregarProducto(producto: Producto): void {
     this.carrito.agregarProducto(producto);

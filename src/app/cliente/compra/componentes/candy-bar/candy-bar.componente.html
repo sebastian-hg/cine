@@ -9,7 +9,7 @@
 </section>
 
 <div class="contenedor seccion">
-  @if (combos$ | async; as combos) {
+  @if (combosActivos(); as combos) {
     @if (combos.length) {
       <section class="bloque">
         <div class="seccion-cabecera">
@@ -37,7 +37,7 @@
                   class="boton boton--primario boton--chico"
                   (click)="agregarCombo(combo)"
                 >
-                  @if (((cantidades$ | async) ?? sinCantidades).get(combo.id); as cantidad) {
+                  @if (cantidades().get(combo.id); as cantidad) {
                     Agregar otro ({{ cantidad }})
                   } @else {
                     Agregar
@@ -51,7 +51,7 @@
     }
   }
 
-  @if (catalogo$ | async; as catalogo) {
+  @if (catalogo(); as catalogo) {
     @for (categoria of catalogo; track categoria.id) {
       <section class="bloque">
         <div class="seccion-cabecera">
@@ -62,7 +62,7 @@
           @for (producto of categoria.productos; track producto.id) {
             <app-tarjeta-producto
               [producto]="producto"
-              [enCarrito]="((cantidades$ | async) ?? sinCantidades).get(producto.id) ?? 0"
+              [enCarrito]="cantidades().get(producto.id) ?? 0"
               (agregado)="agregarProducto($event)"
               (cantidadCambiada)="cambiarCantidadProducto(producto, $event)"
             />
@@ -75,17 +75,17 @@
   }
 </div>
 
-@if ((items$ | async)?.length) {
+@if ((items() ?? []).length) {
   <div class="barra-inferior">
     <div class="contenedor barra-inferior__interior">
       <div>
         <p class="barra-inferior__etiqueta">Total parcial</p>
-        <p class="barra-inferior__total">{{ (totalParcial$ | async) ?? 0 | pipeMonedaArs }}</p>
+        <p class="barra-inferior__total">{{ totalParcial() | pipeMonedaArs }}</p>
       </div>
       <div class="barra-inferior__acciones">
         <a routerLink="/compra/carrito" class="boton boton--fantasma">Ver carrito</a>
         <button type="button" class="boton boton--primario" (click)="continuar()">
-          @if ((tieneEntradas$ | async)) {
+          @if (tieneEntradas()) {
             Ir a pagar
           } @else {
             Continuar

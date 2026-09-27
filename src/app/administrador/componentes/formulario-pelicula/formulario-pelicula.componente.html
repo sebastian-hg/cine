@@ -1,4 +1,4 @@
-<form [formGroup]="FormularioPelicula" (ngSubmit)="enviar()" novalidate>
+<form [formGroup]="FormularioPelicula()" (ngSubmit)="enviar()" novalidate>
   <div class="campo" [class.campo--invalido]="invalido('nombre')">
     <label for="peli-nombre">Nombre</label>
     <input id="peli-nombre" type="text" formControlName="nombre" />
@@ -30,7 +30,7 @@
         </button>
       }
     </div>
-    @if (elegidos.size === 0 && FormularioPelicula.touched) {
+    @if (elegidos().size === 0 && FormularioPelicula().touched) {
       <p class="mensaje-campo">Elegí al menos un género.</p>
     }
   </div>

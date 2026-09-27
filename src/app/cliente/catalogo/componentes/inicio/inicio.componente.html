@@ -9,9 +9,9 @@
   </div>
 </section>
 
-@if (cartelera$ | async; as cartelera) {
-  @if (!(hayFiltro$ | async)) {
-    @if (masVendidas$ | async; as top) {
+@if (cartelera(); as cartelera) {
+  @if (!hayFiltro()) {
+    @if (masVendidas(); as top) {
       @if (top.length) {
         <section class="contenedor seccion">
           <div class="seccion-cabecera">
@@ -22,7 +22,7 @@
           </div>
           <app-mas-vendidas
             [peliculas]="top"
-            [nombresGenero]="(nombresGenero$ | async) ?? sinGeneros"
+            [nombresGenero]="nombresGenero()"
             (peliculaElegida)="verDetalle($event)"
           />
         </section>
@@ -44,15 +44,15 @@
     <div class="controles">
       <app-buscador (textoBuscado)="buscar($event)" />
       <app-filtro-generos
-        [generos]="(generos$ | async) ?? []"
-        [seleccionados]="(seleccionados$ | async) ?? []"
+        [generos]="generosActivos()"
+        [seleccionados]="seleccionados()"
         (generosSeleccionados)="filtrar($event)"
       />
     </div>
 
     <app-cartelera
       [peliculas]="cartelera"
-      [nombresGenero]="(nombresGenero$ | async) ?? sinGeneros"
+      [nombresGenero]="nombresGenero()"
       (peliculaElegida)="verDetalle($event)"
     />
   </section>
@@ -60,7 +60,7 @@
   <app-cargando mensaje="Cargando la cartelera…" />
 }
 
-@if (combosDestacados$ | async; as combos) {
+@if (combosDestacados(); as combos) {
   @if (combos.length) {
     <section class="contenedor seccion">
       <div class="seccion-cabecera">

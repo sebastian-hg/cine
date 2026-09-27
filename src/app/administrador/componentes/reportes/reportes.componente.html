@@ -13,7 +13,7 @@
   </div>
 </header>
 
-@if (totales$ | async; as totales) {
+@if (totales(); as totales) {
   <div class="tarjetas">
     <div class="tarjeta-dato">
       <span class="tarjeta-dato__valor">{{ totales.facturacion | pipeMonedaArs }}</span>
@@ -35,7 +35,7 @@
   cartelera para ver el movimiento reflejado acá.
 </p>
 
-@if (estados$ | async; as estados) {
+@if (estados(); as estados) {
   <div class="tarjetas tarjetas--estados">
     <div class="tarjeta-dato tarjeta-dato--estado">
       <span class="tarjeta-dato__valor">{{ estados.vendidas }}</span>
@@ -56,7 +56,7 @@
   </div>
 }
 
-@if (ventasPorUsuario$ | async; as resumenUsuarios) {
+@if (ventasPorUsuario(); as resumenUsuarios) {
   <div class="tabla-scroll tabla-scroll--usuarios">
     <table>
       <caption class="solo-lectores">Ventas por usuario en los últimos 14 días</caption>
@@ -86,7 +86,7 @@
   </div>
 }
 
-@if (diarios$ | async; as diarios) {
+@if (diarios(); as diarios) {
   <div class="tabla-scroll">
     <table>
       <caption class="solo-lectores">Facturación diaria de los últimos 14 días</caption>

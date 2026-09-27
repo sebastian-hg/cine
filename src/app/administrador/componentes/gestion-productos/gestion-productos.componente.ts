@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, switchMap } from 'rxjs';
 
 import { Producto } from '../../../compartido/interfaces/producto.interfaz';
@@ -12,7 +12,7 @@ import { FormularioProductoComponente } from '../formulario-producto/formulario-
 /** CRUD de productos del Candy Bar (§10). */
 @Component({
   selector: 'app-gestion-productos',
-  imports: [AsyncPipe, FormularioProductoComponente, PipeMonedaArs],
+  imports: [FormularioProductoComponente, PipeMonedaArs],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="seccion-cabecera">
@@ -26,14 +26,14 @@ import { FormularioProductoComponente } from '../formulario-producto/formulario-
       <section class="bloque">
         <h2>Nuevo producto</h2>
         <app-formulario-producto
-          [categorias]="(categorias$ | async) ?? []"
+          [categorias]="categorias()"
           (productoGuardado)="crear($event)"
         />
       </section>
 
       <section class="bloque">
         <h2>Catálogo</h2>
-        @if (productos$ | async; as productos) {
+        @if (productos(); as productos) {
           <div class="tabla-scroll">
             <table>
               <caption class="solo-lectores">Productos del Candy Bar</caption>
@@ -104,10 +104,13 @@ export class GestionProductosComponente {
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
-  protected readonly productos$ = this.recargar.pipe(
-    switchMap(() => this.candy.todosLosProductos()),
+  protected readonly productos = toSignal<Producto[], Producto[]>(
+    this.recargar.pipe(switchMap(() => this.candy.todosLosProductos())),
+    { initialValue: [] },
   );
-  protected readonly categorias$ = this.candy.categorias();
+  protected readonly categorias = toSignal(this.candy.categorias(), {
+    initialValue: [],
+  });
 
   protected crear(datos: Omit<Producto, 'id'>): void {
     this.candy.crearProducto(datos).subscribe((producto) => {

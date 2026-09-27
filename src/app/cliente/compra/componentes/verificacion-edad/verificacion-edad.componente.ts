@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, ElementRef, inject, input, output, viewChild, AfterViewInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, inject, input, output, viewChild, AfterViewInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { ClasificacionEdad } from '../../../../compartido/interfaces/pelicula.interfaz';
@@ -31,9 +31,11 @@ export class VerificacionEdadComponente implements AfterViewInit {
   /** No se puede declarar una fecha futura. */
   protected readonly maximo = soloFecha(new Date());
 
-  protected readonly FormularioEdad = this.fb.nonNullable.group({
-    fechaNacimiento: ['', [Validators.required]],
-  });
+  protected readonly FormularioEdad = signal(
+    this.fb.nonNullable.group({
+      fechaNacimiento: ['', [Validators.required]],
+    }),
+  );
 
   ngAfterViewInit(): void {
     // El modal atrapa el foco: al abrirse, el primer campo lo recibe.
@@ -45,10 +47,10 @@ export class VerificacionEdadComponente implements AfterViewInit {
   }
 
   protected confirmar(): void {
-    if (this.FormularioEdad.invalid) {
-      this.FormularioEdad.markAllAsTouched();
+    if (this.FormularioEdad().invalid) {
+      this.FormularioEdad().markAllAsTouched();
       return;
     }
-    this.fechaNacimientoDeclarada.emit(this.FormularioEdad.controls.fechaNacimiento.value);
+    this.fechaNacimientoDeclarada.emit(this.FormularioEdad().controls.fechaNacimiento.value);
   }
 }

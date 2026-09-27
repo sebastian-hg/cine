@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { switchMap, take } from 'rxjs';
@@ -30,7 +29,6 @@ import { ResumenTotalesComponente } from '../resumen-totales/resumen-totales.com
 @Component({
   selector: 'app-checkout',
   imports: [
-    AsyncPipe,
     RouterLink,
     AplicarCreditoComponente,
     FormularioCuponComponente,
@@ -52,10 +50,12 @@ export class CheckoutComponente {
   private readonly avisos = inject(NotificacionServicio);
   private readonly router = inject(Router);
 
-  protected readonly items$ = this.carrito.items$;
-  protected readonly desglose$ = this.precio.desglose$;
-  protected readonly usuario$ = this.auth.usuarioActual$;
-  protected readonly creditoDisponible$ = this.precio.creditoDisponible$;
+  protected readonly items = toSignal(this.carrito.items$, {
+    initialValue: [],
+  });
+  protected readonly usuario = toSignal(this.auth.usuarioActual$, {
+    initialValue: this.auth.usuarioActual,
+  });
 
   protected readonly desglose = toSignal(this.precio.desglose$);
   protected readonly creditoDisponible = toSignal(this.precio.creditoDisponible$, {

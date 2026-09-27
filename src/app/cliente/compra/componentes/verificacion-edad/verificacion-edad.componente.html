@@ -14,7 +14,7 @@
     >. Para continuar necesitamos saber tu fecha de nacimiento.
   </p>
 
-  <form [formGroup]="FormularioEdad" (ngSubmit)="confirmar()">
+  <form [formGroup]="FormularioEdad()" (ngSubmit)="confirmar()">
     <div class="campo">
       <label for="fecha-nacimiento-declarada">Fecha de nacimiento</label>
       <input
@@ -25,7 +25,7 @@
         [max]="maximo"
         required
       />
-      @if (FormularioEdad.controls.fechaNacimiento.invalid && FormularioEdad.controls.fechaNacimiento.touched) {
+      @if (FormularioEdad().controls.fechaNacimiento.invalid && FormularioEdad().controls.fechaNacimiento.touched) {
         <p class="mensaje-campo">Ingresá tu fecha de nacimiento para continuar.</p>
       }
     </div>

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Combo } from '../../../compartido/interfaces/combo.interfaz';
@@ -12,7 +12,7 @@ const IMAGENES = ['combos/clasico.svg', 'combos/pareja.svg', 'combos/dulce.svg',
   imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <form [formGroup]="FormularioCombo" (ngSubmit)="enviar()" novalidate>
+    <form [formGroup]="FormularioCombo()" (ngSubmit)="enviar()" novalidate>
       <div class="campo">
         <label for="combo-nombre">Nombre</label>
         <input id="combo-nombre" type="text" formControlName="nombre" />
@@ -38,7 +38,7 @@ const IMAGENES = ['combos/clasico.svg', 'combos/pareja.svg', 'combos/dulce.svg',
             </button>
           }
         </div>
-        @if (elegidos.size === 0 && FormularioCombo.touched) {
+        @if (elegidos().size === 0 && FormularioCombo().touched) {
           <p class="mensaje-campo">Elegí al menos un producto.</p>
         }
       </div>
@@ -52,7 +52,7 @@ const IMAGENES = ['combos/clasico.svg', 'combos/pareja.svg', 'combos/dulce.svg',
         <div class="campo">
           <label for="combo-imagen">Imagen</label>
           <select id="combo-imagen" formControlName="imagen">
-            @for (imagen of imagenes; track imagen) {
+            @for (imagen of imagenes(); track imagen) {
               <option [value]="imagen">{{ imagen.split('/')[1] }}</option>
             }
           </select>
@@ -84,40 +84,44 @@ export class FormularioComboComponente {
 
   private readonly fb = inject(FormBuilder);
 
-  protected readonly imagenes = IMAGENES;
-  protected readonly elegidos = new Set<string>();
+  protected readonly imagenes = signal(IMAGENES);
+  protected readonly elegidos = signal<Set<string>>(new Set());
 
-  protected readonly FormularioCombo = this.fb.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.minLength(3)]],
-    descripcion: ['', [Validators.required, Validators.minLength(5)]],
-    precioFijo: [9900, [Validators.required, Validators.min(1)]],
-    imagen: [IMAGENES[0], [Validators.required]],
-    incluyeEntrada: [false],
-    destacado: [false],
-  });
+  protected readonly FormularioCombo = signal(
+    this.fb.nonNullable.group({
+      nombre: ['', [Validators.required, Validators.minLength(3)]],
+      descripcion: ['', [Validators.required, Validators.minLength(5)]],
+      precioFijo: [9900, [Validators.required, Validators.min(1)]],
+      imagen: [IMAGENES[0], [Validators.required]],
+      incluyeEntrada: [false],
+      destacado: [false],
+    }),
+  );
 
   protected alternarProducto(id: string): void {
-    if (this.elegidos.has(id)) this.elegidos.delete(id);
-    else this.elegidos.add(id);
+    const actuales = new Set(this.elegidos());
+    if (actuales.has(id)) actuales.delete(id);
+    else actuales.add(id);
+    this.elegidos.set(actuales);
   }
 
   protected estaElegido(id: string): boolean {
-    return this.elegidos.has(id);
+    return this.elegidos().has(id);
   }
 
   protected enviar(): void {
-    if (this.FormularioCombo.invalid || this.elegidos.size === 0) {
-      this.FormularioCombo.markAllAsTouched();
+    if (this.FormularioCombo().invalid || this.elegidos().size === 0) {
+      this.FormularioCombo().markAllAsTouched();
       return;
     }
 
     this.comboGuardado.emit({
-      ...this.FormularioCombo.getRawValue(),
-      productos: [...this.elegidos].map((idProducto) => ({ idProducto, cantidad: 1 })),
+      ...this.FormularioCombo().getRawValue(),
+      productos: [...this.elegidos()].map((idProducto) => ({ idProducto, cantidad: 1 })),
       activo: true,
     });
 
-    this.FormularioCombo.reset({
+    this.FormularioCombo().reset({
       nombre: '',
       descripcion: '',
       precioFijo: 9900,
@@ -125,6 +129,6 @@ export class FormularioComboComponente {
       incluyeEntrada: false,
       destacado: false,
     });
-    this.elegidos.clear();
+    this.elegidos.set(new Set());
   }
 }

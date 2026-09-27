@@ -10,7 +10,7 @@
   aplicables entre primera compra, mayores de 50 y el cupón que haya ingresado el cliente.
 </p>
 
-<form class="bloque" [formGroup]="FormularioDescuentos" (ngSubmit)="guardar()" novalidate>
+<form class="bloque" [formGroup]="FormularioDescuentos()" (ngSubmit)="guardar()" novalidate>
   <div class="campo">
     <label for="desc-primera">Descuento de primera compra (%)</label>
     <input
@@ -64,7 +64,7 @@
   </button>
 </form>
 
-@if (configuracion$ | async; as actual) {
+@if (configuracionActual(); as actual) {
   <p class="vigente">
     Vigente ahora: primera compra {{ actual.porcentajePrimeraCompra }}%, mayores de 50
     {{ actual.porcentajeMayores50 }}%, VIP ×{{ actual.multiplicadorVip }}.

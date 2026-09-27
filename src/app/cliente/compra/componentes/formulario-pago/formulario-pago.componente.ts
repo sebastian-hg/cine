@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { DirectivaSoloNumeros } from '../../../../compartido/directivas/solo-numeros.directiva';
@@ -33,29 +33,31 @@ export class FormularioPagoComponente {
 
   private readonly fb = inject(FormBuilder);
 
-  protected readonly FormularioPago = this.fb.nonNullable.group({
-    titular: ['', [Validators.required, Validators.minLength(3)]],
-    numero: ['', [Validators.required, Validators.minLength(16), Validators.maxLength(16)]],
-    vencimiento: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]],
-    codigoSeguridad: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(4)]],
-  });
+  protected readonly FormularioPago = signal(
+    this.fb.nonNullable.group({
+      titular: ['', [Validators.required, Validators.minLength(3)]],
+      numero: ['', [Validators.required, Validators.minLength(16), Validators.maxLength(16)]],
+      vencimiento: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]],
+      codigoSeguridad: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(4)]],
+    }),
+  );
 
-  protected invalido(campo: keyof typeof this.FormularioPago.controls): boolean {
-    const control = this.FormularioPago.controls[campo];
+  protected invalido(campo: 'titular' | 'numero' | 'vencimiento' | 'codigoSeguridad'): boolean {
+    const control = this.FormularioPago().controls[campo];
     return control.invalid && control.touched;
   }
 
   protected autocompletarPrueba(): void {
-    this.FormularioPago.patchValue(FormularioPagoComponente.DATOS_PAGO_PRUEBA);
-    this.FormularioPago.markAsDirty();
-    this.FormularioPago.markAsUntouched();
+    this.FormularioPago().patchValue(FormularioPagoComponente.DATOS_PAGO_PRUEBA);
+    this.FormularioPago().markAsDirty();
+    this.FormularioPago().markAsUntouched();
   }
 
   protected enviar(): void {
-    if (this.FormularioPago.invalid) {
-      this.FormularioPago.markAllAsTouched();
+    if (this.FormularioPago().invalid) {
+      this.FormularioPago().markAllAsTouched();
       return;
     }
-    this.pagoConfirmado.emit(this.FormularioPago.getRawValue());
+    this.pagoConfirmado.emit(this.FormularioPago().getRawValue());
   }
 }

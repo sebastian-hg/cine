@@ -1,11 +1,11 @@
 @if (puedeCalificar()) {
-  <form class="formulario-resena tarjeta" [formGroup]="FormularioResena" (ngSubmit)="enviar()">
+  <form class="formulario-resena tarjeta" [formGroup]="FormularioResena()" (ngSubmit)="enviar()">
     <h3>Dejá tu reseña</h3>
 
     <div class="campo">
       <label id="etiqueta-estrellas">Tu calificación</label>
       <app-calificacion-estrellas [valor]="estrellas()" (calificado)="elegirEstrellas($event)" />
-      @if (estrellas() === 0 && FormularioResena.touched) {
+      @if (estrellas() === 0 && FormularioResena().touched) {
         <p class="mensaje-campo">Elegí cuántas estrellas le ponés.</p>
       }
     </div>

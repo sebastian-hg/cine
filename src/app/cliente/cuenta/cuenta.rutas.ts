@@ -18,6 +18,14 @@ export const RutasCuenta: Routes = [
     title: 'Mis compras · Cine',
   },
   {
+    path: 'peliculas',
+    loadComponent: () =>
+      import('./componentes/mis-peliculas/mis-peliculas.componente').then(
+        (m) => m.MisPeliculasComponente,
+      ),
+    title: 'Mis películas · Cine',
+  },
+  {
     path: 'puntos',
     loadComponent: () =>
       import('./componentes/mis-puntos/mis-puntos.componente').then((m) => m.MisPuntosComponente),

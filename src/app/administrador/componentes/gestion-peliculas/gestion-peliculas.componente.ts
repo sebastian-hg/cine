@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, switchMap } from 'rxjs';
 
 import { Pelicula } from '../../../compartido/interfaces/pelicula.interfaz';
@@ -14,7 +15,7 @@ import { FormularioPeliculaComponente } from '../formulario-pelicula/formulario-
 /** CRUD de películas (§2). */
 @Component({
   selector: 'app-gestion-peliculas',
-  imports: [AsyncPipe, DatePipe, FormularioPeliculaComponente, PipeDuracion, PipeMonedaArs],
+  imports: [DatePipe, FormularioPeliculaComponente, PipeDuracion, PipeMonedaArs],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="seccion-cabecera">
@@ -28,14 +29,14 @@ import { FormularioPeliculaComponente } from '../formulario-pelicula/formulario-
       <section class="bloque">
         <h2>Nueva película</h2>
         <app-formulario-pelicula
-          [generos]="(generos$ | async) ?? []"
+          [generos]="generosActivos()"
           (peliculaGuardada)="crear($event)"
         />
       </section>
 
       <section class="bloque">
         <h2>Catálogo</h2>
-        @if (peliculas$ | async; as peliculas) {
+        @if (catalogoPeliculas(); as peliculas) {
           <div class="tabla-scroll">
             <table>
               <caption class="solo-lectores">Películas del catálogo</caption>
@@ -99,8 +100,13 @@ export class GestionPeliculasComponente {
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
-  protected readonly peliculas$ = this.recargar.pipe(switchMap(() => this.peliculas.listar()));
-  protected readonly generos$ = this.generos.activos();
+  protected readonly catalogoPeliculas = toSignal<Pelicula[], Pelicula[]>(
+    this.recargar.pipe(switchMap(() => this.peliculas.listar())),
+    { initialValue: [] },
+  );
+  protected readonly generosActivos = toSignal(this.generos.activos(), {
+    initialValue: [],
+  });
 
   protected crear(datos: Omit<Pelicula, 'id'>): void {
     this.peliculas.crear(datos).subscribe((pelicula) => {

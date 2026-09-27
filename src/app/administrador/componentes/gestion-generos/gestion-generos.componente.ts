@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BehaviorSubject, switchMap } from 'rxjs';
 
@@ -11,7 +11,7 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
 /** CRUD de géneros (§1). */
 @Component({
   selector: 'app-gestion-generos',
-  imports: [AsyncPipe, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="seccion-cabecera">
@@ -21,17 +21,17 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
       </div>
     </header>
 
-    <form class="bloque alta" [formGroup]="FormularioGenero" (ngSubmit)="crear()">
+    <form class="bloque alta" [formGroup]="FormularioGenero()" (ngSubmit)="crear()">
       <div class="campo">
         <label for="genero-nombre">Nuevo género</label>
         <input id="genero-nombre" type="text" formControlName="nombre" placeholder="Ej. Musical" />
       </div>
-      <button type="submit" class="boton boton--primario" [disabled]="FormularioGenero.invalid">
+      <button type="submit" class="boton boton--primario" [disabled]="FormularioGenero().invalid">
         Crear
       </button>
     </form>
 
-    @if (generos$ | async; as generos) {
+    @if (generosListado(); as generos) {
       <div class="tabla-scroll">
         <table>
           <caption class="solo-lectores">Géneros del catálogo</caption>
@@ -84,20 +84,25 @@ export class GestionGenerosComponente {
   private readonly fb = inject(FormBuilder);
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
-  protected readonly generos$ = this.recargar.pipe(switchMap(() => this.generos.listar()));
+  protected readonly generosListado = toSignal<Genero[], Genero[]>(
+    this.recargar.pipe(switchMap(() => this.generos.listar())),
+    { initialValue: [] },
+  );
 
-  protected readonly FormularioGenero = this.fb.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.minLength(3)]],
-  });
+  protected readonly FormularioGenero = signal(
+    this.fb.nonNullable.group({
+      nombre: ['', [Validators.required, Validators.minLength(3)]],
+    }),
+  );
 
   protected crear(): void {
-    if (this.FormularioGenero.invalid) return;
-    const nombre = this.FormularioGenero.controls.nombre.value.trim();
+    if (this.FormularioGenero().invalid) return;
+    const nombre = this.FormularioGenero().controls.nombre.value.trim();
 
     this.generos.crear(nombre).subscribe(() => {
       this.registro.registrar('crear', `creó el género "${nombre}"`).subscribe();
       this.avisos.mostrar(`Género "${nombre}" creado.`, 'exito');
-      this.FormularioGenero.reset();
+      this.FormularioGenero().reset();
       this.recargar.next();
     });
   }

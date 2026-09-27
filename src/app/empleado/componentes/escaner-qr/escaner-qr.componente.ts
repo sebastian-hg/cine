@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { CompraServicio } from '../../../compartido/servicios/compra.servicio';
 
@@ -12,7 +12,7 @@ import { CompraServicio } from '../../../compartido/servicios/compra.servicio';
  */
 @Component({
   selector: 'app-escaner-qr',
-  imports: [AsyncPipe],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="escaner">
@@ -42,7 +42,7 @@ import { CompraServicio } from '../../../compartido/servicios/compra.servicio';
             No hay cámara conectada. Elegí una compra de la sesión para simular el escaneo.
           </p>
 
-          @if (compras.todas() | async; as compras) {
+          @if (comprasLista(); as compras) {
             @if (compras.length) {
               <ul>
                 @for (compra of compras; track compra.id) {
@@ -73,6 +73,9 @@ export class EscanerQrComponente {
 
   protected readonly compras = inject(CompraServicio);
   protected readonly activo = signal(false);
+  protected readonly comprasLista = toSignal(this.compras.todas(), {
+    initialValue: [],
+  });
 
   protected alternar(): void {
     this.activo.update((valor) => !valor);

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { map, switchMap } from 'rxjs';
 
 import { SalaServicio } from '../../../compartido/servicios/sala.servicio';
@@ -20,7 +20,7 @@ import {
  */
 @Component({
   selector: 'app-gestion-butacas',
-  imports: [AsyncPipe],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="seccion-cabecera">
@@ -36,7 +36,7 @@ import {
       <strong>{{ filasVip }}</strong> son VIP. El resto usa la grilla 4 + 20 + 4.
     </p>
 
-    @if (salas$ | async; as salas) {
+    @if (salasResumen(); as salas) {
       <div class="tabla-scroll">
         <table>
           <caption class="solo-lectores">Distribución de butacas por sala</caption>
@@ -110,17 +110,20 @@ export class GestionButacasComponente {
   protected readonly filasAccesibles = FILAS_ACCESIBLES.join(' y ');
   protected readonly filasVip = FILAS_VIP.join(', ');
 
-  protected readonly salas$ = this.salas.listar().pipe(
-    map((salas) =>
-      salas.map((sala) => ({
-        id: sala.id,
-        nombre: sala.nombre,
-        total: sala.butacas.length,
-        normal: sala.butacas.filter((b) => b.tipo === 'normal').length,
-        accesible: sala.butacas.filter((b) => b.tipo === 'accesible').length,
-        vip: sala.butacas.filter((b) => b.tipo === 'vip').length,
-      })),
+  protected readonly salasResumen = toSignal(
+    this.salas.listar().pipe(
+      map((salas) =>
+        salas.map((sala) => ({
+          id: sala.id,
+          nombre: sala.nombre,
+          total: sala.butacas.length,
+          normal: sala.butacas.filter((b) => b.tipo === 'normal').length,
+          accesible: sala.butacas.filter((b) => b.tipo === 'accesible').length,
+          vip: sala.butacas.filter((b) => b.tipo === 'vip').length,
+        })),
+      ),
     ),
+    { initialValue: [] },
   );
 
   protected readonly filas = signal(

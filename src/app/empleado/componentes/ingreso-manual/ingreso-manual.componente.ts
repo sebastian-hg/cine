@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 /** §12: «Ingresar código manualmente si falla el lector». */
@@ -7,7 +7,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
   imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <form class="manual" [formGroup]="FormularioCodigo" (ngSubmit)="enviar()">
+    <form class="manual" [formGroup]="FormularioCodigo()" (ngSubmit)="enviar()">
       <div class="campo">
         <label for="codigo-manual">Código de la compra</label>
         <input
@@ -25,7 +25,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
       <button
         type="submit"
         class="boton boton--primario boton--bloque"
-        [disabled]="FormularioCodigo.invalid || procesando()"
+        [disabled]="FormularioCodigo().invalid || procesando()"
       >
         Validar código
       </button>
@@ -46,13 +46,15 @@ export class IngresoManualComponente {
 
   private readonly fb = inject(FormBuilder);
 
-  protected readonly FormularioCodigo = this.fb.nonNullable.group({
-    codigo: ['', [Validators.required, Validators.minLength(6)]],
-  });
+  protected readonly FormularioCodigo = signal(
+    this.fb.nonNullable.group({
+      codigo: ['', [Validators.required, Validators.minLength(6)]],
+    }),
+  );
 
   protected enviar(): void {
-    if (this.FormularioCodigo.invalid) return;
-    this.codigoIngresado.emit(this.FormularioCodigo.controls.codigo.value.trim().toUpperCase());
-    this.FormularioCodigo.reset();
+    if (this.FormularioCodigo().invalid) return;
+    this.codigoIngresado.emit(this.FormularioCodigo().controls.codigo.value.trim().toUpperCase());
+    this.FormularioCodigo().reset();
   }
 }

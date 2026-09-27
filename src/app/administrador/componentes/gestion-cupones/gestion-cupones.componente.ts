@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, switchMap } from 'rxjs';
 
 import { Cupon } from '../../../compartido/interfaces/cupon.interfaz';
@@ -17,7 +17,7 @@ const ETIQUETA_TIPO: Record<Cupon['tipo'], string> = {
 /** CRUD de cupones (§9). */
 @Component({
   selector: 'app-gestion-cupones',
-  imports: [AsyncPipe, FormularioCuponAdminComponente],
+  imports: [FormularioCuponAdminComponente],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="seccion-cabecera">
@@ -32,7 +32,7 @@ const ETIQUETA_TIPO: Record<Cupon['tipo'], string> = {
       <app-formulario-cupon-admin (cuponGuardado)="crear($event)" />
     </section>
 
-    @if (cupones$ | async; as cupones) {
+    @if (cuponesListado(); as cupones) {
       <div class="tabla-scroll">
         <table>
           <caption class="solo-lectores">Cupones configurados</caption>
@@ -78,7 +78,10 @@ export class GestionCuponesComponente {
   private readonly avisos = inject(NotificacionServicio);
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
-  protected readonly cupones$ = this.recargar.pipe(switchMap(() => this.cupones.listar()));
+  protected readonly cuponesListado = toSignal<Cupon[], Cupon[]>(
+    this.recargar.pipe(switchMap(() => this.cupones.listar())),
+    { initialValue: [] },
+  );
 
   protected etiqueta(tipo: Cupon['tipo']): string {
     return ETIQUETA_TIPO[tipo];

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Genero } from '../../../compartido/interfaces/genero.interfaz';
@@ -19,61 +19,76 @@ export class FormularioPeliculaComponente {
 
   private readonly fb = inject(FormBuilder);
 
-  protected readonly hoy = soloFecha(new Date());
+  protected readonly hoy = signal(soloFecha(new Date()));
 
-  protected readonly FormularioPelicula = this.fb.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.minLength(2)]],
-    sinopsis: ['', [Validators.required, Validators.minLength(20)]],
-    duracionMinutos: [100, [Validators.required, Validators.min(1), Validators.max(400)]],
-    clasificacion: ['ATP' as Pelicula['clasificacion'], [Validators.required]],
-    fechaEstreno: [this.hoy, [Validators.required]],
-    precioNormal: [9500, [Validators.required, Validators.min(1)]],
-    precioPreventa: [7500, [Validators.required, Validators.min(1)]],
-    preventaActivada: [false],
-    poster: ['posters/p1.svg', [Validators.required]],
-  });
+  protected readonly FormularioPelicula = signal(
+    this.fb.nonNullable.group({
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      sinopsis: ['', [Validators.required, Validators.minLength(20)]],
+      duracionMinutos: [100, [Validators.required, Validators.min(1), Validators.max(400)]],
+      clasificacion: ['ATP' as Pelicula['clasificacion'], [Validators.required]],
+      fechaEstreno: [this.hoy(), [Validators.required]],
+      precioNormal: [9500, [Validators.required, Validators.min(1)]],
+      precioPreventa: [7500, [Validators.required, Validators.min(1)]],
+      preventaActivada: [false],
+      poster: ['posters/p1.svg', [Validators.required]],
+    }),
+  );
 
   /** Géneros elegidos; al menos uno (§3 admite varios). */
-  protected readonly elegidos = new Set<string>();
+  protected readonly elegidos = signal<Set<string>>(new Set());
 
   protected alternarGenero(id: string): void {
-    if (this.elegidos.has(id)) this.elegidos.delete(id);
-    else this.elegidos.add(id);
+    const actuales = new Set(this.elegidos());
+    if (actuales.has(id)) actuales.delete(id);
+    else actuales.add(id);
+    this.elegidos.set(actuales);
   }
 
   protected estaElegido(id: string): boolean {
-    return this.elegidos.has(id);
+    return this.elegidos().has(id);
   }
 
-  protected invalido(campo: keyof typeof this.FormularioPelicula.controls): boolean {
-    const control = this.FormularioPelicula.controls[campo];
+  protected invalido(
+    campo:
+      | 'nombre'
+      | 'sinopsis'
+      | 'duracionMinutos'
+      | 'clasificacion'
+      | 'fechaEstreno'
+      | 'precioNormal'
+      | 'precioPreventa'
+      | 'preventaActivada'
+      | 'poster',
+  ): boolean {
+    const control = this.FormularioPelicula().controls[campo];
     return control.invalid && control.touched;
   }
 
   protected enviar(): void {
-    if (this.FormularioPelicula.invalid || this.elegidos.size === 0) {
-      this.FormularioPelicula.markAllAsTouched();
+    if (this.FormularioPelicula().invalid || this.elegidos().size === 0) {
+      this.FormularioPelicula().markAllAsTouched();
       return;
     }
 
     this.peliculaGuardada.emit({
-      ...this.FormularioPelicula.getRawValue(),
-      generos: [...this.elegidos],
+      ...this.FormularioPelicula().getRawValue(),
+      generos: [...this.elegidos()],
       disponible: true,
       ventasPrevias: 0,
     });
 
-    this.FormularioPelicula.reset({
+    this.FormularioPelicula().reset({
       nombre: '',
       sinopsis: '',
       duracionMinutos: 100,
       clasificacion: 'ATP',
-      fechaEstreno: this.hoy,
+      fechaEstreno: this.hoy(),
       precioNormal: 9500,
       precioPreventa: 7500,
       preventaActivada: false,
       poster: 'posters/p1.svg',
     });
-    this.elegidos.clear();
+    this.elegidos.set(new Set());
   }
 }

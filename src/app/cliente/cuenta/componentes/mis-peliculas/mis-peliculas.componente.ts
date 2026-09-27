@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import { PerfilServicio } from '../../servicios/perfil.servicio';
@@ -13,7 +13,7 @@ import { TarjetaPeliculaVistaComponente } from '../tarjeta-pelicula-vista/tarjet
  */
 @Component({
   selector: 'app-mis-peliculas',
-  imports: [AsyncPipe, RouterLink, TarjetaPeliculaVistaComponente],
+  imports: [RouterLink, TarjetaPeliculaVistaComponente],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="contenedor seccion">
@@ -27,7 +27,7 @@ import { TarjetaPeliculaVistaComponente } from '../tarjeta-pelicula-vista/tarjet
         </a>
       </header>
 
-      @if (peliculas$ | async; as peliculas) {
+      @if (peliculas(); as peliculas) {
         @if (peliculas.length) {
           <p class="nota">
             Estas son las funciones a las que ya fuiste. Podés calificar cualquiera de ellas.
@@ -64,5 +64,7 @@ import { TarjetaPeliculaVistaComponente } from '../tarjeta-pelicula-vista/tarjet
 export class MisPeliculasComponente {
   private readonly perfil = inject(PerfilServicio);
 
-  protected readonly peliculas$ = this.perfil.misPeliculas();
+  protected readonly peliculas = toSignal(this.perfil.misPeliculas(), {
+    initialValue: [],
+  });
 }

@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { combineLatest, map, of, switchMap, take } from 'rxjs';
 
@@ -27,7 +28,6 @@ import { CodigoQrComponente } from '../codigo-qr/codigo-qr.componente';
 @Component({
   selector: 'app-entrada-generada',
   imports: [
-    AsyncPipe,
     DatePipe,
     RouterLink,
     CargandoComponente,
@@ -52,22 +52,35 @@ export class EntradaGeneradaComponente {
 
   private readonly idCompra = this.ruta.snapshot.paramMap.get('id') ?? '';
 
-  protected readonly compra$ = this.compras.obtener(this.idCompra);
+  private readonly compra$ = this.compras.obtener(this.idCompra);
 
-  protected readonly funcion$ = this.compra$.pipe(
+  private readonly funcion$ = this.compra$.pipe(
     switchMap((compra) =>
       compra?.idFuncion ? this.funciones.obtener(compra.idFuncion) : of(null),
     ),
   );
 
-  protected readonly pelicula$ = this.funcion$.pipe(
+  private readonly pelicula$ = this.funcion$.pipe(
     switchMap((funcion) => (funcion ? this.peliculas.obtener(funcion.idPelicula) : of(null))),
   );
 
   /** Productos y combos de la compra, para el bloque de retiro del Candy Bar. */
-  protected readonly itemsCandy$ = this.compra$.pipe(
+  private readonly itemsCandy$ = this.compra$.pipe(
     map((compra) => compra?.items.filter((i) => i.tipo !== 'entrada') ?? []),
   );
+
+  protected readonly compra = toSignal(this.compra$, {
+    initialValue: null,
+  });
+  protected readonly funcion = toSignal(this.funcion$, {
+    initialValue: null,
+  });
+  protected readonly pelicula = toSignal(this.pelicula$, {
+    initialValue: null,
+  });
+  protected readonly itemsCandy = toSignal(this.itemsCandy$, {
+    initialValue: [],
+  });
 
   protected descargarPdf(): void {
     combineLatest([this.compra$, this.funcion$, this.pelicula$])

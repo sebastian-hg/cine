@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { of, switchMap } from 'rxjs';
 
@@ -9,7 +10,7 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
 /** §21: cada validación queda registrada en el log. */
 @Component({
   selector: 'app-historial-validaciones',
-  imports: [AsyncPipe, DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="contenedor seccion">
@@ -23,7 +24,7 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
         </a>
       </header>
 
-      @if (validaciones$ | async; as validaciones) {
+      @if (validaciones(); as validaciones) {
         @if (validaciones.length) {
           <div class="tabla-scroll">
             <table>
@@ -63,7 +64,10 @@ export class HistorialValidacionesComponente {
   private readonly auth = inject(AutenticacionServicio);
   private readonly registro = inject(RegistroActividadServicio);
 
-  protected readonly validaciones$ = this.auth.usuarioActual$.pipe(
-    switchMap((usuario) => (usuario ? this.registro.validacionesDe(usuario.id) : of([]))),
+  protected readonly validaciones = toSignal(
+    this.auth.usuarioActual$.pipe(
+      switchMap((usuario) => (usuario ? this.registro.validacionesDe(usuario.id) : of([]))),
+    ),
+    { initialValue: [] },
   );
 }

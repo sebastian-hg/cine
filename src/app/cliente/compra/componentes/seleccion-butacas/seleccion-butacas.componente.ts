@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, computed, inject, signal } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map, of, switchMap } from 'rxjs';
@@ -32,7 +32,6 @@ import { VerificacionEdadComponente } from '../verificacion-edad/verificacion-ed
 @Component({
   selector: 'app-seleccion-butacas',
   imports: [
-    AsyncPipe,
     DatePipe,
     RouterLink,
     CargandoComponente,
@@ -60,11 +59,18 @@ export class SeleccionButacasComponente {
 
   private readonly idFuncion = this.ruta.snapshot.paramMap.get('idFuncion') ?? '';
 
-  protected readonly funcion$ = this.funciones.obtener(this.idFuncion);
+  private readonly funcion$ = this.funciones.obtener(this.idFuncion);
 
-  protected readonly pelicula$ = this.funcion$.pipe(
+  private readonly pelicula$ = this.funcion$.pipe(
     switchMap((funcion) => (funcion ? this.peliculas.obtener(funcion.idPelicula) : of(null))),
   );
+
+  protected readonly funcion = toSignal(this.funcion$, {
+    initialValue: null,
+  });
+  protected readonly pelicula = toSignal(this.pelicula$, {
+    initialValue: null,
+  });
 
   /** Stream en vivo: refleja lo que compran otros usuarios (§6). */
   protected readonly butacas = toSignal(this.tiempoReal.butacas$(this.idFuncion), {
@@ -110,20 +116,26 @@ export class SeleccionButacasComponente {
   protected readonly clasificacionPendiente = signal<'ATP' | '+13' | '+18'>('ATP');
 
   /** Aviso de acompañante para menores en funciones +13. */
-  protected readonly avisoEdad$ = this.pelicula$.pipe(
-    map((pelicula) => {
-      if (!pelicula) return null;
-      const resultado = this.edad.evaluar(pelicula.clasificacion);
-      return resultado?.permitido ? resultado.aviso : null;
-    }),
+  protected readonly avisoEdad = toSignal(
+    this.pelicula$.pipe(
+      map((pelicula) => {
+        if (!pelicula) return null;
+        const resultado = this.edad.evaluar(pelicula.clasificacion);
+        return resultado?.permitido ? resultado.aviso : null;
+      }),
+    ),
+    { initialValue: null },
   );
 
-  protected readonly bloqueoEdad$ = this.pelicula$.pipe(
-    map((pelicula) => {
-      if (!pelicula) return null;
-      const resultado = this.edad.evaluar(pelicula.clasificacion);
-      return resultado && !resultado.permitido ? resultado.motivo : null;
-    }),
+  protected readonly bloqueoEdad = toSignal(
+    this.pelicula$.pipe(
+      map((pelicula) => {
+        if (!pelicula) return null;
+        const resultado = this.edad.evaluar(pelicula.clasificacion);
+        return resultado && !resultado.permitido ? resultado.motivo : null;
+      }),
+    ),
+    { initialValue: null },
   );
 
   protected alternarButaca(butaca: ButacaFuncion): void {

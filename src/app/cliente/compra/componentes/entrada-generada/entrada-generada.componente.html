@@ -1,4 +1,4 @@
-@if (compra$ | async; as compra) {
+@if (compra(); as compra) {
   <div class="contenedor seccion">
     <div class="exito">
       <span class="exito__marca" aria-hidden="true">✓</span>
@@ -6,7 +6,7 @@
         <h1>¡Listo! Tu compra está confirmada</h1>
         <p class="exito__texto">
           Guardá este código. Sirve para entrar a la sala
-          @if ((itemsCandy$ | async)?.length) {
+          @if (itemsCandy().length) {
             y para retirar lo que pediste en el Candy Bar.
           } @else {
             .
@@ -25,8 +25,8 @@
       </div>
 
       <div class="entrada__datos">
-        @if (pelicula$ | async; as pelicula) {
-          @if (funcion$ | async; as funcion) {
+        @if (pelicula(); as pelicula) {
+          @if (funcion(); as funcion) {
             <h2>{{ pelicula.nombre }}</h2>
             <dl class="datos">
               <div>
@@ -57,7 +57,7 @@
           }
         }
 
-        @if (itemsCandy$ | async; as candy) {
+        @if (itemsCandy(); as candy) {
           @if (candy.length) {
             <section class="candy">
               <h3>Para retirar en el Candy Bar</h3>

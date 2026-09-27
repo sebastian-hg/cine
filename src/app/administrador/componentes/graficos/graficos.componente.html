@@ -13,7 +13,7 @@
 <div class="graficos">
   <section class="grafico">
     <h2>Más vistas esta semana</h2>
-    @if (semana$ | async; as serie) {
+    @if (semana(); as serie) {
       @if (serie.length) {
         <ul class="barras">
           @for (punto of serie; track punto.etiqueta) {
@@ -34,7 +34,7 @@
 
   <section class="grafico">
     <h2>Más vistas este mes</h2>
-    @if (mes$ | async; as serie) {
+    @if (mes(); as serie) {
       @if (serie.length) {
         <ul class="barras">
           @for (punto of serie; track punto.etiqueta) {
@@ -55,7 +55,7 @@
 
   <section class="grafico">
     <h2>Candy Bar más vendido</h2>
-    @if (candy$ | async; as serie) {
+    @if (candy(); as serie) {
       @if (serie.length) {
         <ul class="barras barras--candy">
           @for (punto of serie; track punto.etiqueta) {

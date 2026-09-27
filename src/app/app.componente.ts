@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterOutlet } from '@angular/router';
 
 import { AvisosComponente } from './compartido/componentes/avisos/avisos.componente';
@@ -17,7 +17,7 @@ import { CarritoServicio } from './cliente/compra/servicios/carrito.servicio';
  */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, AsyncPipe, EncabezadoComponente, PieComponente, AvisosComponente],
+  imports: [RouterOutlet, EncabezadoComponente, PieComponente, AvisosComponente],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './app.componente.html',
   styleUrl: './app.componente.scss',
@@ -28,8 +28,15 @@ export class App {
   private readonly carrito = inject(CarritoServicio);
 
   protected readonly cargando = inject(CargaServicio);
-  protected readonly usuario$ = this.auth.usuarioActual$;
-  protected readonly itemsCarrito$ = this.carrito.cantidad$;
+  protected readonly usuario = toSignal(this.auth.usuarioActual$, {
+    initialValue: this.auth.usuarioActual,
+  });
+  protected readonly itemsCarrito = toSignal(this.carrito.cantidad$, {
+    initialValue: 0,
+  });
+  protected readonly estaCargando = toSignal(this.cargando.cargando$, {
+    initialValue: false,
+  });
 
   protected alCerrarSesion(): void {
     this.auth.salir();

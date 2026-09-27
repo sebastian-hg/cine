@@ -9,7 +9,7 @@
   <section class="bloque">
     <h2>Programar nuevas funciones</h2>
     <app-formulario-funcion
-      [peliculas]="(peliculas$ | async) ?? []"
+      [peliculas]="peliculasCatalogo() ?? []"
       [procesando]="procesando()"
       (funcionSolicitada)="programar($event)"
     />
@@ -38,7 +38,7 @@
   <section class="bloque">
     <h2>Funciones programadas</h2>
 
-    @if (funciones$ | async; as funciones) {
+    @if (funcionesListado(); as funciones) {
       @if (funciones.length) {
         <p class="conteo">{{ funciones.length }} funciones en la grilla.</p>
         <div class="tabla-scroll">

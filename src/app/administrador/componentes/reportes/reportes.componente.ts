@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, take } from 'rxjs';
 
 import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.servicio';
@@ -9,7 +10,7 @@ import { ReporteServicio } from '../../servicios/reporte.servicio';
 /** Reportes de facturación con exportación a PDF y Excel (§20). */
 @Component({
   selector: 'app-reportes',
-  imports: [AsyncPipe, DatePipe, PipeMonedaArs],
+  imports: [DatePipe, PipeMonedaArs],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './reportes.componente.html',
   styleUrl: './reportes.componente.scss',
@@ -18,10 +19,21 @@ export class ReportesComponente {
   private readonly reportes = inject(ReporteServicio);
   private readonly avisos = inject(NotificacionServicio);
 
-  protected readonly diarios$ = this.reportes.diarios();
-  protected readonly totales$ = this.reportes.totales();
-  protected readonly estados$ = this.reportes.resumenEstados();
-  protected readonly ventasPorUsuario$ = this.reportes.ventasPorUsuario();
+  private readonly diarios$ = this.reportes.diarios();
+  private readonly candy$ = this.reportes.candyMasVendido();
+
+  protected readonly diarios = toSignal(this.diarios$, {
+    initialValue: [],
+  });
+  protected readonly totales = toSignal(this.reportes.totales(), {
+    initialValue: { facturacion: 0, entradas: 0, productos: 0 },
+  });
+  protected readonly estados = toSignal(this.reportes.resumenEstados(), {
+    initialValue: { total: 0, pagadas: 0, usadas: 0, canceladas: 0, vendidas: 0 },
+  });
+  protected readonly ventasPorUsuario = toSignal(this.reportes.ventasPorUsuario(), {
+    initialValue: [],
+  });
 
   protected exportarPdf(): void {
     this.diarios$.pipe(take(1)).subscribe((reportes) => {
@@ -31,7 +43,7 @@ export class ReportesComponente {
   }
 
   protected exportarExcel(): void {
-    combineLatest([this.diarios$, this.reportes.candyMasVendido()])
+    combineLatest([this.diarios$, this.candy$])
       .pipe(take(1))
       .subscribe(([reportes, candy]) => {
         this.reportes.exportarExcel(reportes, candy);

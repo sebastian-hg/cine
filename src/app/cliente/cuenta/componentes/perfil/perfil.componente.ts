@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { take } from 'rxjs';
@@ -8,12 +8,12 @@ import { calcularEdad, soloFecha } from '../../../../nucleo/dominio/fechas';
 import { AutenticacionServicio } from '../../../../nucleo/servicios/autenticacion.servicio';
 import { NotificacionServicio } from '../../../../nucleo/servicios/notificacion.servicio';
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
-import { PerfilServicio } from '../../servicios/perfil.servicio';
+import { PerfilServicio, ResumenCuenta } from '../../servicios/perfil.servicio';
 
 /** Perfil del usuario (§8): datos editables y resumen de la cuenta. */
 @Component({
   selector: 'app-perfil',
-  imports: [AsyncPipe, ReactiveFormsModule, RouterLink, PipeMonedaArs],
+  imports: [ReactiveFormsModule, RouterLink, PipeMonedaArs],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './perfil.componente.html',
   styleUrl: './perfil.componente.scss',
@@ -26,36 +26,42 @@ export class PerfilComponente {
 
   protected readonly maximaFecha = soloFecha(new Date());
 
-  protected readonly usuario$ = this.auth.usuarioActual$;
-  protected readonly resumen$ = this.perfil.resumen();
+  protected readonly usuario = toSignal(this.auth.usuarioActual$, {
+    initialValue: this.auth.usuarioActual,
+  });
+  protected readonly resumen = toSignal<ResumenCuenta, ResumenCuenta>(this.perfil.resumen(), {
+    initialValue: { puntos: 0, credito: 0, compras: 0 },
+  });
   protected readonly guardando = signal(false);
 
   private readonly actual = this.auth.usuarioActual;
 
-  protected readonly FormularioPerfil = this.fb.nonNullable.group({
-    nombre: [this.actual?.nombre ?? '', [Validators.required, Validators.minLength(2)]],
-    apellido: [this.actual?.apellido ?? '', [Validators.required, Validators.minLength(2)]],
-    fechaNacimiento: [this.actual?.fechaNacimiento ?? '', [Validators.required]],
-  });
+  protected readonly FormularioPerfil = signal(
+    this.fb.nonNullable.group({
+      nombre: [this.actual?.nombre ?? '', [Validators.required, Validators.minLength(2)]],
+      apellido: [this.actual?.apellido ?? '', [Validators.required, Validators.minLength(2)]],
+      fechaNacimiento: [this.actual?.fechaNacimiento ?? '', [Validators.required]],
+    }),
+  );
 
   protected edad(fechaNacimiento: string): number {
     return calcularEdad(fechaNacimiento);
   }
 
-  protected invalido(campo: keyof typeof this.FormularioPerfil.controls): boolean {
-    const control = this.FormularioPerfil.controls[campo];
+  protected invalido(campo: 'nombre' | 'apellido' | 'fechaNacimiento'): boolean {
+    const control = this.FormularioPerfil().controls[campo];
     return control.invalid && control.touched;
   }
 
   protected guardar(): void {
-    if (this.FormularioPerfil.invalid) {
-      this.FormularioPerfil.markAllAsTouched();
+    if (this.FormularioPerfil().invalid) {
+      this.FormularioPerfil().markAllAsTouched();
       return;
     }
 
     this.guardando.set(true);
     this.perfil
-      .actualizar(this.FormularioPerfil.getRawValue())
+      .actualizar(this.FormularioPerfil().getRawValue())
       .pipe(take(1))
       .subscribe({
         next: () => {

@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, combineLatest, map, switchMap } from 'rxjs';
 
 import { Pelicula } from '../../../compartido/interfaces/pelicula.interfaz';
@@ -13,7 +14,7 @@ import { PipeMonedaArs } from '../../../compartido/pipes/moneda-ars.pipe';
 /** Preventa película por película (§16). */
 @Component({
   selector: 'app-configuracion-preventa',
-  imports: [AsyncPipe, DatePipe, PipeMonedaArs],
+  imports: [DatePipe, PipeMonedaArs],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './configuracion-preventa.componente.html',
 })
@@ -25,14 +26,17 @@ export class ConfiguracionPreventaComponente {
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
-  protected readonly filas$ = this.recargar.pipe(
-    switchMap(() => combineLatest([this.peliculas.listar(), this.configuracion.obtener()])),
-    map(([peliculas, config]) =>
-      peliculas.map((pelicula) => ({
-        pelicula,
-        estado: estadoPreventa(pelicula, config.diasAnticipacionPreventa),
-      })),
+  protected readonly filas = toSignal(
+    this.recargar.pipe(
+      switchMap(() => combineLatest([this.peliculas.listar(), this.configuracion.obtener()])),
+      map(([peliculas, config]) =>
+        peliculas.map((pelicula) => ({
+          pelicula,
+          estado: estadoPreventa(pelicula, config.diasAnticipacionPreventa),
+        })),
+      ),
     ),
+    { initialValue: [] },
   );
 
   protected alternar(pelicula: Pelicula): void {

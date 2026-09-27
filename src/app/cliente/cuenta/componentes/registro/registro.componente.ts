@@ -30,29 +30,33 @@ export class RegistroComponente {
   protected readonly error = signal<string | null>(null);
   protected readonly enviando = signal(false);
 
-  protected readonly FormularioRegistro = this.fb.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.minLength(2)]],
-    apellido: ['', [Validators.required, Validators.minLength(2)]],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    fechaNacimiento: ['', [Validators.required]],
-  });
+  protected readonly FormularioRegistro = signal(
+    this.fb.nonNullable.group({
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      apellido: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      fechaNacimiento: ['', [Validators.required]],
+    }),
+  );
 
-  protected invalido(campo: keyof typeof this.FormularioRegistro.controls): boolean {
-    const control = this.FormularioRegistro.controls[campo];
+  public invalido(
+    campo: 'nombre' | 'apellido' | 'email' | 'password' | 'fechaNacimiento',
+  ): boolean {
+    const control = this.FormularioRegistro().controls[campo];
     return control.invalid && control.touched;
   }
 
-  protected enviar(): void {
-    if (this.FormularioRegistro.invalid) {
-      this.FormularioRegistro.markAllAsTouched();
+  public enviar(): void {
+    if (this.FormularioRegistro().invalid) {
+      this.FormularioRegistro().markAllAsTouched();
       return;
     }
 
     this.enviando.set(true);
     this.error.set(null);
 
-    this.auth.registrar(this.FormularioRegistro.getRawValue()).subscribe({
+    this.auth.registrar(this.FormularioRegistro().getRawValue()).subscribe({
       next: (usuario) => {
         this.enviando.set(false);
         this.avisos.mostrar(

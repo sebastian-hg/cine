@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AutenticacionServicio } from '../../../nucleo/servicios/autenticacion.servicio';
@@ -18,7 +18,7 @@ interface EntradaMenu {
  */
 @Component({
   selector: 'app-panel-administrador',
-  imports: [AsyncPipe, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './panel-administrador.componente.html',
   styleUrl: './panel-administrador.componente.scss',
@@ -26,7 +26,9 @@ interface EntradaMenu {
 export class PanelAdministradorComponente {
   private readonly auth = inject(AutenticacionServicio);
 
-  protected readonly usuario$ = this.auth.usuarioActual$;
+  protected readonly usuario = toSignal(this.auth.usuarioActual$, {
+    initialValue: this.auth.usuarioActual,
+  });
 
   protected readonly menu: EntradaMenu[] = [
     { grupo: 'Análisis', ruta: 'reportes', etiqueta: 'Reportes' },

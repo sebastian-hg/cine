@@ -37,18 +37,20 @@ export class FormularioFuncionComponente {
 
   private readonly fb = inject(FormBuilder);
 
-  protected readonly diasSemana = DIAS_SEMANA;
+  protected readonly diasSemana = signal(DIAS_SEMANA);
   protected readonly diasElegidos = signal<Set<number>>(new Set());
   /** Cuántas semanas hacia adelante se programa la grilla. */
-  protected readonly semanas = 2;
+  protected readonly semanas = signal(2);
 
-  protected readonly FormularioFuncion = this.fb.nonNullable.group({
-    idPelicula: ['', [Validators.required]],
-    horario: ['', [Validators.required, Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)]],
-    modalidad: ['2D' as const, [Validators.required]],
-    idioma: ['castellano' as const, [Validators.required]],
-    precio: [9500, [Validators.required, Validators.min(1)]],
-  });
+  protected readonly FormularioFuncion = signal(
+    this.fb.nonNullable.group({
+      idPelicula: ['', [Validators.required]],
+      horario: ['', [Validators.required, Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)]],
+      modalidad: ['2D' as const, [Validators.required]],
+      idioma: ['castellano' as const, [Validators.required]],
+      precio: [9500, [Validators.required, Validators.min(1)]],
+    }),
+  );
 
   protected alternarDia(indice: number): void {
     const actuales = new Set(this.diasElegidos());
@@ -61,19 +63,19 @@ export class FormularioFuncionComponente {
     return this.diasElegidos().has(indice);
   }
 
-  protected invalido(campo: keyof typeof this.FormularioFuncion.controls): boolean {
-    const control = this.FormularioFuncion.controls[campo];
+  protected invalido(campo: 'idPelicula' | 'horario' | 'modalidad' | 'idioma' | 'precio'): boolean {
+    const control = this.FormularioFuncion().controls[campo];
     return control.invalid && control.touched;
   }
 
   protected enviar(): void {
-    if (this.FormularioFuncion.invalid || this.diasElegidos().size === 0) {
-      this.FormularioFuncion.markAllAsTouched();
+    if (this.FormularioFuncion().invalid || this.diasElegidos().size === 0) {
+      this.FormularioFuncion().markAllAsTouched();
       return;
     }
 
     this.funcionSolicitada.emit({
-      ...this.FormularioFuncion.getRawValue(),
+      ...this.FormularioFuncion().getRawValue(),
       fechas: this.proximasFechas(),
     });
   }
@@ -84,7 +86,7 @@ export class FormularioFuncionComponente {
     const fechas: string[] = [];
     const hoy = new Date();
 
-    for (let dia = 1; dia <= this.semanas * 7; dia++) {
+    for (let dia = 1; dia <= this.semanas() * 7; dia++) {
       const fecha = sumarDias(hoy, dia);
       if (elegidos.has(fecha.getDay())) {
         fechas.push(soloFecha(fecha));

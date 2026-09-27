@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -9,5 +9,5 @@ import { RouterLink } from '@angular/router';
   styleUrl: './pie.componente.scss',
 })
 export class PieComponente {
-  protected readonly anio = new Date().getFullYear();
+  protected readonly anio = signal(new Date().getFullYear());
 }

@@ -1,9 +1,10 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { take } from 'rxjs';
 
 import { ConfiguracionServicio } from '../../../compartido/servicios/configuracion.servicio';
+import { Configuracion } from '../../../compartido/interfaces/cupon.interfaz';
 import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.servicio';
 import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-actividad.servicio';
 
@@ -15,7 +16,7 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
  */
 @Component({
   selector: 'app-configuracion-descuentos',
-  imports: [AsyncPipe, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './configuracion-descuentos.componente.html',
 })
@@ -26,17 +27,22 @@ export class ConfiguracionDescuentosComponente {
   private readonly fb = inject(FormBuilder);
 
   protected readonly configuracion$ = this.configuracion.obtener();
+  protected readonly configuracionActual = toSignal<Configuracion | null>(this.configuracion$, {
+    initialValue: null,
+  });
   protected readonly guardando = signal(false);
 
-  protected readonly FormularioDescuentos = this.fb.nonNullable.group({
-    porcentajePrimeraCompra: [20, [Validators.required, Validators.min(0), Validators.max(100)]],
-    porcentajeMayores50: [15, [Validators.required, Validators.min(0), Validators.max(100)]],
-    multiplicadorVip: [1.6, [Validators.required, Validators.min(1), Validators.max(5)]],
-  });
+  protected readonly FormularioDescuentos = signal(
+    this.fb.nonNullable.group({
+      porcentajePrimeraCompra: [20, [Validators.required, Validators.min(0), Validators.max(100)]],
+      porcentajeMayores50: [15, [Validators.required, Validators.min(0), Validators.max(100)]],
+      multiplicadorVip: [1.6, [Validators.required, Validators.min(1), Validators.max(5)]],
+    }),
+  );
 
   constructor() {
     this.configuracion$.pipe(take(1)).subscribe((config) => {
-      this.FormularioDescuentos.patchValue({
+      this.FormularioDescuentos().patchValue({
         porcentajePrimeraCompra: config.porcentajePrimeraCompra,
         porcentajeMayores50: config.porcentajeMayores50,
         multiplicadorVip: config.multiplicadorVip,
@@ -45,13 +51,13 @@ export class ConfiguracionDescuentosComponente {
   }
 
   protected guardar(): void {
-    if (this.FormularioDescuentos.invalid) {
-      this.FormularioDescuentos.markAllAsTouched();
+    if (this.FormularioDescuentos().invalid) {
+      this.FormularioDescuentos().markAllAsTouched();
       return;
     }
 
     this.guardando.set(true);
-    const valores = this.FormularioDescuentos.getRawValue();
+    const valores = this.FormularioDescuentos().getRawValue();
 
     this.configuracion
       .actualizar(valores)

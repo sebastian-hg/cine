@@ -1,8 +1,9 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, switchMap } from 'rxjs';
 
 import { Combo } from '../../../compartido/interfaces/combo.interfaz';
+import { Producto } from '../../../compartido/interfaces/producto.interfaz';
 import { CandyServicio } from '../../../compartido/servicios/candy.servicio';
 import { ComboServicio } from '../../../compartido/servicios/combo.servicio';
 import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.servicio';
@@ -13,7 +14,7 @@ import { FormularioComboComponente } from '../formulario-combo/formulario-combo.
 /** CRUD de combos (§11). */
 @Component({
   selector: 'app-gestion-combos',
-  imports: [AsyncPipe, FormularioComboComponente, PipeMonedaArs],
+  imports: [FormularioComboComponente, PipeMonedaArs],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="seccion-cabecera">
@@ -27,14 +28,14 @@ import { FormularioComboComponente } from '../formulario-combo/formulario-combo.
       <section class="bloque">
         <h2>Nuevo combo</h2>
         <app-formulario-combo
-          [productos]="(productos$ | async) ?? []"
+          [productos]="productos() ?? []"
           (comboGuardado)="crear($event)"
         />
       </section>
 
       <section class="bloque">
         <h2>Combos configurados</h2>
-        @if (combos$ | async; as combos) {
+        @if (combosListado(); as combos) {
           <div class="tabla-scroll">
             <table>
               <caption class="solo-lectores">Combos del Candy Bar</caption>
@@ -106,8 +107,13 @@ export class GestionCombosComponente {
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
-  protected readonly combos$ = this.recargar.pipe(switchMap(() => this.combos.todos()));
-  protected readonly productos$ = this.candy.productos();
+  protected readonly combosListado = toSignal<Combo[], Combo[]>(
+    this.recargar.pipe(switchMap(() => this.combos.todos())),
+    { initialValue: [] },
+  );
+  protected readonly productos = toSignal<Producto[], Producto[]>(this.candy.productos(), {
+    initialValue: [],
+  });
 
   protected crear(datos: Omit<Combo, 'id'>): void {
     this.combos.crear(datos).subscribe((combo) => {

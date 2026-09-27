@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BehaviorSubject, map, switchMap } from 'rxjs';
 
@@ -10,7 +10,7 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
 /** Gestión de salas (§5). Al crear una, sus butacas se generan solas. */
 @Component({
   selector: 'app-gestion-salas',
-  imports: [AsyncPipe, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="seccion-cabecera">
@@ -25,17 +25,17 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
       A a la T, con J y K accesibles y R, S y T VIP— dando <strong>532 butacas</strong> por sala.
     </p>
 
-    <form class="bloque alta" [formGroup]="FormularioSala" (ngSubmit)="crear()">
+    <form class="bloque alta" [formGroup]="FormularioSala()" (ngSubmit)="crear()">
       <div class="campo">
         <label for="sala-nombre">Nueva sala</label>
         <input id="sala-nombre" type="text" formControlName="nombre" placeholder="Ej. Sala 5" />
       </div>
-      <button type="submit" class="boton boton--primario" [disabled]="FormularioSala.invalid">
+      <button type="submit" class="boton boton--primario" [disabled]="FormularioSala().invalid">
         Crear sala
       </button>
     </form>
 
-    @if (salas$ | async; as salas) {
+    @if (salasResumen(); as salas) {
       <div class="tabla-scroll">
         <table>
           <caption class="solo-lectores">Salas del complejo</caption>
@@ -86,34 +86,39 @@ export class GestionSalasComponente {
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
-  protected readonly salas$ = this.recargar.pipe(
-    switchMap(() => this.salas.listar()),
-    map((salas) =>
-      salas.map((sala) => ({
-        id: sala.id,
-        nombre: sala.nombre,
-        total: sala.butacas.length,
-        normal: sala.butacas.filter((b) => b.tipo === 'normal').length,
-        accesible: sala.butacas.filter((b) => b.tipo === 'accesible').length,
-        vip: sala.butacas.filter((b) => b.tipo === 'vip').length,
-      })),
+  protected readonly salasResumen = toSignal(
+    this.recargar.pipe(
+      switchMap(() => this.salas.listar()),
+      map((salas) =>
+        salas.map((sala) => ({
+          id: sala.id,
+          nombre: sala.nombre,
+          total: sala.butacas.length,
+          normal: sala.butacas.filter((b) => b.tipo === 'normal').length,
+          accesible: sala.butacas.filter((b) => b.tipo === 'accesible').length,
+          vip: sala.butacas.filter((b) => b.tipo === 'vip').length,
+        })),
+      ),
     ),
+    { initialValue: [] },
   );
 
-  protected readonly FormularioSala = this.fb.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.minLength(3)]],
-  });
+  protected readonly FormularioSala = signal(
+    this.fb.nonNullable.group({
+      nombre: ['', [Validators.required, Validators.minLength(3)]],
+    }),
+  );
 
   protected crear(): void {
-    if (this.FormularioSala.invalid) return;
-    const nombre = this.FormularioSala.controls.nombre.value.trim();
+    if (this.FormularioSala().invalid) return;
+    const nombre = this.FormularioSala().controls.nombre.value.trim();
 
     this.salas.crear(nombre).subscribe((sala) => {
       this.registro
         .registrar('crear', `creó la sala "${nombre}" con ${sala.butacas.length} butacas`)
         .subscribe();
       this.avisos.mostrar(`Sala "${nombre}" creada con ${sala.butacas.length} butacas.`, 'exito');
-      this.FormularioSala.reset();
+      this.FormularioSala().reset();
       this.recargar.next();
     });
   }

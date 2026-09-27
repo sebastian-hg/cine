@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 
 import { ItemCarrito } from '../../../../compartido/interfaces/carrito.interfaz';
@@ -12,7 +12,7 @@ import { SelectorCantidadComponente } from '../selector-cantidad/selector-cantid
 /** Carrito con entradas, productos y combos juntos (§10). */
 @Component({
   selector: 'app-carrito',
-  imports: [AsyncPipe, RouterLink, ResumenTotalesComponente, SelectorCantidadComponente, PipeMonedaArs],
+  imports: [RouterLink, ResumenTotalesComponente, SelectorCantidadComponente, PipeMonedaArs],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './carrito.componente.html',
   styleUrl: './carrito.componente.scss',
@@ -22,8 +22,12 @@ export class CarritoComponente {
   private readonly precio = inject(PrecioServicio);
   private readonly router = inject(Router);
 
-  protected readonly items$ = this.carrito.items$;
-  protected readonly desglose$ = this.precio.desglose$;
+  protected readonly items = toSignal<ItemCarrito[], ItemCarrito[]>(this.carrito.items$, {
+    initialValue: [],
+  });
+  protected readonly desglose = toSignal(this.precio.desglose$, {
+    initialValue: null,
+  });
 
   protected cambiarCantidad(item: ItemCarrito, cantidad: number): void {
     this.carrito.cambiarCantidad(item, cantidad);

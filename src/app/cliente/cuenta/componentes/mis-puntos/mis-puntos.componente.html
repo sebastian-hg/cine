@@ -8,7 +8,7 @@
   </header>
 
   <div class="saldo">
-    <span class="saldo__valor">{{ (saldo$ | async) ?? 0 }}</span>
+    <span class="saldo__valor">{{ saldo() }}</span>
     <span class="saldo__etiqueta">puntos disponibles</span>
     <p class="saldo__nota">Sumás 1 punto por cada peso que gastás. Son personales y no se transfieren.</p>
   </div>
@@ -16,20 +16,20 @@
   <section class="bloque">
     <h2>Canjeá tus puntos</h2>
     <app-catalogo-recompensas
-      [recompensas]="(recompensas$ | async) ?? []"
-      [saldo]="(saldo$ | async) ?? 0"
+      [recompensas]="recompensas() ?? []"
+      [saldo]="saldo() ?? 0"
       (canjeSolicitado)="pedirConfirmacion($event)"
     />
   </section>
 
   <section class="bloque">
     <h2>Historial de canjes</h2>
-    <app-historial-canjes [canjes]="(canjes$ | async) ?? []" />
+    <app-historial-canjes [canjes]="canjes() ?? []" />
   </section>
 
   <section class="bloque">
     <h2>Movimientos</h2>
-    @if (movimientos$ | async; as movimientos) {
+    @if (movimientos(); as movimientos) {
       @if (movimientos.length) {
         <div class="tabla-scroll">
           <table>

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, combineLatest, map, switchMap } from 'rxjs';
 
 import { ConfiguracionServicio } from '../../../../compartido/servicios/configuracion.servicio';
@@ -19,7 +19,7 @@ import { TarjetaProximamenteComponente } from '../tarjeta-proximamente/tarjeta-p
  */
 @Component({
   selector: 'app-proximamente',
-  imports: [AsyncPipe, CargandoComponente, TarjetaProximamenteComponente],
+  imports: [CargandoComponente, TarjetaProximamenteComponente],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './proximamente.componente.html',
   styleUrl: './proximamente.componente.scss',
@@ -34,22 +34,28 @@ export class ProximamenteComponente {
   /** Se empuja tras cada alta o baja para releer las suscripciones. */
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
-  protected readonly autenticado$ = this.auth.estaAutenticado$;
+  protected readonly autenticado = toSignal(this.auth.estaAutenticado$, {
+    initialValue: false,
+  });
 
-  protected readonly proximas$ = combineLatest([
+  protected readonly proximas = toSignal(
+    combineLatest([
     this.peliculas.proximamente(),
     this.configuracion.obtener(),
-  ]).pipe(
-    map(([peliculas, config]) =>
-      peliculas.map((pelicula) => ({
-        pelicula,
-        estado: estadoPreventa(pelicula, config.diasAnticipacionPreventa),
-      })),
+    ]).pipe(
+      map(([peliculas, config]) =>
+        peliculas.map((pelicula) => ({
+          pelicula,
+          estado: estadoPreventa(pelicula, config.diasAnticipacionPreventa),
+        })),
+      ),
     ),
+    { initialValue: [] },
   );
 
-  protected readonly suscritos$ = this.recargar.pipe(
-    switchMap(() => this.alertas.idsSuscritos()),
+  protected readonly suscritos = toSignal(
+    this.recargar.pipe(switchMap(() => this.alertas.idsSuscritos())),
+    { initialValue: new Set<string>() },
   );
 
   protected readonly sinSuscripciones = new Set<string>();

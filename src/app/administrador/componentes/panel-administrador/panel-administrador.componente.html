@@ -2,7 +2,7 @@
   <aside class="panel__lateral">
     <div class="panel__marca">
       <p class="etiqueta-seccion">Administración</p>
-      @if (usuario$ | async; as usuario) {
+      @if (usuario(); as usuario) {
         <p class="panel__usuario">{{ usuario.nombre }} {{ usuario.apellido }}</p>
       }
     </div>

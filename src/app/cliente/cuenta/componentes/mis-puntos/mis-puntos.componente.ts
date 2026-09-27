@@ -1,9 +1,14 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { BehaviorSubject, of, switchMap, take } from 'rxjs';
 
-import { Recompensa } from '../../../../compartido/interfaces/puntos.interfaz';
+import {
+  Canje,
+  MovimientoPuntos,
+  Recompensa,
+} from '../../../../compartido/interfaces/puntos.interfaz';
 import { FidelizacionServicio } from '../../../../compartido/servicios/fidelizacion.servicio';
 import { AutenticacionServicio } from '../../../../nucleo/servicios/autenticacion.servicio';
 import { NotificacionServicio } from '../../../../nucleo/servicios/notificacion.servicio';
@@ -15,7 +20,6 @@ import { HistorialCanjesComponente } from '../historial-canjes/historial-canjes.
 @Component({
   selector: 'app-mis-puntos',
   imports: [
-    AsyncPipe,
     DatePipe,
     RouterLink,
     CatalogoRecompensasComponente,
@@ -34,19 +38,30 @@ export class MisPuntosComponente {
   private readonly recargar = new BehaviorSubject<void>(undefined);
   private readonly usuario$ = this.recargar.pipe(switchMap(() => this.auth.usuarioActual$));
 
-  protected readonly saldo$ = this.usuario$.pipe(
-    switchMap((usuario) => (usuario ? this.fidelizacion.saldo(usuario.id) : of(0))),
+  protected readonly saldo = toSignal<number, number>(
+    this.usuario$.pipe(switchMap((usuario) => (usuario ? this.fidelizacion.saldo(usuario.id) : of(0)))),
+    { initialValue: 0 },
   );
 
-  protected readonly movimientos$ = this.usuario$.pipe(
-    switchMap((usuario) => (usuario ? this.fidelizacion.movimientos(usuario.id) : of([]))),
+  protected readonly movimientos = toSignal<MovimientoPuntos[], MovimientoPuntos[]>(
+    this.usuario$.pipe(
+      switchMap((usuario) =>
+        usuario ? this.fidelizacion.movimientos(usuario.id) : of<MovimientoPuntos[]>([]),
+      ),
+    ),
+    { initialValue: [] },
   );
 
-  protected readonly canjes$ = this.usuario$.pipe(
-    switchMap((usuario) => (usuario ? this.fidelizacion.canjes(usuario.id) : of([]))),
+  protected readonly canjes = toSignal<Canje[], Canje[]>(
+    this.usuario$.pipe(
+      switchMap((usuario) => (usuario ? this.fidelizacion.canjes(usuario.id) : of<Canje[]>([]))),
+    ),
+    { initialValue: [] },
   );
 
-  protected readonly recompensas$ = this.fidelizacion.recompensas();
+  protected readonly recompensas = toSignal<Recompensa[], Recompensa[]>(this.fidelizacion.recompensas(), {
+    initialValue: [],
+  });
 
   protected readonly porCanjear = signal<Recompensa | null>(null);
 

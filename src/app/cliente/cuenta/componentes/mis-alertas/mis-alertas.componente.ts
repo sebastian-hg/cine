@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { BehaviorSubject, combineLatest, map, switchMap } from 'rxjs';
 
@@ -10,7 +11,7 @@ import { AlertaServicio } from '../../servicios/alerta.servicio';
 /** §17: alertas de estreno a las que el usuario se suscribió. */
 @Component({
   selector: 'app-mis-alertas',
-  imports: [AsyncPipe, DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="contenedor seccion">
@@ -24,7 +25,7 @@ import { AlertaServicio } from '../../servicios/alerta.servicio';
         </a>
       </header>
 
-      @if (alertas$ | async; as alertas) {
+      @if (alertas(); as alertas) {
         @if (alertas.length) {
           <p class="nota">Te avisamos en cuanto se habilite la venta de estas películas.</p>
           <div class="lista">
@@ -98,34 +99,37 @@ import { AlertaServicio } from '../../servicios/alerta.servicio';
   `,
 })
 export class MisAlertasComponente {
-  private readonly alertas = inject(AlertaServicio);
+  private readonly alertasServicio = inject(AlertaServicio);
   private readonly peliculas = inject(PeliculaServicio);
   private readonly avisos = inject(NotificacionServicio);
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
   /** Cruza la alerta con los datos de la película para poder mostrarla. */
-  protected readonly alertas$ = this.recargar.pipe(
-    switchMap(() => combineLatest([this.alertas.propias(), this.peliculas.listar()])),
-    map(([alertas, peliculas]) =>
-      alertas.flatMap((alerta) => {
-        const pelicula = peliculas.find((p) => p.id === alerta.idPelicula);
-        if (!pelicula) return [];
-        return [
-          {
-            id: alerta.id,
-            idPelicula: pelicula.id,
-            nombre: pelicula.nombre,
-            poster: pelicula.poster,
-            fechaEstreno: pelicula.fechaEstreno,
-          },
-        ];
-      }),
+  protected readonly alertas = toSignal(
+    this.recargar.pipe(
+      switchMap(() => combineLatest([this.alertasServicio.propias(), this.peliculas.listar()])),
+      map(([alertas, peliculas]) =>
+        alertas.flatMap((alerta) => {
+          const pelicula = peliculas.find((p) => p.id === alerta.idPelicula);
+          if (!pelicula) return [];
+          return [
+            {
+              id: alerta.id,
+              idPelicula: pelicula.id,
+              nombre: pelicula.nombre,
+              poster: pelicula.poster,
+              fechaEstreno: pelicula.fechaEstreno,
+            },
+          ];
+        }),
+      ),
     ),
+    { initialValue: [] },
   );
 
   protected quitar(idPelicula: string): void {
-    this.alertas.alternar(idPelicula).subscribe(() => {
+    this.alertasServicio.alternar(idPelicula).subscribe(() => {
       this.avisos.mostrar('Dejamos de avisarte sobre ese estreno.', 'info');
       this.recargar.next();
     });

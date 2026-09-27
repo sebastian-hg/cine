@@ -9,7 +9,7 @@
 
   <div class="cuerpo">
     <div class="columna">
-      @if (!(usuario$ | async)) {
+      @if (!usuario()) {
         <div class="invitacion">
           <p class="invitacion__titulo">¿Tenés cuenta?</p>
           <p class="invitacion__texto">
@@ -51,7 +51,7 @@
     <aside class="resumen" aria-label="Resumen de la compra">
       <h2>Tu compra</h2>
 
-      @if (items$ | async; as items) {
+      @if (items(); as items) {
         <ul class="lista">
           @for (item of items; track $index) {
             <li>
@@ -73,7 +73,7 @@
         </ul>
       }
 
-      <app-resumen-totales [desglose]="desglose$ | async" />
+      <app-resumen-totales [desglose]="desglose() ?? null" />
     </aside>
   </div>
 </div>

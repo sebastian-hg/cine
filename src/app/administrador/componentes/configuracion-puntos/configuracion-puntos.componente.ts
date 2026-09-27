@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, switchMap } from 'rxjs';
 
 import { Recompensa } from '../../../compartido/interfaces/puntos.interfaz';
@@ -10,7 +10,7 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
 /** Configuración de recompensas (§15). */
 @Component({
   selector: 'app-configuracion-puntos',
-  imports: [AsyncPipe],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './configuracion-puntos.componente.html',
 })
@@ -21,8 +21,9 @@ export class ConfiguracionPuntosComponente {
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
-  protected readonly recompensas$ = this.recargar.pipe(
-    switchMap(() => this.fidelizacion.todasLasRecompensas()),
+  protected readonly recompensas = toSignal<Recompensa[], Recompensa[]>(
+    this.recargar.pipe(switchMap(() => this.fidelizacion.todasLasRecompensas())),
+    { initialValue: [] },
   );
 
   protected cambiarPuntos(recompensa: Recompensa, evento: Event): void {

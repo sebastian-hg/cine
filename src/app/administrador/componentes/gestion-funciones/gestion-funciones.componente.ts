@@ -1,9 +1,11 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, switchMap, take } from 'rxjs';
 
 import { ResultadoProgramacion, SolicitudFuncion } from '../../../compartido/interfaces/funcion.interfaz';
-import { FuncionServicio } from '../../../compartido/servicios/funcion.servicio';
+import { Pelicula } from '../../../compartido/interfaces/pelicula.interfaz';
+import { FuncionDetallada, FuncionServicio } from '../../../compartido/servicios/funcion.servicio';
 import { PeliculaServicio } from '../../../compartido/servicios/pelicula.servicio';
 import { ProgramacionServicio } from '../../../compartido/servicios/programacion.servicio';
 import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.servicio';
@@ -14,7 +16,7 @@ import { FormularioFuncionComponente } from '../formulario-funcion/formulario-fu
 /** Gestión de funciones con asignación automática de sala (§4). */
 @Component({
   selector: 'app-gestion-funciones',
-  imports: [AsyncPipe, DatePipe, FormularioFuncionComponente, PipeModalidad, PipeMonedaArs],
+  imports: [DatePipe, FormularioFuncionComponente, PipeModalidad, PipeMonedaArs],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './gestion-funciones.componente.html',
   styleUrl: './gestion-funciones.componente.scss',
@@ -27,8 +29,13 @@ export class GestionFuncionesComponente {
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
-  protected readonly funciones$ = this.recargar.pipe(switchMap(() => this.funciones.listar()));
-  protected readonly peliculas$ = this.peliculas.listar();
+  protected readonly funcionesListado = toSignal<FuncionDetallada[], FuncionDetallada[]>(
+    this.recargar.pipe(switchMap(() => this.funciones.listar())),
+    { initialValue: [] },
+  );
+  protected readonly peliculasCatalogo = toSignal<Pelicula[], Pelicula[]>(this.peliculas.listar(), {
+    initialValue: [],
+  });
 
   protected readonly resultados = signal<ResultadoProgramacion[]>([]);
   protected readonly procesando = signal(false);

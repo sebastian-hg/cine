@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { CategoriaCandy } from '../../../compartido/interfaces/categoria.interfaz';
@@ -24,7 +24,7 @@ const IMAGENES = [
   imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <form [formGroup]="FormularioProducto" (ngSubmit)="enviar()" novalidate>
+    <form [formGroup]="FormularioProducto()" (ngSubmit)="enviar()" novalidate>
       <div class="campo">
         <label for="prod-nombre">Nombre</label>
         <input id="prod-nombre" type="text" formControlName="nombre" />
@@ -66,7 +66,7 @@ const IMAGENES = [
         </div>
       </div>
 
-      <button type="submit" class="boton boton--primario" [disabled]="FormularioProducto.invalid">
+      <button type="submit" class="boton boton--primario" [disabled]="FormularioProducto().invalid">
         Crear producto
       </button>
     </form>
@@ -81,23 +81,25 @@ export class FormularioProductoComponente {
 
   protected readonly imagenes = IMAGENES;
 
-  protected readonly FormularioProducto = this.fb.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.minLength(3)]],
-    descripcion: ['', [Validators.required, Validators.minLength(5)]],
-    idCategoria: ['', [Validators.required]],
-    precio: [3000, [Validators.required, Validators.min(1)]],
-    stock: [50, [Validators.required, Validators.min(0)]],
-    imagen: [IMAGENES[0], [Validators.required]],
-  });
+  protected readonly FormularioProducto = signal(
+    this.fb.nonNullable.group({
+      nombre: ['', [Validators.required, Validators.minLength(3)]],
+      descripcion: ['', [Validators.required, Validators.minLength(5)]],
+      idCategoria: ['', [Validators.required]],
+      precio: [3000, [Validators.required, Validators.min(1)]],
+      stock: [50, [Validators.required, Validators.min(0)]],
+      imagen: [IMAGENES[0], [Validators.required]],
+    }),
+  );
 
   protected enviar(): void {
-    if (this.FormularioProducto.invalid) {
-      this.FormularioProducto.markAllAsTouched();
+    if (this.FormularioProducto().invalid) {
+      this.FormularioProducto().markAllAsTouched();
       return;
     }
 
-    this.productoGuardado.emit({ ...this.FormularioProducto.getRawValue(), activo: true });
-    this.FormularioProducto.reset({
+    this.productoGuardado.emit({ ...this.FormularioProducto().getRawValue(), activo: true });
+    this.FormularioProducto().reset({
       nombre: '',
       descripcion: '',
       idCategoria: '',

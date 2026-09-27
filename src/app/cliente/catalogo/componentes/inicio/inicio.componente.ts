@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { combineLatest, map } from 'rxjs';
 
@@ -26,7 +26,6 @@ import { MasVendidasComponente } from '../mas-vendidas/mas-vendidas.componente';
 @Component({
   selector: 'app-inicio',
   imports: [
-    AsyncPipe,
     RouterLink,
     CargandoComponente,
     BuscadorComponente,
@@ -48,20 +47,35 @@ export class InicioComponente {
   private readonly router = inject(Router);
 
   /** Valor por defecto para el pipe async: las plantillas no pueden usar `new`. */
-  protected readonly sinGeneros = new Map<string, string>();
+  protected readonly sinGeneros = signal(new Map<string, string>());
 
-  protected readonly masVendidas$ = this.peliculas.masVendidas();
-  protected readonly cartelera$ = this.peliculas.carteleraFiltrada();
-  protected readonly generos$ = this.generos.activos();
-  protected readonly nombresGenero$ = this.generos.nombresPorId();
-  protected readonly combosDestacados$ = this.combos.destacados();
-  protected readonly seleccionados$ = this.peliculas.generosSeleccionados$;
+  protected readonly masVendidas = toSignal(this.peliculas.masVendidas(), {
+    initialValue: [],
+  });
+  protected readonly cartelera = toSignal(this.peliculas.carteleraFiltrada(), {
+    initialValue: [],
+  });
+  protected readonly generosActivos = toSignal(this.generos.activos(), {
+    initialValue: [],
+  });
+  protected readonly nombresGenero = toSignal(this.generos.nombresPorId(), {
+    initialValue: this.sinGeneros(),
+  });
+  protected readonly combosDestacados = toSignal(this.combos.destacados(), {
+    initialValue: [],
+  });
+  protected readonly seleccionados = toSignal(this.peliculas.generosSeleccionados$, {
+    initialValue: [],
+  });
 
   /** `true` cuando hay búsqueda o filtro activos: oculta el podio de más vendidas. */
-  protected readonly hayFiltro$ = combineLatest([
+  protected readonly hayFiltro = toSignal(
+    combineLatest([
     this.peliculas.texto$,
     this.peliculas.generosSeleccionados$,
-  ]).pipe(map(([texto, generos]) => texto.trim().length > 0 || generos.length > 0));
+    ]).pipe(map(([texto, generos]) => texto.trim().length > 0 || generos.length > 0)),
+    { initialValue: false },
+  );
 
   protected buscar(texto: string): void {
     this.peliculas.buscar(texto);

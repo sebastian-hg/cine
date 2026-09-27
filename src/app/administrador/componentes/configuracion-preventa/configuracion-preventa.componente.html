@@ -10,7 +10,7 @@
   Al llegar la fecha de estreno el precio vuelve solo al normal.
 </p>
 
-@if (filas$ | async; as filas) {
+@if (filas(); as filas) {
   <div class="tabla-scroll">
     <table>
       <caption class="solo-lectores">Configuración de preventa por película</caption>

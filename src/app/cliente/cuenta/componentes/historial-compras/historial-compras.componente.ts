@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { BehaviorSubject, map, of, switchMap, take } from 'rxjs';
 
@@ -19,7 +19,6 @@ import { TarjetaCompraComponente } from '../tarjeta-compra/tarjeta-compra.compon
 @Component({
   selector: 'app-historial-compras',
   imports: [
-    AsyncPipe,
     RouterLink,
     TarjetaCompraComponente,
     DialogoConfirmacionComponente,
@@ -35,23 +34,34 @@ export class HistorialComprasComponente {
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
-  protected readonly compras$ = this.recargar.pipe(
+  private readonly compras$ = this.recargar.pipe(
     switchMap(() => this.auth.usuarioActual$),
-    switchMap((usuario) => (usuario ? this.compras.deUsuario(usuario.id) : of([]))),
+    switchMap((usuario) =>
+      usuario ? this.compras.deUsuario(usuario.id) : of<CompraDetallada[]>([]),
+    ),
   );
 
-  protected readonly resumenEstados$ = this.compras$.pipe(
-    map((compras) => {
-      const resumen = { total: compras.length, pagadas: 0, usadas: 0, canceladas: 0 };
+  protected readonly comprasLista = toSignal<CompraDetallada[], CompraDetallada[]>(this.compras$, {
+    initialValue: [],
+  });
 
-      for (const compra of compras) {
-        if (compra.estado === 'pagada') resumen.pagadas += 1;
-        if (compra.estado === 'usada') resumen.usadas += 1;
-        if (compra.estado === 'cancelada') resumen.canceladas += 1;
-      }
+  protected readonly resumenEstados = toSignal(
+    this.compras$.pipe(
+      map((compras) => {
+        const resumen = { total: compras.length, pagadas: 0, usadas: 0, canceladas: 0 };
 
-      return resumen;
-    }),
+        for (const compra of compras) {
+          if (compra.estado === 'pagada') resumen.pagadas += 1;
+          if (compra.estado === 'usada') resumen.usadas += 1;
+          if (compra.estado === 'cancelada') resumen.canceladas += 1;
+        }
+
+        return resumen;
+      }),
+    ),
+    {
+      initialValue: { total: 0, pagadas: 0, usadas: 0, canceladas: 0 },
+    },
   );
 
   protected readonly porCancelar = signal<CompraDetallada | null>(null);

@@ -1,9 +1,11 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, combineLatest, map, of, shareReplay, switchMap } from 'rxjs';
 
 import { PeliculaConMetricas } from '../../../../compartido/interfaces/pelicula.interfaz';
+import { Resena, ResumenResenas } from '../../../../compartido/interfaces/resena.interfaz';
 import { ConfiguracionServicio } from '../../../../compartido/servicios/configuracion.servicio';
 import { FuncionDetallada, FuncionServicio } from '../../../../compartido/servicios/funcion.servicio';
 import { GeneroServicio } from '../../../../compartido/servicios/genero.servicio';
@@ -30,7 +32,6 @@ import { ListadoResenasComponente } from '../listado-resenas/listado-resenas.com
 @Component({
   selector: 'app-detalle-pelicula',
   imports: [
-    AsyncPipe,
     DatePipe,
     CargandoComponente,
     InsigniaClasificacionComponente,
@@ -60,56 +61,89 @@ export class DetallePeliculaComponente {
     shareReplay({ bufferSize: 1, refCount: true }),
   );
 
-  protected readonly pelicula$: Observable<PeliculaConMetricas | null> = this.idPelicula$.pipe(
+  private readonly pelicula$: Observable<PeliculaConMetricas | null> = this.idPelicula$.pipe(
     switchMap((id) => this.peliculas.obtener(id)),
     shareReplay({ bufferSize: 1, refCount: true }),
   );
 
-  protected readonly funciones$ = this.idPelicula$.pipe(
+  private readonly funciones$ = this.idPelicula$.pipe(
     switchMap((id) => this.funcionesServicio.dePelicula(id)),
   );
 
-  protected readonly resenas$ = this.idPelicula$.pipe(
+  private readonly resenas$ = this.idPelicula$.pipe(
     switchMap((id) => this.resenasServicio.dePelicula(id)),
   );
 
-  protected readonly resumen$ = this.idPelicula$.pipe(
+  private readonly resumen$ = this.idPelicula$.pipe(
     switchMap((id) => this.resenasServicio.resumen(id)),
   );
 
-  protected readonly puedeResenar$ = this.idPelicula$.pipe(
+  private readonly puedeResenar$ = this.idPelicula$.pipe(
     switchMap((id) => this.resenasServicio.puedeResenar(id)),
   );
 
   /** Modalidades e idiomas realmente disponibles, que es lo que pide §2. */
-  protected readonly modalidades$ = this.funciones$.pipe(
+  private readonly modalidades$ = this.funciones$.pipe(
     map((funciones) => [...new Set(funciones.map((f) => f.modalidad))].sort()),
   );
 
-  protected readonly idiomas$ = this.funciones$.pipe(
+  private readonly idiomas$ = this.funciones$.pipe(
     map((funciones) => [...new Set(funciones.map((f) => f.idioma))]),
   );
 
-  protected readonly nombresGenero$ = combineLatest([this.pelicula$, this.generos.nombresPorId()]).pipe(
+  private readonly nombresGenero$ = combineLatest([this.pelicula$, this.generos.nombresPorId()]).pipe(
     map(([pelicula, nombres]) =>
       pelicula ? pelicula.generos.map((id) => nombres.get(id) ?? id) : [],
     ),
   );
 
   /** §16: estado de preventa de esta película. */
-  protected readonly preventa$ = combineLatest([this.pelicula$, this.configuracion.obtener()]).pipe(
+  private readonly preventa$ = combineLatest([this.pelicula$, this.configuracion.obtener()]).pipe(
     map(([pelicula, config]) =>
       pelicula ? estadoPreventa(pelicula, config.diasAnticipacionPreventa) : null,
     ),
   );
 
-  protected readonly motivoBloqueoResena$ = this.auth.usuarioActual$.pipe(
+  private readonly motivoBloqueoResena$ = this.auth.usuarioActual$.pipe(
     map((usuario) =>
       usuario
         ? 'Vas a poder calificarla cuando hayas visto una función de esta película.'
         : 'Iniciá sesión y mirá la película para poder calificarla.',
     ),
   );
+
+  protected readonly pelicula = toSignal<PeliculaConMetricas | null, PeliculaConMetricas | null>(this.pelicula$, {
+    initialValue: null,
+  });
+  protected readonly funciones = toSignal<FuncionDetallada[], FuncionDetallada[]>(this.funciones$, {
+    initialValue: [],
+  });
+  protected readonly resenas = toSignal<Resena[], Resena[]>(this.resenas$, {
+    initialValue: [],
+  });
+  protected readonly resumen = toSignal<ResumenResenas, ResumenResenas>(this.resumen$, {
+    initialValue: { promedio: 0, cantidad: 0 },
+  });
+  protected readonly puedeResenar = toSignal<boolean, boolean>(this.puedeResenar$, {
+    initialValue: false,
+  });
+  protected readonly modalidades = toSignal<string[], string[]>(this.modalidades$, {
+    initialValue: [],
+  });
+  protected readonly idiomas = toSignal<string[], string[]>(this.idiomas$, {
+    initialValue: [],
+  });
+  protected readonly nombresGenero = toSignal<string[], string[]>(this.nombresGenero$, {
+    initialValue: [],
+  });
+  protected readonly preventa = toSignal(this.preventa$, {
+    initialValue: null,
+  });
+  protected readonly motivoBloqueoResena = toSignal<string, string>(this.motivoBloqueoResena$, {
+    initialValue: this.auth.usuarioActual
+      ? 'Vas a poder calificarla cuando hayas visto una función de esta película.'
+      : 'Iniciá sesión y mirá la película para poder calificarla.',
+  });
 
   protected irAButacas(funcion: FuncionDetallada): void {
     void this.router.navigate(['/butacas', funcion.id]);

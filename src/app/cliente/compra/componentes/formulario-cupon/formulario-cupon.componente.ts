@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Cupon } from '../../../../compartido/interfaces/cupon.interfaz';
@@ -20,7 +20,7 @@ import { Cupon } from '../../../../compartido/interfaces/cupon.interfaz';
         </button>
       </div>
     } @else {
-      <form class="formulario" [formGroup]="FormularioCupon" (ngSubmit)="enviar()">
+      <form class="formulario" [formGroup]="FormularioCupon()" (ngSubmit)="enviar()">
         <div class="campo" [class.campo--invalido]="!!error()">
           <label for="codigo-cupon">¿Tenés un cupón?</label>
           <div class="fila">
@@ -32,7 +32,7 @@ import { Cupon } from '../../../../compartido/interfaces/cupon.interfaz';
               autocomplete="off"
               spellcheck="false"
             />
-            <button type="submit" class="boton" [disabled]="FormularioCupon.invalid">Aplicar</button>
+            <button type="submit" class="boton" [disabled]="FormularioCupon().invalid">Aplicar</button>
           </div>
           @if (error()) {
             <p class="mensaje-campo">{{ error() }}</p>
@@ -87,12 +87,14 @@ export class FormularioCuponComponente {
 
   private readonly fb = inject(FormBuilder);
 
-  protected readonly FormularioCupon = this.fb.nonNullable.group({
-    codigo: ['', [Validators.required, Validators.minLength(3)]],
-  });
+  protected readonly FormularioCupon = signal(
+    this.fb.nonNullable.group({
+      codigo: ['', [Validators.required, Validators.minLength(3)]],
+    }),
+  );
 
   protected enviar(): void {
-    if (this.FormularioCupon.invalid) return;
-    this.cuponAplicado.emit(this.FormularioCupon.controls.codigo.value.trim().toUpperCase());
+    if (this.FormularioCupon().invalid) return;
+    this.cuponAplicado.emit(this.FormularioCupon().controls.codigo.value.trim().toUpperCase());
   }
 }

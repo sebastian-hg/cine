@@ -10,7 +10,7 @@
 </section>
 
 <div class="contenedor seccion">
-  @if (proximas$ | async; as proximas) {
+  @if (proximas(); as proximas) {
     @if (proximas.length) {
       <div class="lista">
         @for (entrada of proximas; track entrada.pelicula.id) {
@@ -18,8 +18,8 @@
             [pelicula]="entrada.pelicula"
             [preventaActiva]="entrada.estado.activa"
             [diasParaEstreno]="entrada.estado.diasParaEstreno"
-            [suscrito]="((suscritos$ | async) ?? sinSuscripciones).has(entrada.pelicula.id)"
-            [puedeSuscribirse]="(autenticado$ | async) ?? false"
+            [suscrito]="suscritos().has(entrada.pelicula.id)"
+            [puedeSuscribirse]="autenticado()"
             (avisarme)="alternarAlerta($event)"
           />
         }

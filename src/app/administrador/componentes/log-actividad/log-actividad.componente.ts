@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { startWith, switchMap } from 'rxjs';
 
@@ -21,7 +22,7 @@ const ETIQUETA_ACCION: Record<AccionRegistrada, string> = {
 /** Log de actividad (§21), filtrable por usuario, acción y fechas. */
 @Component({
   selector: 'app-log-actividad',
-  imports: [AsyncPipe, DatePipe, ReactiveFormsModule],
+  imports: [DatePipe, ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './log-actividad.componente.html',
   styleUrl: './log-actividad.componente.scss',
@@ -32,23 +33,28 @@ export class LogActividadComponente {
 
   protected readonly acciones = Object.entries(ETIQUETA_ACCION) as [AccionRegistrada, string][];
 
-  protected readonly FormularioFiltro = this.fb.nonNullable.group({
-    texto: [''],
-    accion: [''],
-    desde: [''],
-    hasta: [''],
-  });
+  protected readonly FormularioFiltro = signal(
+    this.fb.nonNullable.group({
+      texto: [''],
+      accion: [''],
+      desde: [''],
+      hasta: [''],
+    }),
+  );
 
-  protected readonly registros$ = this.FormularioFiltro.valueChanges.pipe(
-    startWith(this.FormularioFiltro.getRawValue()),
-    switchMap((filtros) =>
-      this.registro.filtrar({
-        texto: filtros.texto || undefined,
-        accion: (filtros.accion as AccionRegistrada) || null,
-        desde: filtros.desde || null,
-        hasta: filtros.hasta || null,
-      }),
+  protected readonly registros = toSignal(
+    this.FormularioFiltro().valueChanges.pipe(
+      startWith(this.FormularioFiltro().getRawValue()),
+      switchMap((filtros) =>
+        this.registro.filtrar({
+          texto: filtros.texto || undefined,
+          accion: (filtros.accion as AccionRegistrada) || null,
+          desde: filtros.desde || null,
+          hasta: filtros.hasta || null,
+        }),
+      ),
     ),
+    { initialValue: [] },
   );
 
   protected etiqueta(accion: AccionRegistrada): string {
@@ -56,6 +62,6 @@ export class LogActividadComponente {
   }
 
   protected limpiar(): void {
-    this.FormularioFiltro.reset({ texto: '', accion: '', desde: '', hasta: '' });
+    this.FormularioFiltro().reset({ texto: '', accion: '', desde: '', hasta: '' });
   }
 }

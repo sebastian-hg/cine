@@ -1,4 +1,4 @@
-<form class="formulario" [formGroup]="FormularioFuncion" (ngSubmit)="enviar()" novalidate>
+<form class="formulario" [formGroup]="FormularioFuncion()" (ngSubmit)="enviar()" novalidate>
   <div class="campo" [class.campo--invalido]="invalido('idPelicula')">
     <label for="funcion-pelicula">Película</label>
     <select id="funcion-pelicula" formControlName="idPelicula">
@@ -17,7 +17,7 @@
   <div class="campo">
     <label id="etiqueta-dias">Días de la semana</label>
     <div class="dias" role="group" aria-labelledby="etiqueta-dias">
-      @for (dia of diasSemana; track dia.indice) {
+      @for (dia of diasSemana(); track dia.indice) {
         <button
           type="button"
           class="dia"
@@ -29,8 +29,8 @@
         </button>
       }
     </div>
-    <p class="pista">Se programan las próximas {{ semanas }} semanas.</p>
-    @if (diasElegidos().size === 0 && FormularioFuncion.touched) {
+    <p class="pista">Se programan las próximas {{ semanas() }} semanas.</p>
+    @if (diasElegidos().size === 0 && FormularioFuncion().touched) {
       <p class="mensaje-campo">Elegí al menos un día.</p>
     }
   </div>

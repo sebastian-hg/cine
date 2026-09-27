@@ -8,7 +8,7 @@
   </button>
 </header>
 
-<form class="filtros" [formGroup]="FormularioFiltro">
+<form class="filtros" [formGroup]="FormularioFiltro()">
   <div class="campo">
     <label for="filtro-texto">Buscar</label>
     <input id="filtro-texto" type="search" formControlName="texto" placeholder="Usuario o detalle" />
@@ -35,7 +35,7 @@
   </div>
 </form>
 
-@if (registros$ | async; as registros) {
+@if (registros(); as registros) {
   @if (registros.length) {
     <div class="tabla-scroll">
       <table>

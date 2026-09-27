@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Cupon } from '../../../compartido/interfaces/cupon.interfaz';
@@ -9,7 +9,7 @@ import { Cupon } from '../../../compartido/interfaces/cupon.interfaz';
   imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <form [formGroup]="FormularioCuponAdmin" (ngSubmit)="enviar()" novalidate>
+    <form [formGroup]="FormularioCuponAdmin()" (ngSubmit)="enviar()" novalidate>
       <div class="rejilla-campos">
         <div class="campo">
           <label for="cupon-codigo">Código</label>
@@ -53,7 +53,7 @@ import { Cupon } from '../../../compartido/interfaces/cupon.interfaz';
         />
       </div>
 
-      <button type="submit" class="boton boton--primario" [disabled]="FormularioCuponAdmin.invalid">
+      <button type="submit" class="boton boton--primario" [disabled]="FormularioCuponAdmin().invalid">
         Crear cupón
       </button>
     </form>
@@ -64,27 +64,29 @@ export class FormularioCuponAdminComponente {
 
   private readonly fb = inject(FormBuilder);
 
-  protected readonly FormularioCuponAdmin = this.fb.nonNullable.group({
-    codigo: ['', [Validators.required, Validators.minLength(3)]],
-    porcentaje: [10, [Validators.required, Validators.min(1), Validators.max(100)]],
-    tipo: ['generico' as Cupon['tipo'], [Validators.required]],
-    usosPorUsuario: [1, [Validators.required, Validators.min(0)]],
-    descripcion: ['', [Validators.required, Validators.minLength(5)]],
-  });
+  protected readonly FormularioCuponAdmin = signal(
+    this.fb.nonNullable.group({
+      codigo: ['', [Validators.required, Validators.minLength(3)]],
+      porcentaje: [10, [Validators.required, Validators.min(1), Validators.max(100)]],
+      tipo: ['generico' as Cupon['tipo'], [Validators.required]],
+      usosPorUsuario: [1, [Validators.required, Validators.min(0)]],
+      descripcion: ['', [Validators.required, Validators.minLength(5)]],
+    }),
+  );
 
   protected enviar(): void {
-    if (this.FormularioCuponAdmin.invalid) {
-      this.FormularioCuponAdmin.markAllAsTouched();
+    if (this.FormularioCuponAdmin().invalid) {
+      this.FormularioCuponAdmin().markAllAsTouched();
       return;
     }
 
-    const valores = this.FormularioCuponAdmin.getRawValue();
+    const valores = this.FormularioCuponAdmin().getRawValue();
     this.cuponGuardado.emit({
       ...valores,
       codigo: valores.codigo.trim().toUpperCase(),
       activo: true,
     });
-    this.FormularioCuponAdmin.reset({
+    this.FormularioCuponAdmin().reset({
       codigo: '',
       porcentaje: 10,
       tipo: 'generico',

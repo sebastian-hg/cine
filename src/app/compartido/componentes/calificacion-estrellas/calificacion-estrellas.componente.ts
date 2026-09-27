@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
 
 /**
  * Calificación de 1 a 5 estrellas (§14).
@@ -16,7 +16,7 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
       role="group"
       [attr.aria-label]="soloLectura() ? 'Calificación: ' + valor() + ' de 5' : 'Elegí una calificación'"
     >
-      @for (punto of puntos; track punto) {
+      @for (punto of puntos(); track punto) {
         <button
           type="button"
           class="estrella"
@@ -75,5 +75,5 @@ export class CalificacionEstrellasComponente {
 
   readonly calificado = output<number>();
 
-  protected readonly puntos = [1, 2, 3, 4, 5];
+  protected readonly puntos = signal([1, 2, 3, 4, 5]);
 }

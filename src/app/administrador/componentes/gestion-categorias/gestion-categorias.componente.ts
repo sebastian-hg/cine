@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BehaviorSubject, switchMap } from 'rxjs';
 
@@ -10,7 +10,7 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
 /** CRUD de categorías del Candy Bar (§10). */
 @Component({
   selector: 'app-gestion-categorias',
-  imports: [AsyncPipe, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="seccion-cabecera">
@@ -20,17 +20,17 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
       </div>
     </header>
 
-    <form class="bloque alta" [formGroup]="FormularioCategoria" (ngSubmit)="crear()">
+    <form class="bloque alta" [formGroup]="FormularioCategoria()" (ngSubmit)="crear()">
       <div class="campo">
         <label for="categoria-nombre">Nueva categoría</label>
         <input id="categoria-nombre" type="text" formControlName="nombre" placeholder="Ej. Helados" />
       </div>
-      <button type="submit" class="boton boton--primario" [disabled]="FormularioCategoria.invalid">
+      <button type="submit" class="boton boton--primario" [disabled]="FormularioCategoria().invalid">
         Crear
       </button>
     </form>
 
-    @if (categorias$ | async; as categorias) {
+    @if (categorias(); as categorias) {
       <div class="tabla-scroll">
         <table>
           <caption class="solo-lectores">Categorías del Candy Bar</caption>
@@ -71,20 +71,25 @@ export class GestionCategoriasComponente {
   private readonly fb = inject(FormBuilder);
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
-  protected readonly categorias$ = this.recargar.pipe(switchMap(() => this.candy.categorias()));
+  protected readonly categorias = toSignal(
+    this.recargar.pipe(switchMap(() => this.candy.categorias())),
+    { initialValue: [] },
+  );
 
-  protected readonly FormularioCategoria = this.fb.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.minLength(3)]],
-  });
+  protected readonly FormularioCategoria = signal(
+    this.fb.nonNullable.group({
+      nombre: ['', [Validators.required, Validators.minLength(3)]],
+    }),
+  );
 
   protected crear(): void {
-    if (this.FormularioCategoria.invalid) return;
-    const nombre = this.FormularioCategoria.controls.nombre.value.trim();
+    if (this.FormularioCategoria().invalid) return;
+    const nombre = this.FormularioCategoria().controls.nombre.value.trim();
 
     this.candy.crearCategoria(nombre).subscribe(() => {
       this.registro.registrar('crear', `creó la categoría "${nombre}"`).subscribe();
       this.avisos.mostrar(`Categoría "${nombre}" creada.`, 'exito');
-      this.FormularioCategoria.reset();
+      this.FormularioCategoria().reset();
       this.recargar.next();
     });
   }

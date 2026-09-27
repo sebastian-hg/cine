@@ -1,4 +1,4 @@
-<form [formGroup]="FormularioPago" (ngSubmit)="enviar()" novalidate>
+<form [formGroup]="FormularioPago()" (ngSubmit)="enviar()" novalidate>
   @if (aPagar() > 0) {
     <div class="acciones-prueba">
       <button type="button" class="boton boton--fantasma boton--chico" (click)="autocompletarPrueba()">

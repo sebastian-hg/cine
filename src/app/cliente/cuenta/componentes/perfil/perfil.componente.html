@@ -1,4 +1,4 @@
-@if (usuario$ | async; as usuario) {
+@if (usuario(); as usuario) {
   <div class="contenedor seccion">
     <header class="cabecera">
       <span class="cabecera__inicial" aria-hidden="true">{{ usuario.nombre.charAt(0) }}</span>
@@ -11,7 +11,7 @@
       </div>
     </header>
 
-    @if (resumen$ | async; as resumen) {
+    @if (resumen(); as resumen) {
       <div class="tarjetas">
         <a routerLink="/cuenta/puntos" class="tarjeta-dato">
           <span class="tarjeta-dato__valor">{{ resumen.puntos }}</span>
@@ -24,6 +24,10 @@
         <a routerLink="/cuenta/compras" class="tarjeta-dato">
           <span class="tarjeta-dato__valor">{{ resumen.compras }}</span>
           <span class="tarjeta-dato__etiqueta">Compras realizadas</span>
+        </a>
+        <a routerLink="/cuenta/peliculas" class="tarjeta-dato">
+          <span class="tarjeta-dato__valor">Ver</span>
+          <span class="tarjeta-dato__etiqueta">Mis películas</span>
         </a>
       </div>
     }

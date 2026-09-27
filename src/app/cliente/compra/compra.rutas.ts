@@ -1,19 +1,21 @@
 import { Routes } from '@angular/router';
 
+import { GuardCompraActiva } from './guards/compra-activa.guard';
 import { GuardEdad } from './guards/edad.guard';
 
-/** Flujo de compra. `GuardCompraActiva` ya se aplicó en la ruta padre. */
+/** Flujo de compra. Solo carrito/checkout requieren una compra activa. */
 export const RutasCompra: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'carrito' },
   {
     path: 'carrito',
+    canActivate: [GuardCompraActiva],
     loadComponent: () =>
       import('./componentes/carrito/carrito.componente').then((m) => m.CarritoComponente),
     title: 'Tu carrito · Cine',
   },
   {
     path: 'checkout',
-    canActivate: [GuardEdad],
+    canActivate: [GuardCompraActiva, GuardEdad],
     loadComponent: () =>
       import('./componentes/checkout/checkout.componente').then((m) => m.CheckoutComponente),
     title: 'Confirmar compra · Cine',

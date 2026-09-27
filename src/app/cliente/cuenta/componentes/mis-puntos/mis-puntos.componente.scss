@@ -40,6 +40,28 @@
   }
 }
 
+.bloque--qr {
+  text-align: center;
+}
+
+.bloque__nota {
+  margin: 0 0 16px;
+  color: var(--texto-suave);
+}
+
+.canje-qr {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+
+  &__codigo {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+}
+
 .positivo {
   color: var(--ok);
 }

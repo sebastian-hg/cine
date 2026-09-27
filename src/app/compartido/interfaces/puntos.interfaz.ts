@@ -29,5 +29,7 @@ export interface Canje {
   idRecompensa: string;
   nombreRecompensa: string;
   puntosGastados: number;
+  tipoRecompensa: TipoRecompensa;
   fecha: string;
+  idQr: string;
 }

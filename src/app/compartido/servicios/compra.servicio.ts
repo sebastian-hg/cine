@@ -1,5 +1,5 @@
 import { Service, inject } from '@angular/core';
-import { Observable, firstValueFrom, from, map, mergeMap, switchMap, throwError } from 'rxjs';
+import { Observable, combineLatest, firstValueFrom, from, map, mergeMap, switchMap, throwError } from 'rxjs';
 
 import { ItemCarrito } from '../interfaces/carrito.interfaz';
 import { Compra, Desglose } from '../interfaces/compra.interfaz';
@@ -49,7 +49,7 @@ interface VentaCineFila {
   credito_aplicado: number;
   a_pagar: number;
   puntos_ganados: number | null;
-  id_qr: number | null;
+  id_qr: string | number | null;
   id_funcion: number | null;
 }
 
@@ -235,19 +235,24 @@ export class CompraServicio {
     idUsuario: number | string,
   ): Observable<{ idPelicula: string; inicioFuncion: string; idCompra: string | number }[]> {
     const ahora = new Date().toISOString();
-    return this.supabase.consultar((base) =>
-      base.compras
-        .filter(
-          (c) => String(c.idUsuario ?? '') === String(idUsuario) && c.estado !== 'cancelada' && c.idFuncion,
-        )
-        .flatMap((compra) => {
-          const funcion = base.funciones.find((f) => f.id === compra.idFuncion);
-          if (!funcion || funcion.inicio > ahora) return [];
-          return [
-            { idPelicula: funcion.idPelicula, inicioFuncion: funcion.inicio, idCompra: compra.id },
-          ];
-        })
-        .sort((a, b) => b.inicioFuncion.localeCompare(a.inicioFuncion)),
+    return combineLatest([this.todas(), this.supabase.consultar((base) => base.funciones)]).pipe(
+      map(([compras, funciones]) =>
+        compras
+          .filter(
+            (compra: Compra) =>
+              String(compra.idUsuario ?? '') === String(idUsuario) &&
+              compra.estado !== 'cancelada' &&
+              compra.idFuncion,
+          )
+          .flatMap((compra: Compra) => {
+            const funcion = funciones.find((funcion) => funcion.id === compra.idFuncion);
+            if (!funcion || funcion.inicio > ahora) return [];
+            return [
+              { idPelicula: funcion.idPelicula, inicioFuncion: funcion.inicio, idCompra: compra.id },
+            ];
+          })
+          .sort((a, b) => b.inicioFuncion.localeCompare(a.inicioFuncion)),
+      ),
     );
   }
 
@@ -265,6 +270,7 @@ export class CompraServicio {
     const cliente = this.supabase.cliente;
     const usuario = this.auth.usuarioActual;
     const fechaCompra = new Date().toISOString();
+    const codigoQrVenta = this.generarCodigoQrVenta();
 
     if (cliente) {
       const filaSnake = {
@@ -279,7 +285,7 @@ export class CompraServicio {
         credito_aplicado: solicitud.desglose.creditoAplicado,
         a_pagar: solicitud.desglose.aPagar,
         puntos_ganados: usuario ? solicitud.desglose.puntosGanados : 0,
-        id_qr: null,
+        id_qr: codigoQrVenta,
         id_funcion: this.aNumeroBaseDatos(solicitud.idFuncion),
       };
 
@@ -298,7 +304,7 @@ export class CompraServicio {
             return throwError(() => new Error('La venta se guardó sin devolver un identificador.'));
           }
 
-          return this.qr.generar(idCompra, solicitud.items).pipe(
+          return this.qr.generar(idCompra, solicitud.items, codigoQrVenta).pipe(
             mergeMap((codigo) => {
               const compra: Compra = {
                 id: idCompra,
@@ -354,8 +360,9 @@ export class CompraServicio {
     usuario: AutenticacionServicio['usuarioActual'],
     fechaCompra: string,
   ): Observable<Compra> {
+    const codigoQrVenta = this.generarCodigoQrVenta();
     const codigo: CodigoQr = {
-      id: this.supabase.nuevoId('QR'),
+      id: codigoQrVenta,
       idCompra: this.idProvisional(),
       permisos: {},
     };
@@ -478,6 +485,11 @@ export class CompraServicio {
     filaSnake: Record<string, unknown>,
   ): Promise<{ data: unknown; error: { code?: string; message: string } | null }> {
     return cliente.from('ventas_cine').insert(filaSnake).select('*').single();
+  }
+
+  private generarCodigoQrVenta(): string {
+    const bloque = () => Math.random().toString(36).slice(2, 6).toUpperCase();
+    return `QR-${bloque()}-${bloque()}`;
   }
 
   private guardarCompraPersistida(compra: Compra): void {

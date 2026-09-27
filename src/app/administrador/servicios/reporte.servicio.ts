@@ -1,15 +1,17 @@
 import { Service, inject } from '@angular/core';
 import { jsPDF } from 'jspdf';
-import { Observable, map } from 'rxjs';
+import { Observable, combineLatest, map } from 'rxjs';
 
+import { Compra } from '../../compartido/interfaces/compra.interfaz';
 import {
   PuntoGrafico,
   ReporteDiario,
   ResumenEstadosVenta,
   VentaPorUsuario,
 } from '../../compartido/interfaces/reporte.interfaz';
+import { CompraServicio } from '../../compartido/servicios/compra.servicio';
 import { soloFecha, sumarDias } from '../../nucleo/dominio/fechas';
-import { BaseDatos, SupabaseServicio } from '../../nucleo/servicios/supabase.servicio';
+import { SupabaseServicio } from '../../nucleo/servicios/supabase.servicio';
 
 /** Una hoja de la planilla exportada. */
 interface Hoja {
@@ -29,10 +31,11 @@ interface Hoja {
 @Service()
 export class ReporteServicio {
   private readonly supabase = inject(SupabaseServicio);
+  private readonly compras = inject(CompraServicio);
 
-  /** Facturación y entradas vendidas por día, del más reciente al más viejo. */
+  /** Facturación y ventas con entradas/Candy por día, del más reciente al más viejo. */
   diarios(dias = 14): Observable<ReporteDiario[]> {
-    return this.supabase.consultar((base) => {
+    return this.compras.todas().pipe(map((compras) => {
       const hoy = new Date();
       const porDia = new Map<string, ReporteDiario>();
 
@@ -41,7 +44,7 @@ export class ReporteServicio {
         porDia.set(fecha, { fecha, facturacion: 0, entradasVendidas: 0, productosVendidos: 0 });
       }
 
-      for (const compra of base.compras) {
+      for (const compra of compras) {
         if (compra.estado === 'cancelada') continue;
 
         const fecha = soloFecha(new Date(compra.fechaCompra));
@@ -49,14 +52,12 @@ export class ReporteServicio {
         if (!reporte) continue;
 
         reporte.facturacion += compra.desglose.aPagar + compra.desglose.creditoAplicado;
-        for (const item of compra.items) {
-          if (item.tipo === 'entrada') reporte.entradasVendidas += 1;
-          else reporte.productosVendidos += item.cantidad;
-        }
+        if (compra.desglose.subtotalEntradas > 0) reporte.entradasVendidas += 1;
+        if (compra.desglose.subtotalCandy > 0) reporte.productosVendidos += 1;
       }
 
       return [...porDia.values()].sort((a, b) => b.fecha.localeCompare(a.fecha));
-    });
+    }));
   }
 
   /** Totales del período, para las tarjetas de encabezado. */
@@ -75,33 +76,35 @@ export class ReporteServicio {
     );
   }
 
-  /** Conteo de ventas por estado para el panel admin. */
-  resumenEstados(dias = 14): Observable<ResumenEstadosVenta> {
-    return this.supabase.consultar((base) => {
-      const compras = this.comprasEnPeriodo(base, dias);
-      const resumen: ResumenEstadosVenta = {
-        total: compras.length,
-        pagadas: 0,
-        usadas: 0,
-        canceladas: 0,
-        vendidas: 0,
-      };
-
-      for (const compra of compras) {
-        if (compra.estado === 'pagada') resumen.pagadas += 1;
-        if (compra.estado === 'usada') resumen.usadas += 1;
-        if (compra.estado === 'cancelada') resumen.canceladas += 1;
-      }
-
-      resumen.vendidas = resumen.pagadas + resumen.usadas;
-      return resumen;
-    });
+  /** Resumen histórico de facturación de todas las ventas. */
+  resumenHistorico(): Observable<{ facturacion: number }> {
+    return this.compras.todas().pipe(
+      map((compras) => ({
+        facturacion: compras.reduce((total, compra) => {
+          if (compra.estado === 'cancelada') return total;
+          return total + compra.desglose.aPagar + compra.desglose.creditoAplicado;
+        }, 0),
+      })),
+    );
   }
+
+  /** Resumen de la última semana de ventas. */
+  resumenUltimaSemana(): Observable<{ facturacion: number }> {
+    return this.diarios(7).pipe(
+      map((reportes) => ({
+        facturacion: reportes.reduce((total, reporte) => total + reporte.facturacion, 0),
+      })),
+    );
+  }
+
 
   /** Ventas por usuario para saber quién compró y cuánto se vendió. */
   ventasPorUsuario(dias = 14): Observable<VentaPorUsuario[]> {
-    return this.supabase.consultar((base) => {
-      const compras = this.comprasEnPeriodo(base, dias);
+    return combineLatest([
+      this.compras.todas(),
+      this.supabase.consultar((base) => base.usuarios),
+    ]).pipe(map(([comprasBase, usuarios]) => {
+      const compras = this.comprasEnPeriodo(comprasBase, dias);
       const resumen = new Map<string, VentaPorUsuario>();
 
       for (const compra of compras) {
@@ -111,7 +114,7 @@ export class ReporteServicio {
         const usuario =
           idUsuario
             ? (() => {
-                const encontrado = base.usuarios.find((u) => u.id === Number(idUsuario));
+                const encontrado = usuarios.find((u) => String(u.id) === String(idUsuario));
                 return encontrado ? `${encontrado.nombre} ${encontrado.apellido}` : String(idUsuario);
               })()
             : 'Cliente anónimo';
@@ -143,7 +146,7 @@ export class ReporteServicio {
         if (b.totalVendido !== a.totalVendido) return b.totalVendido - a.totalVendido;
         return b.ventas - a.ventas;
       });
-    });
+    }));
   }
 
   /** §20: películas más vistas por semana. */
@@ -158,13 +161,12 @@ export class ReporteServicio {
 
   /** §20: producto del Candy Bar más vendido. */
   candyMasVendido(): Observable<PuntoGrafico[]> {
-    return this.supabase.consultar((base) => {
+    return this.compras.todas().pipe(map((compras) => {
       const unidades = new Map<string, number>();
 
-      for (const compra of base.compras.filter((c) => c.estado !== 'cancelada')) {
-        for (const item of compra.items) {
-          if (item.tipo !== 'producto') continue;
-          unidades.set(item.nombre, (unidades.get(item.nombre) ?? 0) + item.cantidad);
+      for (const compra of compras.filter((c) => c.estado !== 'cancelada')) {
+        if (compra.desglose.subtotalCandy > 0) {
+          unidades.set('Ventas con Candy Bar', (unidades.get('Ventas con Candy Bar') ?? 0) + 1);
         }
       }
 
@@ -172,22 +174,24 @@ export class ReporteServicio {
         .map(([etiqueta, valor]) => ({ etiqueta, valor }))
         .sort((a, b) => b.valor - a.valor)
         .slice(0, 8);
-    });
+    }));
   }
 
   /** §20: exportación a PDF. */
-  exportarPdf(reportes: ReporteDiario[]): void {
+  exportarPdf(reportes: ReporteDiario[], periodo = 'Última semana'): void {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const margen = 18;
+    const textoPeriodo = `Período: ${periodo}`;
 
     doc.setFillColor(26, 23, 20);
     doc.rect(0, 0, doc.internal.pageSize.getWidth(), 28, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(15);
-    doc.text('Reporte de facturación', margen, 18);
+    doc.text(`Reporte de facturación - ${periodo}`, margen, 16);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
+    doc.text(textoPeriodo, margen, 22);
     doc.text(
       new Date().toLocaleDateString('es-AR', { dateStyle: 'long' }),
       doc.internal.pageSize.getWidth() - margen,
@@ -224,7 +228,7 @@ export class ReporteServicio {
     const total = reportes.reduce((suma, r) => suma + r.facturacion, 0);
     y += 12;
     doc.setFont('helvetica', 'bold');
-    doc.text('TOTAL', margen, y);
+    doc.text(`TOTAL (${periodo})`, margen, y);
     doc.text(this.pesos(total), margen + 160, y, { align: 'right' });
 
     doc.save(`reporte-${soloFecha(new Date())}.pdf`);
@@ -264,18 +268,27 @@ export class ReporteServicio {
   }
 
   private vistasEnUltimosDias(dias: number): Observable<PuntoGrafico[]> {
-    return this.supabase.consultar((base) => {
+    return combineLatest([
+      this.compras.todas(),
+      this.supabase.consultar((base) => base.funciones),
+      this.supabase.consultar((base) => base.peliculas),
+    ]).pipe(map(([compras, funciones, peliculas]) => {
       const desde = sumarDias(new Date(), -dias).toISOString();
       const conteo = new Map<string, number>();
 
-      for (const compra of base.compras) {
+      for (const compra of compras) {
         if (compra.estado === 'cancelada' || compra.fechaCompra < desde) continue;
 
-        const funcion = base.funciones.find((f) => f.id === compra.idFuncion);
+        const funcion = funciones.find((f) => f.id === compra.idFuncion);
         if (!funcion) continue;
 
-        const nombre = this.nombrePelicula(base, funcion.idPelicula);
-        const entradas = compra.items.filter((i) => i.tipo === 'entrada').length;
+        const nombre = this.nombrePelicula(peliculas, funcion.idPelicula);
+        const entradas =
+          compra.items.length > 0
+            ? compra.items.filter((i) => i.tipo === 'entrada').reduce((suma, item) => suma + item.cantidad, 0)
+            : compra.desglose.subtotalEntradas > 0
+              ? 1
+              : 0;
         conteo.set(nombre, (conteo.get(nombre) ?? 0) + entradas);
       }
 
@@ -283,16 +296,16 @@ export class ReporteServicio {
         .map(([etiqueta, valor]) => ({ etiqueta, valor }))
         .sort((a, b) => b.valor - a.valor)
         .slice(0, 8);
-    });
+    }));
   }
 
-  private nombrePelicula(base: BaseDatos, idPelicula: string): string {
-    return base.peliculas.find((p) => p.id === idPelicula)?.nombre ?? idPelicula;
+  private nombrePelicula(peliculas: { id: string; nombre: string }[], idPelicula: string): string {
+    return peliculas.find((p) => p.id === idPelicula)?.nombre ?? idPelicula;
   }
 
-  private comprasEnPeriodo(base: BaseDatos, dias: number) {
+  private comprasEnPeriodo(compras: Compra[], dias: number) {
     const desde = sumarDias(new Date(), -dias).toISOString();
-    return base.compras.filter((compra) => compra.fechaCompra >= desde);
+    return compras.filter((compra) => compra.fechaCompra >= desde);
   }
 
   private aSpreadsheetMl(hojas: Hoja[]): string {

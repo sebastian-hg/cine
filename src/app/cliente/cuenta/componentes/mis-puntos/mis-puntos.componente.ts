@@ -13,6 +13,7 @@ import { FidelizacionServicio } from '../../../../compartido/servicios/fidelizac
 import { AutenticacionServicio } from '../../../../nucleo/servicios/autenticacion.servicio';
 import { NotificacionServicio } from '../../../../nucleo/servicios/notificacion.servicio';
 import { DialogoConfirmacionComponente } from '../../../../compartido/componentes/dialogo-confirmacion/dialogo-confirmacion.componente';
+import { CodigoQrComponente } from '../../../compra/componentes/codigo-qr/codigo-qr.componente';
 import { CatalogoRecompensasComponente } from '../catalogo-recompensas/catalogo-recompensas.componente';
 import { HistorialCanjesComponente } from '../historial-canjes/historial-canjes.componente';
 
@@ -22,6 +23,7 @@ import { HistorialCanjesComponente } from '../historial-canjes/historial-canjes.
   imports: [
     DatePipe,
     RouterLink,
+    CodigoQrComponente,
     CatalogoRecompensasComponente,
     HistorialCanjesComponente,
     DialogoConfirmacionComponente,
@@ -64,6 +66,7 @@ export class MisPuntosComponente {
   });
 
   protected readonly porCanjear = signal<Recompensa | null>(null);
+  protected readonly ultimoCanje = signal<Canje | null>(null);
 
   protected pedirConfirmacion(recompensa: Recompensa): void {
     this.porCanjear.set(recompensa);
@@ -80,6 +83,7 @@ export class MisPuntosComponente {
       .subscribe({
         next: (canje) => {
           this.porCanjear.set(null);
+          this.ultimoCanje.set(canje);
           this.avisos.mostrar(`Canjeaste ${canje.nombreRecompensa}.`, 'exito');
           this.recargar.next();
         },

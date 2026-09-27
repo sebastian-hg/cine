@@ -30,7 +30,7 @@ export class QrServicio {
    * Un permiso solo existe si la compra incluye ese concepto: una compra sin
    * candy no debería tener un permiso de candy que nadie va a usar.
    */
-  generar(idCompra: string, items: readonly ItemCarrito[]): Observable<CodigoQr> {
+  generar(idCompra: string, items: readonly ItemCarrito[], idCodigo = this.supabase.nuevoId('QR')): Observable<CodigoQr> {
     return this.supabase.transaccion((base) => {
       const permisos: CodigoQr['permisos'] = {};
       const nuevo = (): PermisoQr => ({ usado: false, validadoPor: null, validadoEn: null });
@@ -38,10 +38,14 @@ export class QrServicio {
       if (items.some((i) => i.tipo === 'entrada')) permisos.entrada = nuevo();
       if (items.some((i) => i.tipo !== 'entrada')) permisos.candy = nuevo();
 
-      const codigo: CodigoQr = { id: this.supabase.nuevoId('QR'), idCompra, permisos };
+      const codigo: CodigoQr = { id: idCodigo, idCompra, permisos };
       base.codigosQr.push(codigo);
       return codigo;
     });
+  }
+
+  listar(): Observable<CodigoQr[]> {
+    return this.supabase.consultar((base) => [...base.codigosQr]);
   }
 
   obtener(idQr: string): Observable<CodigoQr | null> {
@@ -69,7 +73,7 @@ export class QrServicio {
       const codigo = base.codigosQr.find((c) => c.id.toUpperCase() === buscado);
 
       if (!codigo) {
-        return { valido: false as const, motivo: 'El código no corresponde a ninguna compra.' };
+        return { valido: false as const, motivo: 'El código no corresponde a ninguna compra o canje.' };
       }
 
       const compra = base.compras.find((c) => c.id === codigo.idCompra);
@@ -83,8 +87,8 @@ export class QrServicio {
           valido: false as const,
           motivo:
             concepto === 'candy'
-              ? 'Esta compra no incluye productos del Candy Bar.'
-              : 'Esta compra no incluye entradas.',
+              ? 'Este código no habilita retiro de Candy Bar.'
+              : 'Este código no habilita entradas.',
         };
       }
 

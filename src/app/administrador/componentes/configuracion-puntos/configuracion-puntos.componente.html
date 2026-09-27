@@ -10,7 +10,48 @@
   define cuántos puntos cuesta cada recompensa.
 </p>
 
+<section class="bloque">
+  <h2>Agregar recompensa</h2>
+
+  <form class="formulario" [formGroup]="formularioNuevaRecompensa()" (ngSubmit)="crearRecompensa()">
+    <div class="rejilla-campos">
+      <div class="campo">
+        <label for="recompensa-nombre">Nombre</label>
+        <input id="recompensa-nombre" type="text" formControlName="nombre" />
+      </div>
+
+      <div class="campo">
+        <label for="recompensa-tipo">Tipo</label>
+        <select id="recompensa-tipo" formControlName="tipo">
+          <option value="entrada">Entrada</option>
+          <option value="producto-candy">Candy Bar</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label for="recompensa-puntos">Puntos requeridos</label>
+        <input id="recompensa-puntos" type="number" min="1" step="100" formControlName="puntosRequeridos" />
+      </div>
+    </div>
+
+    <button type="submit" class="boton boton--primario" [disabled]="formularioNuevaRecompensa().invalid || creandoRecompensa()">
+      Agregar recompensa
+    </button>
+  </form>
+</section>
+
 @if (recompensas(); as recompensas) {
+  <div class="acciones acciones--separadas">
+    <button
+      type="button"
+      class="boton boton--primario"
+      [disabled]="!hayCambiosPendientes() || guardandoCambios()"
+      (click)="guardarCambios()"
+    >
+      Guardar cambios
+    </button>
+  </div>
+
   <div class="tabla-scroll">
     <table>
       <caption class="solo-lectores">Recompensas canjeables por puntos</caption>
@@ -35,24 +76,26 @@
               <label class="solo-lectores" [attr.for]="'puntos-' + recompensa.id">
                 Puntos para {{ recompensa.nombre }}
               </label>
-              <input
-                [id]="'puntos-' + recompensa.id"
-                class="puntos"
-                type="number"
-                min="1"
-                step="100"
-                [value]="recompensa.puntosRequeridos"
-                (change)="cambiarPuntos(recompensa, $event)"
-              />
+              <div class="fila fila--puntos">
+                <input
+                  [id]="'puntos-' + recompensa.id"
+                  class="puntos"
+                  type="number"
+                  min="1"
+                  step="100"
+                  [value]="puntosEditados(recompensa)"
+                  (input)="actualizarBorrador(recompensa, $event)"
+                />
+              </div>
             </td>
             <td>
               <button
                 type="button"
                 class="boton boton--chico"
-                [class.boton--fantasma]="recompensa.activa"
+                [class.boton--fantasma]="estadoEditado(recompensa)"
                 (click)="alternarActiva(recompensa)"
               >
-                {{ recompensa.activa ? 'Activa' : 'Desactivada' }}
+                {{ estadoEditado(recompensa) ? 'Activa' : 'Desactivada' }}
               </button>
             </td>
           </tr>

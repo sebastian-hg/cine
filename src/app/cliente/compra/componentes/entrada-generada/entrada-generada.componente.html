@@ -19,9 +19,11 @@
       <div class="entrada__qr">
         <app-codigo-qr [contenido]="compra.idQr" [lado]="200" />
         <p class="entrada__codigo">{{ compra.idQr }}</p>
-        <button type="button" class="boton boton--primario boton--bloque" (click)="descargarPdf()">
-          Descargar entrada en PDF
-        </button>
+        @if (compra.butacas.length) {
+          <button type="button" class="boton boton--primario boton--bloque" (click)="descargarPdf()">
+            Descargar entrada en PDF
+          </button>
+        }
       </div>
 
       <div class="entrada__datos">
@@ -54,7 +56,51 @@
                 <dd>{{ pelicula.clasificacion }}</dd>
               </div>
             </dl>
+          } @else {
+            <section class="resumen-generico">
+              <h2>Tu código de acceso</h2>
+              <p>
+                Recuperamos este código desde el registro de tu compra. Podés usarlo para validar tu
+                acceso o retiro igual que cuando confirmaste la venta.
+              </p>
+              <dl class="datos datos--compactos">
+                <div>
+                  <dt>Compra</dt>
+                  <dd>#{{ compra.id }}</dd>
+                </div>
+                <div>
+                  <dt>Estado</dt>
+                  <dd>{{ compra.estado }}</dd>
+                </div>
+                <div>
+                  <dt>Fecha</dt>
+                  <dd>{{ compra.fechaCompra | date: 'd MMM y, HH:mm' }}</dd>
+                </div>
+              </dl>
+            </section>
           }
+        } @else {
+            <section class="resumen-generico">
+              <h2>Tu código de acceso</h2>
+              <p>
+                Recuperamos este código desde el registro de tu compra. Podés usarlo para validar tu
+                acceso o retiro igual que cuando confirmaste la venta.
+              </p>
+              <dl class="datos datos--compactos">
+                <div>
+                  <dt>Compra</dt>
+                  <dd>#{{ compra.id }}</dd>
+                </div>
+                <div>
+                  <dt>Estado</dt>
+                  <dd>{{ compra.estado }}</dd>
+                </div>
+                <div>
+                  <dt>Fecha</dt>
+                  <dd>{{ compra.fechaCompra | date: 'd MMM y, HH:mm' }}</dd>
+                </div>
+              </dl>
+            </section>
         }
 
         @if (itemsCandy(); as candy) {

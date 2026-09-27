@@ -1,7 +1,8 @@
 import { Service, inject } from '@angular/core';
-import { Observable, from, throwError } from 'rxjs';
+import { Observable, from, mergeMap, throwError } from 'rxjs';
 
 import { Canje, MovimientoPuntos, Recompensa } from '../interfaces/puntos.interfaz';
+import { CodigoQr } from '../interfaces/qr.interfaz';
 import { BaseDatos, SupabaseServicio } from '../../nucleo/servicios/supabase.servicio';
 import { AutenticacionServicio } from '../../nucleo/servicios/autenticacion.servicio';
 
@@ -22,11 +23,7 @@ export class FidelizacionServicio {
   private readonly auth = inject(AutenticacionServicio);
 
   saldo(idUsuario: number | string): Observable<number> {
-    return this.supabase.consultar((base) => {
-      const usuario = base.usuarios.find((u) => String(u.id) === String(idUsuario));
-      if (usuario) return usuario.puntos;
-      return this.calcularSaldo(base, idUsuario);
-    });
+    return this.supabase.consultar((base) => this.obtenerSaldoActual(base, idUsuario));
   }
 
   movimientos(idUsuario: number | string): Observable<MovimientoPuntos[]> {
@@ -46,10 +43,18 @@ export class FidelizacionServicio {
   }
 
   recompensas(): Observable<Recompensa[]> {
+    const cliente = this.supabase.cliente;
+    if (!cliente) {
+      return this.supabase.consultar((base) => base.recompensas.filter((r) => r.activa));
+    }
+
     return this.supabase.consultar((base) => base.recompensas.filter((r) => r.activa));
   }
 
   todasLasRecompensas(): Observable<Recompensa[]> {
+    const cliente = this.supabase.cliente;
+    if (!cliente) return this.supabase.consultar((base) => [...base.recompensas]);
+
     return this.supabase.consultar((base) => [...base.recompensas]);
   }
 
@@ -57,9 +62,11 @@ export class FidelizacionServicio {
   acumular(base: BaseDatos, idUsuario: number | string, puntos: number, idCompraOrigen: string): void {
     if (puntos <= 0) return;
 
+    const saldoAnterior = this.obtenerSaldoActual(base, idUsuario);
+
     const usuario = base.usuarios.find((u) => String(u.id) === String(idUsuario));
     if (usuario) {
-      usuario.puntos += puntos;
+      usuario.puntos = saldoAnterior + puntos;
     }
 
     base.movimientosPuntos.push({
@@ -67,7 +74,7 @@ export class FidelizacionServicio {
       idUsuario,
       tipo: 'acumulacion',
       cantidad: puntos,
-      saldoResultante: this.calcularSaldo(base, idUsuario) + puntos,
+      saldoResultante: saldoAnterior + puntos,
       fecha: new Date().toISOString(),
       detalle: 'Compra confirmada',
       idCompraOrigen,
@@ -101,9 +108,11 @@ export class FidelizacionServicio {
 
     if (otorgados <= 0) return;
 
+    const saldoAnterior = this.obtenerSaldoActual(base, idUsuario);
+
     const usuario = base.usuarios.find((u) => String(u.id) === String(idUsuario));
     if (usuario) {
-      usuario.puntos -= otorgados;
+      usuario.puntos = saldoAnterior - otorgados;
     }
 
     base.movimientosPuntos.push({
@@ -111,7 +120,7 @@ export class FidelizacionServicio {
       idUsuario,
       tipo: 'reversion',
       cantidad: -otorgados,
-      saldoResultante: this.calcularSaldo(base, idUsuario) - otorgados,
+      saldoResultante: saldoAnterior - otorgados,
       fecha: new Date().toISOString(),
       detalle: 'Compra cancelada',
       idCompraOrigen,
@@ -126,7 +135,7 @@ export class FidelizacionServicio {
         return throwError(() => new Error('Esa recompensa ya no está disponible.'));
       }
 
-      const saldo = this.calcularSaldo(base, idUsuario);
+      const saldo = this.obtenerSaldoActual(base, idUsuario);
       if (saldo < recompensa.puntosRequeridos) {
         return throwError(
           () =>
@@ -158,25 +167,113 @@ export class FidelizacionServicio {
         idRecompensa,
         nombreRecompensa: recompensa.nombre,
         puntosGastados: recompensa.puntosRequeridos,
+        tipoRecompensa: recompensa.tipo,
         fecha: new Date().toISOString(),
+        idQr: this.supabase.nuevoId('QR'),
       };
-      base.canjes.push(canje);
 
-      return this.supabase.inmediato(canje);
+      const codigo: CodigoQr = {
+        id: canje.idQr,
+        idCompra: `canje:${canje.id}`,
+        permisos: {
+          [recompensa.tipo === 'entrada' ? 'entrada' : 'candy']: {
+            usado: false,
+            validadoPor: null,
+            validadoEn: null,
+          },
+        },
+      };
+
+      base.canjes.push(canje);
+      base.codigosQr.push(codigo);
+
+      const cliente = this.supabase.cliente;
+      if (!cliente) return this.supabase.inmediato(canje);
+
+      return from(this.actualizarPuntosEnBase(cliente, idUsuario, -recompensa.puntosRequeridos, `canje:${canje.id}`)).pipe(
+        mergeMap(() => this.supabase.inmediato(canje)),
+      );
     });
   }
 
+  crearRecompensa(datos: Omit<Recompensa, 'id'>): Observable<Recompensa> {
+    const cliente = this.supabase.cliente;
+    if (!cliente) {
+      return this.supabase.transaccion((base) => {
+        const recompensa: Recompensa = { ...datos, id: this.supabase.nuevoId('rp') };
+        base.recompensas.push(recompensa);
+        return recompensa;
+      });
+    }
+
+    const fila = {
+      tipo: datos.tipo,
+      nombre: datos.nombre,
+      puntos_requeridos: datos.puntosRequeridos,
+      activa: datos.activa,
+    };
+
+    return from(cliente.from('recompensas').insert(fila).select('*').single()).pipe(
+      mergeMap(({ data, error }) => {
+        if (error) return throwError(() => new Error(error.message));
+
+        const recompensa = this.mapearRecompensa(data as Record<string, unknown>);
+        return this.supabase.transaccion((base) => {
+          base.recompensas.push(recompensa);
+          return recompensa;
+        });
+      }),
+    );
+  }
+
   actualizarRecompensa(id: string, cambios: Partial<Omit<Recompensa, 'id'>>): Observable<void> {
-    return this.supabase.transaccion((base) => {
-      const recompensa = base.recompensas.find((r) => r.id === id);
-      if (recompensa) Object.assign(recompensa, cambios);
-    });
+    const cliente = this.supabase.cliente;
+    if (!cliente) {
+      return this.supabase.transaccion((base) => {
+        const recompensa = base.recompensas.find((r) => r.id === id);
+        if (recompensa) Object.assign(recompensa, cambios);
+      });
+    }
+
+    const fila: Record<string, unknown> = {};
+    if (cambios.tipo !== undefined) fila['tipo'] = cambios.tipo;
+    if (cambios.nombre !== undefined) fila['nombre'] = cambios.nombre;
+    if (cambios.puntosRequeridos !== undefined) fila['puntos_requeridos'] = cambios.puntosRequeridos;
+    if (cambios.activa !== undefined) fila['activa'] = cambios.activa;
+
+    return from(cliente.from('recompensas').update(fila).eq('id', id)).pipe(
+      mergeMap(({ error }) => {
+        if (error) return throwError(() => new Error(error.message));
+
+        return this.supabase.transaccion((base) => {
+          const recompensa = base.recompensas.find((r) => r.id === id);
+          if (recompensa) Object.assign(recompensa, cambios);
+        });
+      }),
+    );
+  }
+
+  private mapearRecompensa(fila: Record<string, unknown>): Recompensa {
+    const tipo = String(fila['tipo'] ?? 'entrada');
+    return {
+      id: String(fila['id'] ?? ''),
+      tipo: tipo === 'producto-candy' ? 'producto-candy' : 'entrada',
+      nombre: String(fila['nombre'] ?? ''),
+      puntosRequeridos: Number(fila['puntosRequeridos'] ?? fila['puntos_requeridos'] ?? 0),
+      activa: Boolean(fila['activa'] ?? true),
+    };
   }
 
   private calcularSaldo(base: BaseDatos, idUsuario: number | string): number {
     return base.movimientosPuntos
       .filter((m) => String(m.idUsuario) === String(idUsuario))
       .reduce((total, m) => total + m.cantidad, 0);
+  }
+
+  private obtenerSaldoActual(base: BaseDatos, idUsuario: number | string): number {
+    const usuario = base.usuarios.find((u) => String(u.id) === String(idUsuario));
+    if (usuario) return usuario.puntos;
+    return this.calcularSaldo(base, idUsuario);
   }
 
   private async actualizarPuntosEnBase(

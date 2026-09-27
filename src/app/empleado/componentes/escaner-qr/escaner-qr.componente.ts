@@ -1,7 +1,8 @@
 import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { CompraServicio } from '../../../compartido/servicios/compra.servicio';
+import { CodigoQr } from '../../../compartido/interfaces/qr.interfaz';
+import { QrServicio } from '../../../compartido/servicios/qr.servicio';
 
 /**
  * Lector de QR (§12) — MOCKEADO.
@@ -39,25 +40,24 @@ import { CompraServicio } from '../../../compartido/servicios/compra.servicio';
         <div class="simulador">
           <p class="simulador__titulo">Simulador de lectura</p>
           <p class="simulador__nota">
-            No hay cámara conectada. Elegí una compra de la sesión para simular el escaneo.
+            No hay cámara conectada. Elegí un QR de la sesión para simular el escaneo.
           </p>
 
-          @if (comprasLista(); as compras) {
-            @if (compras.length) {
+          @if (codigosLista(); as codigos) {
+            @if (codigos.length) {
               <ul>
-                @for (compra of compras; track compra.id) {
+                @for (codigo of codigos; track codigo.id) {
                   <li>
-                    <button type="button" (click)="codigoLeido.emit(compra.idQr)">
-                      <span class="simulador__qr">{{ compra.idQr }}</span>
-                      <span class="simulador__estado">{{ compra.estado }}</span>
+                    <button type="button" (click)="codigoLeido.emit(codigo.id)">
+                      <span class="simulador__qr">{{ codigo.id }}</span>
+                      <span class="simulador__estado">{{ describir(codigo) }}</span>
                     </button>
                   </li>
                 }
               </ul>
             } @else {
               <p class="simulador__vacio">
-                Todavía no se hizo ninguna compra en esta sesión. Comprá una entrada desde la
-                cartelera y volvé acá.
+                Todavía no hay QR disponibles en esta sesión. Hacé una compra o un canje y volvé acá.
               </p>
             }
           }
@@ -71,13 +71,24 @@ export class EscanerQrComponente {
   readonly activoInicial = input<boolean>(false);
   readonly codigoLeido = output<string>();
 
-  protected readonly compras = inject(CompraServicio);
+  protected readonly qr = inject(QrServicio);
   protected readonly activo = signal(false);
-  protected readonly comprasLista = toSignal(this.compras.todas(), {
+  protected readonly codigosLista = toSignal(this.qr.listar(), {
     initialValue: [],
   });
 
   protected alternar(): void {
     this.activo.update((valor) => !valor);
+  }
+
+  protected describir(codigo: CodigoQr): string {
+    const conceptos = Object.keys(codigo.permisos);
+    const etiqueta = conceptos.includes('entrada')
+      ? conceptos.includes('candy')
+        ? 'Entrada + Candy'
+        : 'Entrada'
+      : 'Candy Bar';
+    const usado = Object.values(codigo.permisos).every((permiso) => permiso?.usado);
+    return usado ? `${etiqueta} · usado` : etiqueta;
   }
 }

@@ -17,6 +17,7 @@ import { Canje } from '../../../../compartido/interfaces/puntos.interfaz';
             <tr>
               <th scope="col">Fecha</th>
               <th scope="col">Recompensa</th>
+              <th scope="col">QR</th>
               <th scope="col" class="numerico">Puntos</th>
             </tr>
           </thead>
@@ -24,7 +25,11 @@ import { Canje } from '../../../../compartido/interfaces/puntos.interfaz';
             @for (canje of canjes(); track canje.id) {
               <tr>
                 <td>{{ canje.fecha | date: 'd MMM y, HH:mm' }}</td>
-                <td>{{ canje.nombreRecompensa }}</td>
+                <td>
+                  {{ canje.nombreRecompensa }}
+                  <div class="tipo">{{ canje.tipoRecompensa === 'entrada' ? 'Entrada' : 'Candy Bar' }}</div>
+                </td>
+                <td><code>{{ canje.idQr }}</code></td>
                 <td class="numerico">−{{ canje.puntosGastados }}</td>
               </tr>
             }

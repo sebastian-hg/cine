@@ -1,5 +1,5 @@
 import { Service, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, from, mergeMap, throwError } from 'rxjs';
 
 import { Cupon } from '../interfaces/cupon.interfaz';
 import { Usuario } from '../interfaces/usuario.interfaz';
@@ -48,7 +48,7 @@ export class CuponServicio {
         };
       }
 
-        if (cupon.tipo === 'primera-compra' && usuario && !usuario.flagPrimeraCompra) {
+      if (cupon.tipo === 'primera-compra' && usuario && !usuario.flagPrimeraCompra) {
         return { valido: false as const, motivo: 'Este cupón es solo para la primera compra.' };
       }
 
@@ -86,17 +86,79 @@ export class CuponServicio {
   }
 
   crear(datos: Omit<Cupon, 'id'>): Observable<Cupon> {
-    return this.supabase.transaccion((base) => {
-      const cupon: Cupon = { ...datos, id: this.supabase.nuevoId('cu') };
-      base.cupones.push(cupon);
-      return cupon;
-    });
+    const cliente = this.supabase.cliente;
+    if (!cliente) {
+      return this.supabase.transaccion((base) => {
+        const cupon: Cupon = { ...datos, id: this.supabase.nuevoId('cu') };
+        base.cupones.push(cupon);
+        return cupon;
+      });
+    }
+
+    const fila = {
+      codigo: datos.codigo.trim().toUpperCase(),
+      tipo: datos.tipo,
+      porcentaje: datos.porcentaje,
+      activo: datos.activo,
+      descripcion: datos.descripcion,
+      usos_por_usuario: datos.usosPorUsuario,
+    };
+
+    return from(cliente.from('cupones').insert(fila).select('*').single()).pipe(
+      mergeMap(({ data, error }) => {
+        if (error) return throwError(() => new Error(error.message));
+
+        const cupon = this.mapearCupon(data as Record<string, unknown>);
+        return this.supabase.transaccion((base) => {
+          base.cupones.push(cupon);
+          return cupon;
+        });
+      }),
+    );
   }
 
   actualizar(id: string, cambios: Partial<Omit<Cupon, 'id'>>): Observable<void> {
-    return this.supabase.transaccion((base) => {
-      const cupon = base.cupones.find((c) => c.id === id);
-      if (cupon) Object.assign(cupon, cambios);
-    });
+    const cliente = this.supabase.cliente;
+    if (!cliente) {
+      return this.supabase.transaccion((base) => {
+        const cupon = base.cupones.find((c) => c.id === id);
+        if (cupon) Object.assign(cupon, cambios);
+      });
+    }
+
+    const fila: Record<string, unknown> = {};
+    if (cambios.codigo !== undefined) fila['codigo'] = cambios.codigo.trim().toUpperCase();
+    if (cambios.tipo !== undefined) fila['tipo'] = cambios.tipo;
+    if (cambios.porcentaje !== undefined) fila['porcentaje'] = cambios.porcentaje;
+    if (cambios.activo !== undefined) fila['activo'] = cambios.activo;
+    if (cambios.descripcion !== undefined) fila['descripcion'] = cambios.descripcion;
+    if (cambios.usosPorUsuario !== undefined) fila['usos_por_usuario'] = cambios.usosPorUsuario;
+
+    return from(cliente.from('cupones').update(fila).eq('id', id)).pipe(
+      mergeMap(({ error }) => {
+        if (error) return throwError(() => new Error(error.message));
+
+        return this.supabase.transaccion((base) => {
+          const cupon = base.cupones.find((c) => c.id === id);
+          if (cupon) Object.assign(cupon, cambios);
+        });
+      }),
+    );
+  }
+
+  private mapearCupon(fila: Record<string, unknown>): Cupon {
+    const tipo = String(fila['tipo'] ?? 'generico') as Cupon['tipo'];
+    return {
+      id: String(fila['id'] ?? ''),
+      codigo: String(fila['codigo'] ?? ''),
+      tipo:
+        tipo === 'primera-compra' || tipo === 'mayores-50' || tipo === 'generico'
+          ? tipo
+          : 'generico',
+      porcentaje: Number(fila['porcentaje'] ?? 0),
+      activo: Boolean(fila['activo'] ?? true),
+      descripcion: String(fila['descripcion'] ?? ''),
+      usosPorUsuario: Number(fila['usosPorUsuario'] ?? fila['usos_por_usuario'] ?? 0),
+    };
   }
 }

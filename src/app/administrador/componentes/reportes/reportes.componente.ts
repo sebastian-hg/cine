@@ -25,19 +25,22 @@ export class ReportesComponente {
   protected readonly diarios = toSignal(this.diarios$, {
     initialValue: [],
   });
-  protected readonly totales = toSignal(this.reportes.totales(), {
-    initialValue: { facturacion: 0, entradas: 0, productos: 0 },
-  });
-  protected readonly estados = toSignal(this.reportes.resumenEstados(), {
-    initialValue: { total: 0, pagadas: 0, usadas: 0, canceladas: 0, vendidas: 0 },
-  });
   protected readonly ventasPorUsuario = toSignal(this.reportes.ventasPorUsuario(), {
     initialValue: [],
   });
+  protected readonly resumenHistorico = toSignal(this.reportes.resumenHistorico(), {
+    initialValue: { facturacion: 0 },
+  });
+  protected readonly resumenUltimaSemana = toSignal(this.reportes.resumenUltimaSemana(), {
+    initialValue: { facturacion: 0 },
+  });
+  protected readonly resumenTickets = toSignal(this.reportes.totales(), {
+    initialValue: { facturacion: 0, entradas: 0, productos: 0 },
+  });
 
   protected exportarPdf(): void {
-    this.diarios$.pipe(take(1)).subscribe((reportes) => {
-      this.reportes.exportarPdf(reportes);
+    this.reportes.diarios(7).pipe(take(1)).subscribe((reportes) => {
+      this.reportes.exportarPdf(reportes, 'Última semana');
       this.avisos.mostrar('Descargamos el reporte en PDF.', 'exito');
     });
   }

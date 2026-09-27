@@ -18,7 +18,6 @@ export const RutasApp: Routes = [
   },
   {
     path: 'compra',
-    canActivate: [GuardCompraActiva],
     loadChildren: () => import('./cliente/compra/compra.rutas').then((m) => m.RutasCompra),
   },
   {

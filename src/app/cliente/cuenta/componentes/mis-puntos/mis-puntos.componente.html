@@ -27,6 +27,20 @@
     <app-historial-canjes [canjes]="canjes() ?? []" />
   </section>
 
+  @if (ultimoCanje(); as ultimoCanje) {
+    <section class="bloque bloque--qr">
+      <h2>QR de tu último canje</h2>
+      <p class="bloque__nota">
+        Presentá este código como si fuera una venta para retirar tu
+        {{ ultimoCanje.tipoRecompensa === 'entrada' ? 'entrada' : 'recompensa de Candy Bar' }}.
+      </p>
+      <div class="canje-qr">
+        <app-codigo-qr [contenido]="ultimoCanje.idQr" [lado]="180" />
+        <p class="canje-qr__codigo">{{ ultimoCanje.idQr }}</p>
+      </div>
+    </section>
+  }
+
   <section class="bloque">
     <h2>Movimientos</h2>
     @if (movimientos(); as movimientos) {

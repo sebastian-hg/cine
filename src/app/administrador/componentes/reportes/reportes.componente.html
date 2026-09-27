@@ -13,48 +13,42 @@
   </div>
 </header>
 
-@if (totales(); as totales) {
-  <div class="tarjetas">
+<div class="tarjetas tarjetas--ventas-cine">
+  @if (resumenHistorico(); as resumenHistorico) {
     <div class="tarjeta-dato">
-      <span class="tarjeta-dato__valor">{{ totales.facturacion | pipeMonedaArs }}</span>
-      <span class="tarjeta-dato__etiqueta">Facturación (14 días)</span>
+      <span class="tarjeta-dato__valor">{{ resumenHistorico.facturacion | pipeMonedaArs }}</span>
+      <span class="tarjeta-dato__etiqueta">Ventas históricas</span>
     </div>
+  }
+  @if (resumenUltimaSemana(); as resumenUltimaSemana) {
     <div class="tarjeta-dato">
-      <span class="tarjeta-dato__valor">{{ totales.entradas }}</span>
-      <span class="tarjeta-dato__etiqueta">Entradas vendidas</span>
+      <span class="tarjeta-dato__valor">{{ resumenUltimaSemana.facturacion | pipeMonedaArs }}</span>
+      <span class="tarjeta-dato__etiqueta">Ventas última semana</span>
     </div>
-    <div class="tarjeta-dato">
-      <span class="tarjeta-dato__valor">{{ totales.productos }}</span>
-      <span class="tarjeta-dato__etiqueta">Productos de Candy Bar</span>
-    </div>
-  </div>
-}
+  }
+</div>
 
 <p class="nota">
   Los reportes se calculan sobre las compras de esta sesión. Comprá algunas entradas desde la
   cartelera para ver el movimiento reflejado acá.
 </p>
 
-@if (estados(); as estados) {
-  <div class="tarjetas tarjetas--estados">
-    <div class="tarjeta-dato tarjeta-dato--estado">
-      <span class="tarjeta-dato__valor">{{ estados.vendidas }}</span>
-      <span class="tarjeta-dato__etiqueta">Vendidas (pagadas + usadas)</span>
+<div class="tarjetas tarjetas--ventas-cine">
+  @if (resumenTickets(); as resumenTickets) {
+    <div class="tarjeta-dato">
+      <span class="tarjeta-dato__valor">{{ resumenTickets.entradas + resumenTickets.productos }}</span>
+      <span class="tarjeta-dato__etiqueta">Tickets totales</span>
     </div>
-    <div class="tarjeta-dato tarjeta-dato--estado">
-      <span class="tarjeta-dato__valor">{{ estados.pagadas }}</span>
-      <span class="tarjeta-dato__etiqueta">Pagadas</span>
+    <div class="tarjeta-dato">
+      <span class="tarjeta-dato__valor">{{ resumenTickets.entradas }}</span>
+      <span class="tarjeta-dato__etiqueta">Entradas</span>
     </div>
-    <div class="tarjeta-dato tarjeta-dato--estado">
-      <span class="tarjeta-dato__valor">{{ estados.usadas }}</span>
-      <span class="tarjeta-dato__etiqueta">Usadas</span>
+    <div class="tarjeta-dato">
+      <span class="tarjeta-dato__valor">{{ resumenTickets.productos }}</span>
+      <span class="tarjeta-dato__etiqueta">Candy Bar</span>
     </div>
-    <div class="tarjeta-dato tarjeta-dato--estado">
-      <span class="tarjeta-dato__valor">{{ estados.canceladas }}</span>
-      <span class="tarjeta-dato__etiqueta">Canceladas</span>
-    </div>
-  </div>
-}
+  }
+</div>
 
 @if (ventasPorUsuario(); as resumenUsuarios) {
   <div class="tabla-scroll tabla-scroll--usuarios">

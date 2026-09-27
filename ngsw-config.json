@@ -28,7 +28,7 @@
   "dataGroups": [
     {
       "name": "catalogo",
-      "urls": ["/mock/peliculas.json", "/mock/generos.json", "/mock/candy.json", "/mock/salas.json"],
+      "urls": ["/mock/peliculas.json", "/mock/generos.json", "/mock/candy.json"],
       "cacheConfig": {
         "strategy": "performance",
         "maxSize": 40,
@@ -37,7 +37,7 @@
     },
     {
       "name": "volatil",
-      "urls": ["/mock/funciones.json", "/mock/configuracion.json", "/mock/resenas.json"],
+      "urls": ["/mock/configuracion.json", "/mock/resenas.json"],
       "cacheConfig": {
         "strategy": "freshness",
         "maxSize": 20,

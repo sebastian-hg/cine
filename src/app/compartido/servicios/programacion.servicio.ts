@@ -61,7 +61,7 @@ export class ProgramacionServicio {
         }
 
         const funcion: Funcion = {
-          id: this.supabase.nuevoId('f'),
+          id: this.siguienteIdFuncion(base),
           idPelicula: solicitud.idPelicula,
           idSala: asignacion.sala.id,
           inicio: inicio.toISOString(),
@@ -129,5 +129,14 @@ export class ProgramacionServicio {
 
   private duracionDe(funcion: Funcion, base: BaseDatos): number {
     return base.peliculas.find((p) => p.id === funcion.idPelicula)?.duracionMinutos ?? 0;
+  }
+
+  private siguienteIdFuncion(base: BaseDatos): string {
+    const maximo = base.funciones.reduce((max, funcion) => {
+      const n = Number(funcion.id);
+      return Number.isInteger(n) && n > max ? n : max;
+    }, 0);
+
+    return String(maximo + 1);
   }
 }

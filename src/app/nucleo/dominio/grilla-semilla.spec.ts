@@ -1,13 +1,10 @@
-import funcionesJson from '../../../../public/mock/funciones.json';
-import peliculasJson from '../../../../public/mock/peliculas.json';
-
 import { haySeparacionSuficiente, SEPARACION_MINUTOS } from './programacion-salas';
 
 /**
- * La grilla semilla de `funciones.json` está escrita a mano y representa lo que
- * el administrador ya programó. Este test comprueba que respete la misma regla
- * de §4 que aplica el algoritmo: sin esto, la aplicación arrancaría con datos
- * que su propia lógica consideraría inválidos.
+ * Esta grilla replica la semilla de la tabla `funciones` en Supabase.
+ * El test comprueba que respete la misma regla de §4 que aplica el algoritmo:
+ * sin esto, la aplicación arrancaría con datos que su propia lógica
+ * consideraría inválidos.
  */
 
 interface Plantilla {
@@ -17,11 +14,34 @@ interface Plantilla {
   desdeDia: number;
 }
 
-const plantillas = funcionesJson.plantillas as Plantilla[];
+const plantillas: Plantilla[] = [
+  { idPelicula: '2', idSala: '1', horario: '14:00', desdeDia: 0 },
+  { idPelicula: '2', idSala: '1', horario: '17:00', desdeDia: 0 },
+  { idPelicula: '2', idSala: '1', horario: '20:00', desdeDia: 0 },
 
-const duraciones = new Map<string, number>(
-  peliculasJson.map((p) => [p.id, p.duracionMinutos]),
-);
+  { idPelicula: '1', idSala: '2', horario: '14:30', desdeDia: 0 },
+  { idPelicula: '1', idSala: '2', horario: '17:30', desdeDia: 0 },
+  { idPelicula: '1', idSala: '2', horario: '20:30', desdeDia: 0 },
+
+  { idPelicula: '4', idSala: '3', horario: '13:00', desdeDia: 0 },
+  { idPelicula: '4', idSala: '3', horario: '15:30', desdeDia: 0 },
+  { idPelicula: '3', idSala: '3', horario: '18:00', desdeDia: 0 },
+  { idPelicula: '3', idSala: '3', horario: '20:30', desdeDia: 0 },
+
+  { idPelicula: '5', idSala: '4', horario: '14:00', desdeDia: 0 },
+  { idPelicula: '7', idSala: '4', horario: '16:00', desdeDia: 3 },
+  { idPelicula: '6', idSala: '4', horario: '18:30', desdeDia: 5 },
+];
+
+const duraciones = new Map<string, number>([
+  ['1', 120],
+  ['2', 142],
+  ['3', 120],
+  ['4', 118],
+  ['5', 90],
+  ['6', 155],
+  ['7', 110],
+]);
 
 /** Minutos desde medianoche. */
 function enMinutos(horario: string): number {
@@ -71,7 +91,7 @@ describe('grilla semilla de funciones', () => {
 
   it('respeta el ejemplo de la consigna en la sala 1', () => {
     // p2 dura 142 min: 14:00 → 16:22, la siguiente no puede ser antes de 16:52.
-    const sala1 = plantillas.filter((p) => p.idSala === 's1');
+    const sala1 = plantillas.filter((p) => p.idSala === 's1' || p.idSala === '1');
     const horarios = sala1.map((p) => p.horario).sort();
     expect(horarios).toEqual(['14:00', '17:00', '20:00']);
   });

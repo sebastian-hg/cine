@@ -37,12 +37,12 @@ export class FuncionServicio {
 
   /** Funciones futuras de una película, ordenadas por horario. */
   dePelicula(idPelicula: string): Observable<FuncionDetallada[]> {
-    const ahora = new Date().toISOString();
+    const ahora = Date.now();
     return this.listar().pipe(
       map((funciones) =>
         funciones
-          .filter((f) => f.idPelicula === idPelicula && f.inicio > ahora)
-          .sort((a, b) => a.inicio.localeCompare(b.inicio)),
+          .filter((f) => f.idPelicula === idPelicula && this.aMilisegundos(f.inicio) > ahora)
+          .sort((a, b) => this.aMilisegundos(a.inicio) - this.aMilisegundos(b.inicio)),
       ),
     );
   }
@@ -53,7 +53,10 @@ export class FuncionServicio {
       map((funciones) => {
         const porDia = new Map<string, FuncionDetallada[]>();
         for (const funcion of funciones) {
-          const dia = soloFecha(new Date(funcion.inicio));
+          const marca = this.aMilisegundos(funcion.inicio);
+          if (!Number.isFinite(marca)) continue;
+
+          const dia = soloFecha(new Date(marca));
           const delDia = porDia.get(dia) ?? [];
           delDia.push(funcion);
           porDia.set(dia, delDia);
@@ -61,6 +64,11 @@ export class FuncionServicio {
         return porDia;
       }),
     );
+  }
+
+  private aMilisegundos(fechaIso: string): number {
+    const ms = Date.parse(fechaIso);
+    return Number.isNaN(ms) ? Number.NEGATIVE_INFINITY : ms;
   }
 
   private detallar(

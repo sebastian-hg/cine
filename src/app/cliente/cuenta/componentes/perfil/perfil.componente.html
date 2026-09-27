@@ -73,37 +73,8 @@
             }
           </div>
 
-          <div class="campo">
-            <label for="perfil-sangre">Tipo de sangre</label>
-            <select id="perfil-sangre" formControlName="tipoSangre">
-              @for (tipo of tiposSangre; track tipo) {
-                <option [value]="tipo">{{ tipo }}</option>
-              }
-            </select>
-          </div>
 
-          <div class="campo">
-            <label for="perfil-ojos">Color de ojos</label>
-            <select id="perfil-ojos" formControlName="colorOjos">
-              @for (color of coloresOjos; track color) {
-                <option [value]="color">{{ color }}</option>
-              }
-            </select>
-          </div>
 
-          <div class="campo" [class.campo--invalido]="invalido('diasVacaciones')">
-            <label for="perfil-vacaciones">Días de vacaciones anuales</label>
-            <input
-              id="perfil-vacaciones"
-              type="number"
-              formControlName="diasVacaciones"
-              min="0"
-              max="365"
-            />
-            @if (invalido('diasVacaciones')) {
-              <p class="mensaje-campo">Ingresá un número entre 0 y 365.</p>
-            }
-          </div>
         </div>
 
         <button type="submit" class="boton boton--primario" [disabled]="guardando()">

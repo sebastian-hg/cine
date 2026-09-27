@@ -28,7 +28,11 @@ export class ListadoFuncionesComponente {
 
   /** Días con funciones, en orden. */
   protected readonly dias = computed(() => {
-    const unicos = new Set(this.funciones().map((f) => f.inicio.slice(0, 10)));
+    const unicos = new Set(
+      this.funciones()
+        .map((funcion) => this.claveDia(funcion.inicio))
+        .filter((dia): dia is string => dia !== null),
+    );
     return [...unicos].sort();
   });
 
@@ -37,10 +41,16 @@ export class ListadoFuncionesComponente {
   protected readonly funcionesDelDia = computed(() => {
     const dia = this.diaActivo();
     if (!dia) return [];
-    return this.funciones().filter((f) => f.inicio.startsWith(dia));
+    return this.funciones().filter((funcion) => this.claveDia(funcion.inicio) === dia);
   });
 
   protected elegirDia(dia: string): void {
     this.diaElegido.set(dia);
+  }
+
+  private claveDia(inicio: string): string | null {
+    const marca = Date.parse(inicio);
+    if (Number.isNaN(marca)) return null;
+    return new Date(marca).toISOString().slice(0, 10);
   }
 }

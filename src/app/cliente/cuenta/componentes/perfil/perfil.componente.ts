@@ -10,9 +10,6 @@ import { NotificacionServicio } from '../../../../nucleo/servicios/notificacion.
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 import { PerfilServicio } from '../../servicios/perfil.servicio';
 
-const TIPOS_SANGRE = ['0-', '0+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'];
-const COLORES_OJOS = ['Marrón', 'Negro', 'Verde', 'Celeste', 'Gris', 'Miel'];
-
 /** Perfil del usuario (§8): datos editables y resumen de la cuenta. */
 @Component({
   selector: 'app-perfil',
@@ -27,8 +24,6 @@ export class PerfilComponente {
   private readonly perfil = inject(PerfilServicio);
   private readonly avisos = inject(NotificacionServicio);
 
-  protected readonly tiposSangre = TIPOS_SANGRE;
-  protected readonly coloresOjos = COLORES_OJOS;
   protected readonly maximaFecha = soloFecha(new Date());
 
   protected readonly usuario$ = this.auth.usuarioActual$;
@@ -41,12 +36,6 @@ export class PerfilComponente {
     nombre: [this.actual?.nombre ?? '', [Validators.required, Validators.minLength(2)]],
     apellido: [this.actual?.apellido ?? '', [Validators.required, Validators.minLength(2)]],
     fechaNacimiento: [this.actual?.fechaNacimiento ?? '', [Validators.required]],
-    tipoSangre: [this.actual?.tipoSangre ?? '0+', [Validators.required]],
-    colorOjos: [this.actual?.colorOjos ?? 'Marrón', [Validators.required]],
-    diasVacaciones: [
-      this.actual?.diasVacaciones ?? 0,
-      [Validators.required, Validators.min(0), Validators.max(365)],
-    ],
   });
 
   protected edad(fechaNacimiento: string): number {

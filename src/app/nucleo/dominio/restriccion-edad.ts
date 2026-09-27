@@ -4,10 +4,10 @@ import { calcularEdad } from './fechas';
 /**
  * Restricción por edad (§7 de la consigna).
  *
- * Supuesto 4 del plan, donde la consigna no define el detalle:
+ * Reglas de compra por edad:
  *   ATP → sin restricción
- *   +13 → menor de 13 bloqueado; puede ingresar acompañado por un adulto
- *   +18 → menor de 18 bloqueado, sin excepción
+ *   +13 → menor de 13 bloqueado
+ *   +18 → menor de 18 bloqueado
  */
 
 export const EDAD_MINIMA: Record<ClasificacionEdad, number> = {
@@ -15,9 +15,6 @@ export const EDAD_MINIMA: Record<ClasificacionEdad, number> = {
   '+13': 13,
   '+18': 18,
 };
-
-/** Clasificaciones que admiten el ingreso de un menor acompañado por un adulto. */
-const ADMITE_ACOMPANANTE: ReadonlySet<ClasificacionEdad> = new Set<ClasificacionEdad>(['+13']);
 
 export type ResultadoEdad =
   | { permitido: true; requiereAdulto: boolean; aviso: string | null }
@@ -28,14 +25,13 @@ export function evaluarEdad(edad: number, clasificacion: ClasificacionEdad): Res
   const minima = EDAD_MINIMA[clasificacion];
 
   if (edad >= minima) {
-    return { permitido: true, requiereAdulto: false, aviso: null };
-  }
-
-  if (ADMITE_ACOMPANANTE.has(clasificacion)) {
     return {
       permitido: true,
-      requiereAdulto: true,
-      aviso: `Esta función es ${clasificacion}. Al ser menor de ${minima} años, debés asistir acompañado por un adulto responsable. Puede solicitarse documento en la puerta.`,
+      requiereAdulto: clasificacion !== 'ATP',
+      aviso:
+        clasificacion === 'ATP'
+          ? null
+          : `Esta función es ${clasificacion}. Puede solicitarse documento en la puerta y los menores deben asistir acompañados por un adulto responsable.`,
     };
   }
 

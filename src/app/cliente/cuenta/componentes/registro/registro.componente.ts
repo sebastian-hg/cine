@@ -6,15 +6,11 @@ import { soloFecha } from '../../../../nucleo/dominio/fechas';
 import { AutenticacionServicio } from '../../../../nucleo/servicios/autenticacion.servicio';
 import { NotificacionServicio } from '../../../../nucleo/servicios/notificacion.servicio';
 
-const TIPOS_SANGRE = ['0-', '0+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'];
-const COLORES_OJOS = ['Marrón', 'Negro', 'Verde', 'Celeste', 'Gris', 'Miel'];
-
 /**
  * Registro de usuario (§8 de la consigna).
  *
- * Pide los siete campos que la consigna enumera. `tipoSangre`, `colorOjos` y
- * `diasVacaciones` no tienen lógica asociada (supuesto 7 del plan): se guardan
- * y se muestran en el perfil.
+ * El formulario coincide con los campos reales de la tabla `usuarios_cine`.
+ * No se envían datos extra que la DB no tiene.
  */
 @Component({
   selector: 'app-registro',
@@ -29,8 +25,6 @@ export class RegistroComponente {
   private readonly router = inject(Router);
   private readonly avisos = inject(NotificacionServicio);
 
-  protected readonly tiposSangre = TIPOS_SANGRE;
-  protected readonly coloresOjos = COLORES_OJOS;
   protected readonly maximaFecha = soloFecha(new Date());
 
   protected readonly error = signal<string | null>(null);
@@ -42,9 +36,6 @@ export class RegistroComponente {
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
     fechaNacimiento: ['', [Validators.required]],
-    tipoSangre: ['0+', [Validators.required]],
-    colorOjos: ['Marrón', [Validators.required]],
-    diasVacaciones: [14, [Validators.required, Validators.min(0), Validators.max(365)]],
   });
 
   protected invalido(campo: keyof typeof this.FormularioRegistro.controls): boolean {

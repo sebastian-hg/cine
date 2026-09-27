@@ -81,9 +81,67 @@ export class CreditoServicio {
     });
   }
 
+  /** Acredita crédito real del usuario en la tabla `usuarios_cine`. */
+  acreditarSinTransaccion(idUsuario: number | string, monto: number, idCompraOrigen: string): void {
+    const cliente = this.supabase.cliente;
+    if (!cliente || monto <= 0) return;
+
+    void this.actualizarCreditoEnBase(cliente, idUsuario, monto, idCompraOrigen);
+  }
+
   private calcularSaldo(base: BaseDatos, idUsuario: number | string): number {
     return base.movimientosCredito
       .filter((m) => String(m.idUsuario) === String(idUsuario))
       .reduce((total, m) => total + m.monto, 0);
+  }
+
+  private async actualizarCreditoEnBase(
+    cliente: NonNullable<SupabaseServicio['cliente']>,
+    idUsuario: number | string,
+    monto: number,
+    idCompraOrigen: string,
+  ): Promise<void> {
+    const id = Number(idUsuario);
+    const usuarioR = await cliente.from('usuarios_cine').select('*').eq('id', id).maybeSingle();
+    if (usuarioR.error) throw new Error(usuarioR.error.message);
+
+    const fila = (usuarioR.data ?? {}) as Record<string, unknown>;
+    const saldoActual = Number(fila['credito'] ?? fila['saldo_credito'] ?? 0);
+    const saldoResultante = saldoActual + monto;
+
+    const actualizarUsuario = async (payload: Record<string, unknown>) =>
+      cliente.from('usuarios_cine').update(payload).eq('id', id).select('id').maybeSingle();
+
+    let res = await actualizarUsuario({ credito: saldoResultante });
+    if (res.error?.code === 'PGRST204') {
+      res = await actualizarUsuario({ saldo_credito: saldoResultante });
+    }
+    if (res.error) throw new Error(res.error.message);
+
+    const fecha = new Date().toISOString();
+    const insertarMovimiento = async (payload: Record<string, unknown>) =>
+      cliente.from('movimientos_credito').insert(payload).select('id').maybeSingle();
+
+    let mvR = await insertarMovimiento({
+      id_usuario: id,
+      tipo: 'alta-por-cancelacion',
+      monto,
+      saldo_resultante: saldoResultante,
+      fecha,
+      id_compra_origen: idCompraOrigen,
+    });
+
+    if (mvR.error?.code === 'PGRST204') {
+      mvR = await insertarMovimiento({
+        idUsuario: id,
+        tipo: 'alta-por-cancelacion',
+        monto,
+        saldoResultante,
+        fecha,
+        idCompraOrigen,
+      });
+    }
+
+    if (mvR.error) throw new Error(mvR.error.message);
   }
 }

@@ -34,6 +34,7 @@ export function grillaDeFila(fila: string): { izquierda: number; centro: number;
  *
  * Los números corren de 1 a N de izquierda a derecha, atravesando los tres
  * sectores: en una fila normal la butaca 5 es la primera del sector central.
+ * El identificador visible queda como `a-1`, `a-2`, `b-1`, etc.
  */
 export function generarButacas(idSala: string): Butaca[] {
   const butacas: Butaca[] = [];
@@ -51,7 +52,7 @@ export function generarButacas(idSala: string): Butaca[] {
     for (const [sector, cantidad] of sectores) {
       for (let i = 0; i < cantidad; i++) {
         butacas.push({
-          id: `${idSala}-${fila}${numero}`,
+          id: `${fila.toLowerCase()}-${numero}`,
           idSala,
           fila,
           numero,

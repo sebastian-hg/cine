@@ -122,7 +122,7 @@ export class PdfServicio {
     if (entrada.clasificacion !== 'ATP') {
       const yAviso = y + ladoQr + 14;
       doc.setFillColor(253, 240, 236);
-      doc.rect(margen, yAviso, ancho, entrada.requiereAdulto ? 20 : 14, 'F');
+      doc.rect(margen, yAviso, ancho, 20, 'F');
       doc.setTextColor(ACENTO.r, ACENTO.g, ACENTO.b);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
@@ -131,14 +131,12 @@ export class PdfServicio {
         margen + 4,
         yAviso + 6,
       );
-      if (entrada.requiereAdulto) {
-        doc.setFont('helvetica', 'normal');
-        doc.text(
-          'El menor debe asistir acompañado por un adulto responsable.',
-          margen + 4,
-          yAviso + 13,
-        );
-      }
+      doc.setFont('helvetica', 'normal');
+      doc.text(
+        'Los menores deben asistir acompañados por un adulto responsable.',
+        margen + 4,
+        yAviso + 13,
+      );
     }
   }
 

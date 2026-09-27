@@ -1,15 +1,12 @@
 import { Service, OnDestroy, inject } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription, interval, switchMap, take, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, take, throwError } from 'rxjs';
 
 import { ButacaFuncion } from '../interfaces/butaca.interfaz';
 import { ButacaNoDisponibleError, ButacaServicio } from '../servicios/butaca.servicio';
 import { etiquetaButaca } from '../../nucleo/dominio/generador-butacas';
 import { SupabaseServicio } from '../../nucleo/servicios/supabase.servicio';
 
-/** Cada cuánto el simulador ocupa butacas en nombre de «otros usuarios». */
-const INTERVALO_SIMULACION_MS = 6000;
-/** Probabilidad de que en cada tick alguien ocupe una butaca. */
-const PROBABILIDAD_OCUPACION = 0.55;
+// El simulador fantasma quedó desactivado porque ocupaba butacas sin compras reales.
 
 /**
  * Ocupación de butacas en tiempo real (§6) — MOCK DE SUPABASE REALTIME.
@@ -38,7 +35,6 @@ export class TiempoRealServicio implements OnDestroy {
 
   /** Un flujo por función; se crea al primer suscriptor y se reutiliza. */
   private readonly flujos = new Map<string, BehaviorSubject<ButacaFuncion[]>>();
-  private readonly simuladores = new Map<string, Subscription>();
 
   /** Estado de la sala, actualizado cuando alguien reserva o cancela. */
   butacas$(idFuncion: string): Observable<ButacaFuncion[]> {
@@ -89,10 +85,7 @@ export class TiempoRealServicio implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    for (const simulador of this.simuladores.values()) {
-      simulador.unsubscribe();
-    }
-    this.simuladores.clear();
+    // Sin simulador persistente, no hay suscripciones que limpiar acá.
   }
 
   private flujoDe(idFuncion: string): BehaviorSubject<ButacaFuncion[]> {
@@ -106,8 +99,6 @@ export class TiempoRealServicio implements OnDestroy {
       .deFuncion(idFuncion)
       .pipe(take(1))
       .subscribe((inicial) => flujo!.next(inicial));
-
-    this.iniciarSimulador(idFuncion);
     return flujo;
   }
 
@@ -115,28 +106,5 @@ export class TiempoRealServicio implements OnDestroy {
     this.flujos.get(idFuncion)?.next(this.butacas.componer(base, idFuncion));
   }
 
-  /**
-   * Simula que otros usuarios compran mientras miramos el mapa.
-   *
-   * Sin esto no habría forma de ver el comportamiento en vivo con un solo
-   * navegador abierto, y el requisito de §6 quedaría sin demostrar.
-   */
-  private iniciarSimulador(idFuncion: string): void {
-    if (this.simuladores.has(idFuncion)) return;
-
-    const suscripcion = interval(INTERVALO_SIMULACION_MS)
-      .pipe(switchMap(() => this.supabase.transaccion((base) => base)))
-      .subscribe((base) => {
-        if (Math.random() > PROBABILIDAD_OCUPACION) return;
-
-        const libres = this.butacas.componer(base, idFuncion).filter((b) => b.estado === 'libre');
-        if (libres.length === 0) return;
-
-        const elegida = libres[Math.floor(Math.random() * libres.length)];
-        this.supabase.ocupacionDe(base, idFuncion).set(elegida.id, 'ocupada');
-        this.refrescar(base, idFuncion);
-      });
-
-    this.simuladores.set(idFuncion, suscripcion);
-  }
+  // El simulador fantasma quedó removido.
 }

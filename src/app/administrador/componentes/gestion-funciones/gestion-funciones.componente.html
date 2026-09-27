@@ -46,6 +46,7 @@
             <caption class="solo-lectores">Funciones programadas</caption>
             <thead>
               <tr>
+                <th scope="col">ID</th>
                 <th scope="col">Película</th>
                 <th scope="col">Fecha y hora</th>
                 <th scope="col">Sala</th>
@@ -56,6 +57,7 @@
             <tbody>
               @for (funcion of funciones; track funcion.id) {
                 <tr>
+                  <td>#{{ funcion.id }}</td>
                   <td>{{ funcion.nombrePelicula }}</td>
                   <td>{{ funcion.inicio | date: 'EEE d MMM, HH:mm' }}</td>
                   <td>{{ funcion.nombreSala }}</td>

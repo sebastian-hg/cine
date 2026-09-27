@@ -15,12 +15,16 @@ import { FidelizacionServicio } from './fidelizacion.servicio';
 import { QrServicio } from './qr.servicio';
 import { TiempoRealServicio } from './tiempo-real.servicio';
 
+const CLAVE_COMPRAS = 'cine.compras';
+
 /** Compra junto con lo que hace falta para mostrarla en el historial. */
 export interface CompraDetallada extends Compra {
   nombrePelicula: string | null;
   inicioFuncion: string | null;
   nombreSala: string | null;
   butacas: string[];
+  butacasDisponiblesFuncion: number | null;
+  butacasOcupadasFuncion: number | null;
   puedeCancelar: boolean;
   motivoBloqueoCancelacion: string | null;
 }
@@ -44,7 +48,7 @@ interface VentaCineFila {
   motivo_descuento: string | null;
   credito_aplicado: number;
   a_pagar: number;
-  puntos_ganados: number;
+  puntos_ganados: number | null;
   id_qr: number | null;
   id_funcion: number | null;
 }
@@ -90,26 +94,31 @@ export class CompraServicio {
         : this.supabase.inmediato([]);
 
     return reserva$.pipe(
-      switchMap(() => this.qr.generar(this.idProvisional(), solicitud.items)),
-      switchMap((codigo) => this.persistir(solicitud, codigo)),
+      switchMap(() => this.persistir(solicitud)),
     );
   }
 
   /** Historial de un usuario, más reciente primero. */
   deUsuario(idUsuario: number | string): Observable<CompraDetallada[]> {
     const cliente = this.supabase.cliente;
-    if (cliente) {
+    const idUsuarioBd = this.aNumeroBaseDatos(idUsuario);
+    if (cliente && idUsuarioBd !== null) {
       return from(
         cliente
           .from('ventas_cine')
           .select('*')
-          .eq('id_usuario', Number(idUsuario))
+          .eq('id_usuario', idUsuarioBd)
           .order('fecha_compra', { ascending: false }),
       ).pipe(
         mergeMap(({ data, error }) => {
           if (error) return throwError(() => new Error(error.message));
+          const comprasLocales = new Map(this.comprasGuardadas().map((compra) => [compra.id, compra]));
           return this.supabase.consultar((base) =>
-            (data ?? []).map((fila) => this.detallar(this.mapearVentaACcompra(fila as VentaCineFila), base)),
+            (data ?? []).map((fila) => {
+              const compraCabecera = this.mapearVentaACcompra(fila as VentaCineFila);
+              const compra = this.completarDesdeCompraLocal(compraCabecera, comprasLocales);
+              return this.detallar(compra, base);
+            }),
           );
         }),
       );
@@ -125,20 +134,26 @@ export class CompraServicio {
 
   obtener(id: string): Observable<CompraDetallada | null> {
     const cliente = this.supabase.cliente;
-    if (cliente) {
-      return from(cliente.from('ventas_cine').select('*').eq('id_venta', Number(id)).maybeSingle()).pipe(
+    const idVenta = this.aNumeroBaseDatos(id);
+    if (cliente && idVenta !== null) {
+      return from(cliente.from('ventas_cine').select('*').eq('id_venta', idVenta).maybeSingle()).pipe(
         mergeMap(({ data, error }) => {
           if (error) return throwError(() => new Error(error.message));
           return this.supabase.consultar((base) => {
-            if (!data) return null;
-            return this.detallar(this.mapearVentaACcompra(data as VentaCineFila), base);
+            if (!data) {
+              const local = this.comprasGuardadas().find((c) => c.id === id);
+              return local ? this.detallar(local, base) : null;
+            }
+            const compraCabecera = this.mapearVentaACcompra(data as VentaCineFila);
+            const compra = this.completarDesdeCompraLocal(compraCabecera);
+            return this.detallar(compra, base);
           });
         }),
       );
     }
 
     return this.supabase.consultar((base) => {
-      const compra = base.compras.find((c) => c.id === id);
+      const compra = base.compras.find((c) => c.id === id) ?? this.comprasGuardadas().find((c) => c.id === id);
       return compra ? this.detallar(compra, base) : null;
     });
   }
@@ -167,7 +182,7 @@ export class CompraServicio {
    */
   cancelar(idCompra: string): Observable<number> {
     const cliente = this.supabase.cliente;
-    if (cliente) {
+    if (cliente && this.aNumeroBaseDatos(idCompra) !== null) {
       return from(this.cancelarEnSupabase(cliente, idCompra));
     }
 
@@ -246,21 +261,127 @@ export class CompraServicio {
     );
   }
 
-  private persistir(solicitud: SolicitudCompra, codigo: CodigoQr): Observable<Compra> {
-    return this.supabase.transaccion((base) => {
-      const usuario = this.auth.usuarioActual;
+  private persistir(solicitud: SolicitudCompra): Observable<Compra> {
+    const cliente = this.supabase.cliente;
+    const usuario = this.auth.usuarioActual;
+    const fechaCompra = new Date().toISOString();
 
-      const compra: Compra = {
-        id: codigo.idCompra,
-        idUsuario: usuario?.id ?? null,
-        fechaCompra: new Date().toISOString(),
-        items: solicitud.items,
-        desglose: solicitud.desglose,
-        estado: 'pagada',
-        idQr: codigo.id,
-        idFuncion: solicitud.idFuncion,
+    if (cliente) {
+      const filaSnake = {
+        id_usuario: this.aNumeroBaseDatos(usuario?.id ?? null),
+        fecha_compra: fechaCompra,
+        estado: 'pagada' as const,
+        subtotal_entradas: solicitud.desglose.subtotalEntradas,
+        subtotal_candy: solicitud.desglose.subtotalCandy,
+        subtotal: solicitud.desglose.subtotal,
+        descuento: solicitud.desglose.descuento,
+        motivo_descuento: solicitud.desglose.motivoDescuento,
+        credito_aplicado: solicitud.desglose.creditoAplicado,
+        a_pagar: solicitud.desglose.aPagar,
+        puntos_ganados: usuario ? solicitud.desglose.puntosGanados : 0,
+        id_qr: null,
+        id_funcion: this.aNumeroBaseDatos(solicitud.idFuncion),
       };
+
+      return from(this.insertarVenta(cliente, filaSnake)).pipe(
+        mergeMap(({ data, error }) => {
+          if (error) {
+            if (this.escrituraBloqueadaPorRls(error.code, error.message)) {
+              return this.persistirEnMemoria(solicitud, usuario, fechaCompra);
+            }
+            return throwError(() => new Error(error.message));
+          }
+
+          const fila = (data ?? {}) as Partial<VentaCineFila>;
+          const idCompra = String(fila.id_venta ?? '');
+          if (!idCompra) {
+            return throwError(() => new Error('La venta se guardó sin devolver un identificador.'));
+          }
+
+          return this.qr.generar(idCompra, solicitud.items).pipe(
+            mergeMap((codigo) => {
+              const compra: Compra = {
+                id: idCompra,
+                idUsuario: usuario?.id ?? null,
+                fechaCompra,
+                items: solicitud.items,
+                desglose: solicitud.desglose,
+                estado: 'pagada',
+                idQr: codigo.id,
+                idFuncion: solicitud.idFuncion,
+              };
+
+              this.guardarCompraPersistida(compra);
+              this.candy.descontarStock(this.unidadesPorProducto(solicitud.items)).subscribe();
+              const persistirButacas$ = this.persistirButacasFuncion(cliente, compra);
+
+              const sincronizarPuntos$ = usuario
+                ? this.puntos.acumularEnBase(usuario.id, solicitud.desglose.puntosGanados, idCompra)
+                : this.supabase.inmediato(undefined);
+              const marcarPrimeraCompra$ =
+                usuario?.flagPrimeraCompra
+                  ? this.auth.marcarPrimeraCompraUsada(usuario.id)
+                  : this.supabase.inmediato(undefined);
+
+              return persistirButacas$.pipe(
+                mergeMap(() => sincronizarPuntos$),
+                mergeMap(() => marcarPrimeraCompra$),
+                mergeMap(() => {
+                  if (usuario) {
+                    if (solicitud.desglose.creditoAplicado > 0) {
+                      this.credito.acreditarSinTransaccion(usuario.id, solicitud.desglose.creditoAplicado, idCompra);
+                    }
+                    if (solicitud.codigoCupon) {
+                      this.cupones.registrarUso(solicitud.codigoCupon, usuario.id).subscribe();
+                    }
+                  }
+
+                  this.registro.registrar('crear', `confirmó la compra ${compra.id}`).subscribe();
+                  return this.supabase.inmediato(compra);
+                }),
+              );
+            }),
+          );
+        }),
+      );
+    }
+
+    return this.persistirEnMemoria(solicitud, usuario, fechaCompra);
+  }
+
+  private persistirEnMemoria(
+    solicitud: SolicitudCompra,
+    usuario: AutenticacionServicio['usuarioActual'],
+    fechaCompra: string,
+  ): Observable<Compra> {
+    const codigo: CodigoQr = {
+      id: this.supabase.nuevoId('QR'),
+      idCompra: this.idProvisional(),
+      permisos: {},
+    };
+
+    if (solicitud.items.some((i) => i.tipo === 'entrada')) {
+      codigo.permisos.entrada = { usado: false, validadoPor: null, validadoEn: null };
+    }
+    if (solicitud.items.some((i) => i.tipo !== 'entrada')) {
+      codigo.permisos.candy = { usado: false, validadoPor: null, validadoEn: null };
+    }
+
+    const compra: Compra = {
+      id: codigo.idCompra,
+      idUsuario: usuario?.id ?? null,
+      fechaCompra,
+      items: solicitud.items,
+      desglose: solicitud.desglose,
+      estado: 'pagada',
+      idQr: codigo.id,
+      idFuncion: solicitud.idFuncion,
+    };
+
+    return this.supabase.transaccion((base) => {
+      base.codigosQr.push(codigo);
       base.compras.push(compra);
+      this.guardarCompraPersistida(compra);
 
       this.candy.descontarStock(this.unidadesPorProducto(solicitud.items)).subscribe();
 
@@ -292,6 +413,94 @@ export class CompraServicio {
     return this.supabase.nuevoId('CMP');
   }
 
+  private aNumeroBaseDatos(valor: number | string | null | undefined): number | null {
+    if (valor === null || valor === undefined) return null;
+    const numero = Number(valor);
+    return Number.isFinite(numero) ? numero : null;
+  }
+
+  private escrituraBloqueadaPorRls(codigo?: string, mensaje?: string): boolean {
+    if (codigo === '42501') return true;
+
+    const texto = mensaje?.toLowerCase() ?? '';
+    return texto.includes('row-level security') && (texto.includes('violates') || texto.includes('policy'));
+  }
+
+  private persistirButacasFuncion(
+    cliente: NonNullable<SupabaseServicio['cliente']>,
+    compra: Compra,
+  ): Observable<void> {
+    const idFuncion = this.aNumeroBaseDatos(compra.idFuncion);
+    const idVenta = this.aNumeroBaseDatos(compra.id);
+    const idUsuario = this.aNumeroBaseDatos(compra.idUsuario);
+    const entradas = compra.items.filter((item) => item.tipo === 'entrada');
+
+    if (idFuncion === null || idVenta === null || entradas.length === 0) {
+      return this.supabase.inmediato(undefined);
+    }
+
+    const filas = entradas.map((item) => ({
+      id_funcion: idFuncion,
+      id_butaca: item.idButaca,
+      id_usuario: idUsuario,
+      id_venta: idVenta,
+      estado: 'ocupada' as const,
+      reservado_en: compra.fechaCompra,
+      actualizado_en: compra.fechaCompra,
+    }));
+
+    return from(cliente.from('butacas_funcion').insert(filas)).pipe(
+      mergeMap(({ error }) => {
+        if (!error) return this.supabase.inmediato(undefined);
+        if (this.escrituraBloqueadaPorRls(error.code, error.message)) {
+          return this.supabase.inmediato(undefined);
+        }
+        return throwError(() => new Error(error.message));
+      }),
+    );
+  }
+
+  private async liberarButacasFuncion(
+    cliente: NonNullable<SupabaseServicio['cliente']>,
+    idCompra: string,
+  ): Promise<void> {
+    const idVenta = this.aNumeroBaseDatos(idCompra);
+    if (idVenta === null) return;
+
+    const { error } = await cliente.from('butacas_funcion').delete().eq('id_venta', idVenta);
+    if (error && !this.escrituraBloqueadaPorRls(error.code, error.message)) {
+      throw new Error(error.message);
+    }
+  }
+
+  private async insertarVenta(
+    cliente: NonNullable<SupabaseServicio['cliente']>,
+    filaSnake: Record<string, unknown>,
+  ): Promise<{ data: unknown; error: { code?: string; message: string } | null }> {
+    return cliente.from('ventas_cine').insert(filaSnake).select('*').single();
+  }
+
+  private guardarCompraPersistida(compra: Compra): void {
+    try {
+      const compras = this.comprasGuardadas();
+      const actualizadas = [...compras.filter((c) => c.id !== compra.id), compra];
+      localStorage.setItem(CLAVE_COMPRAS, JSON.stringify(actualizadas));
+    } catch {
+      // La persistencia del navegador puede estar bloqueada; la compra sigue en memoria.
+    }
+  }
+
+  private comprasGuardadas(): Compra[] {
+    try {
+      const raw = localStorage.getItem(CLAVE_COMPRAS);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw) as Compra[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
   private unidadesPorProducto(items: readonly ItemCarrito[]): Map<string, number> {
     const unidades = new Map<string, number>();
     for (const item of items) {
@@ -309,6 +518,13 @@ export class CompraServicio {
       ? base.peliculas.find((p) => p.id === funcion.idPelicula)
       : undefined;
     const sala = funcion ? base.salas.find((s) => s.id === funcion.idSala) : undefined;
+    const butacasSala = sala?.butacas ?? [];
+    const ocupacionFuncion = compra.idFuncion ? base.ocupacion.get(compra.idFuncion) : undefined;
+    const butacasOcupadasFuncion = ocupacionFuncion ? ocupacionFuncion.size : null;
+    const butacasDisponiblesFuncion =
+      funcion && butacasOcupadasFuncion !== null
+        ? Math.max(0, butacasSala.length - butacasOcupadasFuncion)
+        : null;
 
     let puedeCancelar = compra.estado === 'pagada';
     let motivoBloqueo: string | null =
@@ -330,6 +546,8 @@ export class CompraServicio {
       inicioFuncion: funcion?.inicio ?? null,
       nombreSala: sala?.nombre ?? null,
       butacas: compra.items.filter((i) => i.tipo === 'entrada').map((i) => i.etiquetaButaca),
+      butacasDisponiblesFuncion,
+      butacasOcupadasFuncion,
       puedeCancelar,
       motivoBloqueoCancelacion: motivoBloqueo,
     };
@@ -355,6 +573,21 @@ export class CompraServicio {
       estado: fila.estado,
       idQr: fila.id_qr === null ? String(fila.id_venta) : String(fila.id_qr),
       idFuncion: fila.id_funcion === null ? null : String(fila.id_funcion),
+    };
+  }
+
+  private completarDesdeCompraLocal(
+    compra: Compra,
+    comprasLocales?: ReadonlyMap<string, Compra>,
+  ): Compra {
+    const local = comprasLocales?.get(compra.id) ?? this.comprasGuardadas().find((c) => c.id === compra.id);
+    if (!local) return compra;
+
+    return {
+      ...compra,
+      items: local.items,
+      idFuncion: compra.idFuncion ?? local.idFuncion,
+      idQr: local.idQr || compra.idQr,
     };
   }
 
@@ -395,6 +628,8 @@ export class CompraServicio {
       .select('id_venta')
       .maybeSingle();
     if (cancelarR.error) throw new Error(cancelarR.error.message);
+
+    await this.liberarButacasFuncion(cliente, String(idVenta));
 
     const aDevolver = Number(venta.a_pagar ?? 0) + Number(venta.credito_aplicado ?? 0);
     if (venta.id_usuario !== null && aDevolver > 0) {

@@ -50,8 +50,21 @@
     text-transform: uppercase;
   }
 
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
   &__precio {
     font-weight: 700;
+    white-space: nowrap;
+  }
+
+  &__id {
+    font-size: 10.5px;
+    color: var(--texto-tenue);
     white-space: nowrap;
   }
 }

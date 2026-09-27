@@ -19,6 +19,13 @@ import { DatosPago } from '../../servicios/pago.servicio';
   styleUrl: './formulario-pago.componente.scss',
 })
 export class FormularioPagoComponente {
+  private static readonly DATOS_PAGO_PRUEBA: DatosPago = {
+    titular: 'Cliente Prueba',
+    numero: '4242424242424242',
+    vencimiento: '12/30',
+    codigoSeguridad: '123',
+  };
+
   readonly aPagar = input<number>(0);
   readonly procesando = input<boolean>(false);
 
@@ -36,6 +43,12 @@ export class FormularioPagoComponente {
   protected invalido(campo: keyof typeof this.FormularioPago.controls): boolean {
     const control = this.FormularioPago.controls[campo];
     return control.invalid && control.touched;
+  }
+
+  protected autocompletarPrueba(): void {
+    this.FormularioPago.patchValue(FormularioPagoComponente.DATOS_PAGO_PRUEBA);
+    this.FormularioPago.markAsDirty();
+    this.FormularioPago.markAsUntouched();
   }
 
   protected enviar(): void {

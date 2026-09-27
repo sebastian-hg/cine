@@ -4,18 +4,9 @@ import { BehaviorSubject, Observable, from, map, mergeMap, throwError } from 'rx
 import { Credenciales, RolUsuario, Usuario } from '../../compartido/interfaces/usuario.interfaz';
 import { SupabaseServicio, UsuarioMock } from './supabase.servicio';
 
-type DatosRegistroUsuario = Omit<
+type DatosRegistroUsuario = Pick<
   UsuarioMock,
-  | 'id'
-  | 'rol'
-  | 'edad'
-  | 'activo'
-  | 'flagPrimeraCompra'
-  | 'puntos'
-  | 'credito'
-  | 'createdAt'
-  | 'updatedAt'
-  | 'primeraCompraUsada'
+  'email' | 'password' | 'nombre' | 'apellido' | 'fechaNacimiento'
 >;
 
 /** Clave del almacenamiento local donde se recuerda la sesión. */
@@ -87,6 +78,7 @@ export class AutenticacionServicio {
     const cliente = this.supabase.cliente;
     if (!cliente) return this.registrarMock(datos);
 
+    const ahora = new Date().toISOString();
     const filaCamel = {
       email: datos.email.trim().toLowerCase(),
       password: datos.password,
@@ -98,11 +90,9 @@ export class AutenticacionServicio {
       flagPrimeraCompra: true,
       puntos: 0,
       credito: 0,
-      tipoSangre: datos.tipoSangre,
-      colorOjos: datos.colorOjos,
-      diasVacaciones: datos.diasVacaciones,
       rol: 'cliente',
-      primeraCompraUsada: false,
+      createdAt: ahora,
+      updatedAt: ahora,
     };
 
     const filaSnake = {
@@ -116,11 +106,9 @@ export class AutenticacionServicio {
       flag_primera_compra: true,
       puntos: 0,
       credito: 0,
-      tipo_sangre: datos.tipoSangre,
-      color_ojos: datos.colorOjos,
-      dias_vacaciones: datos.diasVacaciones,
       rol: 'cliente',
-      primera_compra_usada: false,
+      created_at: ahora,
+      updated_at: ahora,
     };
 
     return from(this.insertarUsuarioConFallback(cliente, filaCamel, filaSnake)).pipe(
@@ -223,6 +211,9 @@ export class AutenticacionServicio {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         rol: 'cliente',
+        tipoSangre: '',
+        colorOjos: '',
+        diasVacaciones: 0,
         primeraCompraUsada: false,
       };
       base.usuarios.push(nuevo);
@@ -239,11 +230,16 @@ export class AutenticacionServicio {
     const password = String(fila['password'] ?? '');
     if (!id || !email || !password) return null;
 
-    const rol = this.normalizarRol(fila['rol']);
+    const fechaNacimiento = String(
+      fila['fechaNacimiento'] ?? fila['fecha_nacimiento'] ?? '',
+    );
     const flagPrimeraCompra = Boolean(
       fila['flagPrimeraCompra'] ??
         fila['flag_primera_compra'] ??
         !(fila['primeraCompraUsada'] ?? fila['primera_compra_usada'] ?? false),
+    );
+    const primeraCompraUsada = Boolean(
+      fila['primeraCompraUsada'] ?? fila['primera_compra_usada'] ?? !flagPrimeraCompra,
     );
 
     return {
@@ -252,8 +248,10 @@ export class AutenticacionServicio {
       password,
       nombre: String(fila['nombre'] ?? ''),
       apellido: String(fila['apellido'] ?? ''),
-      fechaNacimiento: String(fila['fechaNacimiento'] ?? fila['fecha_nacimiento'] ?? ''),
-      edad: Number(fila['edad'] ?? this.edadDesdeFecha(String(fila['fechaNacimiento'] ?? fila['fecha_nacimiento'] ?? ''))),
+      fechaNacimiento,
+      edad: Number(
+        fila['edad'] ?? this.edadDesdeFecha(fechaNacimiento),
+      ),
       activo: Boolean(fila['activo'] ?? true),
       flagPrimeraCompra,
       puntos: Number(fila['puntos'] ?? fila['puntos_acumulados'] ?? 0),
@@ -263,8 +261,8 @@ export class AutenticacionServicio {
       tipoSangre: String(fila['tipoSangre'] ?? fila['tipo_sangre'] ?? ''),
       colorOjos: String(fila['colorOjos'] ?? fila['color_ojos'] ?? ''),
       diasVacaciones: Number(fila['diasVacaciones'] ?? fila['dias_vacaciones'] ?? 0),
-      rol,
-      primeraCompraUsada: !flagPrimeraCompra,
+      rol: this.normalizarRol(fila['rol']),
+      primeraCompraUsada,
     };
   }
 
@@ -293,19 +291,9 @@ export class AutenticacionServicio {
     cliente: NonNullable<SupabaseServicio['cliente']>,
     idUsuario: number,
   ): Promise<{ data: unknown; error: { code?: string; message: string } | null }> {
-    const primerIntento = await cliente
-      .from('usuarios_cine')
-      .update({ flagPrimeraCompra: false, primeraCompraUsada: true })
-      .eq('id', idUsuario)
-      .select('*')
-      .maybeSingle();
-
-    if (!primerIntento.error) return primerIntento;
-    if (primerIntento.error.code !== 'PGRST204') return primerIntento;
-
     return cliente
       .from('usuarios_cine')
-      .update({ flag_primera_compra: false, primera_compra_usada: true })
+      .update({ flag_primera_compra: false })
       .eq('id', idUsuario)
       .select('*')
       .maybeSingle();

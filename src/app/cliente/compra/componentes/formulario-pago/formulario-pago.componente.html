@@ -1,5 +1,11 @@
 <form [formGroup]="FormularioPago" (ngSubmit)="enviar()" novalidate>
   @if (aPagar() > 0) {
+    <div class="acciones-prueba">
+      <button type="button" class="boton boton--fantasma boton--chico" (click)="autocompletarPrueba()">
+        Autocompletar pago de prueba
+      </button>
+    </div>
+
     <div class="campo" [class.campo--invalido]="invalido('titular')">
       <label for="pago-titular">Titular de la tarjeta</label>
       <input id="pago-titular" type="text" formControlName="titular" autocomplete="cc-name" />

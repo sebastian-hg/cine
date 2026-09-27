@@ -1,8 +1,9 @@
 import { Service, inject } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { Observable, from, throwError } from 'rxjs';
 
 import { Canje, MovimientoPuntos, Recompensa } from '../interfaces/puntos.interfaz';
 import { BaseDatos, SupabaseServicio } from '../../nucleo/servicios/supabase.servicio';
+import { AutenticacionServicio } from '../../nucleo/servicios/autenticacion.servicio';
 
 /**
  * Fidelización por puntos (§15 de la consigna).
@@ -18,6 +19,7 @@ import { BaseDatos, SupabaseServicio } from '../../nucleo/servicios/supabase.ser
 @Service()
 export class FidelizacionServicio {
   private readonly supabase = inject(SupabaseServicio);
+  private readonly auth = inject(AutenticacionServicio);
 
   saldo(idUsuario: number | string): Observable<number> {
     return this.supabase.consultar((base) => {
@@ -70,6 +72,14 @@ export class FidelizacionServicio {
       detalle: 'Compra confirmada',
       idCompraOrigen,
     });
+  }
+
+  /** Actualiza el saldo real de puntos del usuario en la tabla `usuarios_cine`. */
+  acumularEnBase(idUsuario: number | string, puntos: number, idCompraOrigen: string): Observable<void> {
+    const cliente = this.supabase.cliente;
+    if (!cliente || puntos <= 0) return this.supabase.inmediato(undefined);
+
+    return from(this.actualizarPuntosEnBase(cliente, idUsuario, puntos, idCompraOrigen));
   }
 
   /**
@@ -167,5 +177,37 @@ export class FidelizacionServicio {
     return base.movimientosPuntos
       .filter((m) => String(m.idUsuario) === String(idUsuario))
       .reduce((total, m) => total + m.cantidad, 0);
+  }
+
+  private async actualizarPuntosEnBase(
+    cliente: NonNullable<SupabaseServicio['cliente']>,
+    idUsuario: number | string,
+    puntos: number,
+    _idCompraOrigen: string,
+  ): Promise<void> {
+    const id = Number(idUsuario);
+    const usuarioR = await cliente.from('usuarios_cine').select('*').eq('id', id).maybeSingle();
+    if (usuarioR.error) throw new Error(usuarioR.error.message);
+
+    const fila = (usuarioR.data ?? {}) as Record<string, unknown>;
+    const saldoActual = Number(fila['puntos'] ?? fila['puntos_acumulados'] ?? 0);
+    const saldoResultante = saldoActual + puntos;
+
+    const actualizarUsuario = async (payload: Record<string, unknown>) =>
+      cliente.from('usuarios_cine').update(payload).eq('id', id).select('id').maybeSingle();
+
+    let res = await actualizarUsuario({ puntos: saldoResultante });
+    if (res.error?.code === 'PGRST204') {
+      res = await actualizarUsuario({ puntos_acumulados: saldoResultante });
+    }
+    if (res.error) throw new Error(res.error.message);
+
+    const usuarioActual = this.auth.usuarioActual;
+    if (usuarioActual && String(usuarioActual.id) === String(idUsuario)) {
+      this.auth.refrescar({
+        ...usuarioActual,
+        puntos: saldoResultante,
+      });
+    }
   }
 }

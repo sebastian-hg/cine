@@ -137,7 +137,9 @@ export class SupabaseServicio {
     configuracion: { configuracion: Configuracion; cupones: Cupon[]; recompensas: Recompensa[] };
     resenas: Resena[];
     usuarios: { usuarios: UsuarioMock[] };
+    butacasFuncion: unknown[];
   }> {
+    const usuarioSemilla = this.usuariosPorDefecto();
     const cliente = this.clienteSupabase;
     if (!cliente) {
       return of({
@@ -152,7 +154,8 @@ export class SupabaseServicio {
           recompensas: [],
         },
         resenas: [],
-        usuarios: { usuarios: [] },
+        usuarios: { usuarios: usuarioSemilla },
+        butacasFuncion: [],
       });
     }
 
@@ -177,6 +180,7 @@ export class SupabaseServicio {
             this.seleccionarTablaOpcional(cliente, 'recompensas'),
             this.seleccionarComentarios(cliente),
             this.seleccionarTablaOpcional(cliente, 'usuarios_cine'),
+            this.seleccionarTablaOpcional(cliente, 'butacas_funcion'),
           ]),
         ).pipe(
           mergeMap(
@@ -192,6 +196,7 @@ export class SupabaseServicio {
               recompensasR,
               resenasR,
               usuariosR,
+              butacasFuncionR,
             ]) => {
         const error =
           generosR.error ??
@@ -207,7 +212,8 @@ export class SupabaseServicio {
           cuponesR.error ??
           recompensasR.error ??
           resenasR.error ??
-          usuariosR.error;
+          usuariosR.error ??
+          butacasFuncionR.error;
 
         if (error) throw new Error(error.message);
 
@@ -515,6 +521,9 @@ export class SupabaseServicio {
               filaRegistro['flag_primera_compra'] ??
               !(filaRegistro['primeraCompraUsada'] ?? filaRegistro['primera_compra_usada'] ?? false),
           );
+          const primeraCompraUsada = Boolean(
+            filaRegistro['primeraCompraUsada'] ?? filaRegistro['primera_compra_usada'] ?? !flagPrimeraCompra,
+          );
 
           return {
             id: Number(filaRegistro['id'] ?? 0),
@@ -545,9 +554,11 @@ export class SupabaseServicio {
               filaRegistro['rol'] === 'empleado' || filaRegistro['rol'] === 'administrador'
                 ? (filaRegistro['rol'] as Usuario['rol'])
                 : 'cliente',
-            primeraCompraUsada: !flagPrimeraCompra,
+            primeraCompraUsada,
           } as UsuarioMock;
         });
+
+        const usuariosFinales = usuarios.length > 0 ? usuarios : this.usuariosPorDefecto();
 
         return of({
           generos,
@@ -557,13 +568,141 @@ export class SupabaseServicio {
           candy: { categorias, productos, combos },
           configuracion: { configuracion, cupones, recompensas },
           resenas,
-          usuarios: { usuarios },
+          usuarios: { usuarios: usuariosFinales },
+          butacasFuncion: (butacasFuncionR.data ?? []) as unknown[],
         });
             },
           ),
         ),
       ),
     );
+  }
+
+  private usuariosPorDefecto(): UsuarioMock[] {
+    const ahora = '2026-09-26 21:15:21.333984+00';
+
+    return [
+      {
+        id: 2,
+        email: 'menor@cine.test',
+        password: 'cine1234',
+        nombre: 'Tomás',
+        apellido: 'Bianchi',
+        fechaNacimiento: '2014-06-04',
+        edad: 12,
+        rol: 'cliente',
+        activo: true,
+        flagPrimeraCompra: true,
+        puntos: 1200,
+        credito: 0,
+        createdAt: ahora,
+        updatedAt: ahora,
+        tipoSangre: '',
+        colorOjos: '',
+        diasVacaciones: 0,
+        primeraCompraUsada: false,
+      },
+      {
+        id: 3,
+        email: 'adolescente@cine.test',
+        password: 'cine1234',
+        nombre: 'Renata',
+        apellido: 'Ocampo',
+        fechaNacimiento: '2011-03-15',
+        edad: 15,
+        rol: 'cliente',
+        activo: true,
+        flagPrimeraCompra: true,
+        puntos: 0,
+        credito: 0,
+        createdAt: ahora,
+        updatedAt: ahora,
+        tipoSangre: '',
+        colorOjos: '',
+        diasVacaciones: 0,
+        primeraCompraUsada: false,
+      },
+      {
+        id: 4,
+        email: 'mayor@cine.test',
+        password: 'cine1234',
+        nombre: 'Héctor',
+        apellido: 'Sosa',
+        fechaNacimiento: '1968-02-19',
+        edad: 58,
+        rol: 'cliente',
+        activo: true,
+        flagPrimeraCompra: true,
+        puntos: 8000,
+        credito: 2500,
+        createdAt: ahora,
+        updatedAt: ahora,
+        tipoSangre: '',
+        colorOjos: '',
+        diasVacaciones: 0,
+        primeraCompraUsada: false,
+      },
+      {
+        id: 5,
+        email: 'empleado@cine.test',
+        password: 'cine1234',
+        nombre: 'Carlos',
+        apellido: 'Medina',
+        fechaNacimiento: '1990-07-07',
+        edad: 36,
+        rol: 'empleado',
+        activo: true,
+        flagPrimeraCompra: true,
+        puntos: 3000,
+        credito: 0,
+        createdAt: ahora,
+        updatedAt: ahora,
+        tipoSangre: '',
+        colorOjos: '',
+        diasVacaciones: 0,
+        primeraCompraUsada: false,
+      },
+      {
+        id: 6,
+        email: 'admin@cine.test',
+        password: 'cine1234',
+        nombre: 'Juan',
+        apellido: 'Peralta',
+        fechaNacimiento: '1985-01-23',
+        edad: 41,
+        rol: 'administrador',
+        activo: true,
+        flagPrimeraCompra: true,
+        puntos: 15000,
+        credito: 5000,
+        createdAt: ahora,
+        updatedAt: ahora,
+        tipoSangre: '',
+        colorOjos: '',
+        diasVacaciones: 0,
+        primeraCompraUsada: false,
+      },
+      {
+        id: 1,
+        email: 'cliente@cine.test',
+        password: 'cine1234',
+        nombre: 'Lucía',
+        apellido: 'Ferrari',
+        fechaNacimiento: '1995-03-12',
+        edad: 31,
+        rol: 'cliente',
+        activo: true,
+        flagPrimeraCompra: false,
+        puntos: 2500,
+        credito: 5000,
+        createdAt: ahora,
+        updatedAt: ahora,
+        tipoSangre: '',
+        colorOjos: '',
+        diasVacaciones: 0,
+        primeraCompraUsada: true,
+      },
+    ];
   }
 
   private configuracionPorDefecto(): Configuracion {
@@ -715,6 +854,7 @@ export class SupabaseServicio {
     configuracion: { configuracion: Configuracion; cupones: Cupon[]; recompensas: Recompensa[] };
     resenas: Resena[];
     usuarios: { usuarios: UsuarioMock[] };
+    butacasFuncion: unknown[];
   }): BaseDatos {
     const peliculas: Pelicula[] = [...semilla.peliculas];
 
@@ -733,6 +873,7 @@ export class SupabaseServicio {
     );
     const compras = comprasGeneradas;
     const ocupacion = this.crearOcupacionMock(compras);
+    this.cargarOcupacionDesdeTabla(ocupacion, semilla.butacasFuncion);
     const codigosQr = this.crearCodigosQrMock(compras);
 
     return {
@@ -1023,6 +1164,26 @@ export class SupabaseServicio {
     }
 
     return ocupacion;
+  }
+
+  private cargarOcupacionDesdeTabla(
+    ocupacion: Map<string, Map<string, EstadoButaca>>,
+    filas: unknown[],
+  ): void {
+    for (const fila of filas) {
+      const registro = fila as Record<string, unknown>;
+      const idFuncion = String(
+        registro['id_funcion'] ?? registro['idFuncion'] ?? registro['funcion_id'] ?? '',
+      ).trim();
+      const idButaca = String(registro['id_butaca'] ?? registro['idButaca'] ?? '').trim();
+      const estadoCrudo = String(registro['estado'] ?? 'reservada').trim();
+
+      if (!idFuncion || !idButaca) continue;
+
+      const mapaFuncion = ocupacion.get(idFuncion) ?? new Map<string, EstadoButaca>();
+      mapaFuncion.set(idButaca, estadoCrudo === 'ocupada' ? 'ocupada' : 'reservada');
+      ocupacion.set(idFuncion, mapaFuncion);
+    }
   }
 
   private normalizarRelacion(idOriginal: string, idsDisponibles: Set<string>, prefijo: string): string {

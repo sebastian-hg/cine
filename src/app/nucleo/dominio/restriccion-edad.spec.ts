@@ -31,16 +31,16 @@ describe('evaluarEdad', () => {
     it('deja pasar a los 13', () => {
       const r = evaluarEdad(13, '+13');
       expect(r.permitido).toBe(true);
-      if (r.permitido) expect(r.requiereAdulto).toBe(false);
-    });
-
-    it('deja pasar a un menor de 13 pero exige adulto acompañante', () => {
-      const r = evaluarEdad(11, '+13');
-      expect(r.permitido).toBe(true);
       if (r.permitido) {
         expect(r.requiereAdulto).toBe(true);
         expect(r.aviso).toContain('adulto responsable');
       }
+    });
+
+    it('bloquea a un menor de 13', () => {
+      const r = evaluarEdad(11, '+13');
+      expect(r.permitido).toBe(false);
+      if (!r.permitido) expect(r.motivo).toContain('+13');
     });
   });
 
@@ -67,17 +67,16 @@ describe('evaluarFechaNacimiento', () => {
     expect(r.permitido).toBe(false);
   });
 
-  it('bloquea al usuario de 12 años en +13, pero lo deja con adulto', () => {
+  it('bloquea al usuario de 12 años en +13', () => {
     const r = evaluarFechaNacimiento('2014-06-04', '+13', AHORA);
-    expect(r.permitido).toBe(true);
-    if (r.permitido) expect(r.requiereAdulto).toBe(true);
+    expect(r.permitido).toBe(false);
   });
 
-  it('deja pasar al de 15 años en +13 sin acompañante', () => {
+  it('deja pasar al de 15 años en +13 con advertencia de acompañante', () => {
     // Renata, 2011-03-15 → 15 años.
     const r = evaluarFechaNacimiento('2011-03-15', '+13', AHORA);
     expect(r.permitido).toBe(true);
-    if (r.permitido) expect(r.requiereAdulto).toBe(false);
+    if (r.permitido) expect(r.requiereAdulto).toBe(true);
   });
 
   it('bloquea al de 15 años en +18', () => {

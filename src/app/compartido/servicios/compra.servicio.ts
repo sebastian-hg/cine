@@ -1,5 +1,5 @@
 import { Service, inject } from '@angular/core';
-import { Observable, map, switchMap, throwError } from 'rxjs';
+import { Observable, firstValueFrom, from, map, mergeMap, switchMap, throwError } from 'rxjs';
 
 import { ItemCarrito } from '../interfaces/carrito.interfaz';
 import { Compra, Desglose } from '../interfaces/compra.interfaz';
@@ -30,6 +30,23 @@ export interface SolicitudCompra {
   desglose: Desglose;
   idFuncion: string | null;
   codigoCupon: string | null;
+}
+
+interface VentaCineFila {
+  id_venta: number;
+  id_usuario: number | null;
+  fecha_compra: string;
+  estado: 'pagada' | 'cancelada' | 'usada';
+  subtotal_entradas: number;
+  subtotal_candy: number;
+  subtotal: number;
+  descuento: number;
+  motivo_descuento: string | null;
+  credito_aplicado: number;
+  a_pagar: number;
+  puntos_ganados: number;
+  id_qr: number | null;
+  id_funcion: number | null;
 }
 
 /**
@@ -79,16 +96,47 @@ export class CompraServicio {
   }
 
   /** Historial de un usuario, más reciente primero. */
-  deUsuario(idUsuario: string): Observable<CompraDetallada[]> {
+  deUsuario(idUsuario: number | string): Observable<CompraDetallada[]> {
+    const cliente = this.supabase.cliente;
+    if (cliente) {
+      return from(
+        cliente
+          .from('ventas_cine')
+          .select('*')
+          .eq('id_usuario', Number(idUsuario))
+          .order('fecha_compra', { ascending: false }),
+      ).pipe(
+        mergeMap(({ data, error }) => {
+          if (error) return throwError(() => new Error(error.message));
+          return this.supabase.consultar((base) =>
+            (data ?? []).map((fila) => this.detallar(this.mapearVentaACcompra(fila as VentaCineFila), base)),
+          );
+        }),
+      );
+    }
+
     return this.supabase.consultar((base) =>
       base.compras
-        .filter((c) => c.idUsuario === idUsuario)
+        .filter((c) => String(c.idUsuario ?? '') === String(idUsuario))
         .sort((a, b) => b.fechaCompra.localeCompare(a.fechaCompra))
         .map((c) => this.detallar(c, base)),
     );
   }
 
   obtener(id: string): Observable<CompraDetallada | null> {
+    const cliente = this.supabase.cliente;
+    if (cliente) {
+      return from(cliente.from('ventas_cine').select('*').eq('id_venta', Number(id)).maybeSingle()).pipe(
+        mergeMap(({ data, error }) => {
+          if (error) return throwError(() => new Error(error.message));
+          return this.supabase.consultar((base) => {
+            if (!data) return null;
+            return this.detallar(this.mapearVentaACcompra(data as VentaCineFila), base);
+          });
+        }),
+      );
+    }
+
     return this.supabase.consultar((base) => {
       const compra = base.compras.find((c) => c.id === id);
       return compra ? this.detallar(compra, base) : null;
@@ -96,6 +144,18 @@ export class CompraServicio {
   }
 
   todas(): Observable<Compra[]> {
+    const cliente = this.supabase.cliente;
+    if (cliente) {
+      return from(cliente.from('ventas_cine').select('*').order('fecha_compra', { ascending: false })).pipe(
+        mergeMap(({ data, error }) => {
+          if (error) return throwError(() => new Error(error.message));
+          return this.supabase.inmediato(
+            (data ?? []).map((fila) => this.mapearVentaACcompra(fila as VentaCineFila)),
+          );
+        }),
+      );
+    }
+
     return this.supabase.consultar((base) => [...base.compras]);
   }
 
@@ -106,6 +166,11 @@ export class CompraServicio {
    * repone el stock y se revierten los puntos otorgados (supuesto 3).
    */
   cancelar(idCompra: string): Observable<number> {
+    const cliente = this.supabase.cliente;
+    if (cliente) {
+      return from(this.cancelarEnSupabase(cliente, idCompra));
+    }
+
     return this.supabase.transaccionAsync((base) => {
       const compra = base.compras.find((c) => c.id === idCompra);
 
@@ -142,8 +207,8 @@ export class CompraServicio {
       // descuento y el crédito ya usado no salieron del bolsillo del cliente.
       const aDevolver = compra.desglose.aPagar + compra.desglose.creditoAplicado;
       if (compra.idUsuario) {
-        this.credito.acreditar(base, compra.idUsuario, aDevolver, compra.id);
-        this.puntos.revertir(base, compra.idUsuario, compra.id);
+        this.credito.acreditar(base, String(compra.idUsuario), aDevolver, String(compra.id));
+        this.puntos.revertir(base, String(compra.idUsuario), String(compra.id));
       }
 
       return this.supabase.inmediato(aDevolver);
@@ -152,12 +217,14 @@ export class CompraServicio {
 
   /** §18: películas que el usuario ya vio, para la galería «Mis películas». */
   peliculasVistas(
-    idUsuario: string,
-  ): Observable<{ idPelicula: string; inicioFuncion: string; idCompra: string }[]> {
+    idUsuario: number | string,
+  ): Observable<{ idPelicula: string; inicioFuncion: string; idCompra: string | number }[]> {
     const ahora = new Date().toISOString();
     return this.supabase.consultar((base) =>
       base.compras
-        .filter((c) => c.idUsuario === idUsuario && c.estado !== 'cancelada' && c.idFuncion)
+        .filter(
+          (c) => String(c.idUsuario ?? '') === String(idUsuario) && c.estado !== 'cancelada' && c.idFuncion,
+        )
         .flatMap((compra) => {
           const funcion = base.funciones.find((f) => f.id === compra.idFuncion);
           if (!funcion || funcion.inicio > ahora) return [];
@@ -170,9 +237,12 @@ export class CompraServicio {
   }
 
   /** §14: ¿el usuario vio esta película y puede reseñarla? */
-  compraQueHabilitaResena(idUsuario: string, idPelicula: string): Observable<string | null> {
+  compraQueHabilitaResena(idUsuario: number | string, idPelicula: string): Observable<string | null> {
     return this.peliculasVistas(idUsuario).pipe(
-      map((vistas) => vistas.find((v) => v.idPelicula === idPelicula)?.idCompra ?? null),
+      map((vistas) => {
+        const compra = vistas.find((v) => v.idPelicula === idPelicula)?.idCompra;
+        return compra === null || compra === undefined ? null : String(compra);
+      }),
     );
   }
 
@@ -195,10 +265,10 @@ export class CompraServicio {
       this.candy.descontarStock(this.unidadesPorProducto(solicitud.items)).subscribe();
 
       if (usuario) {
-        this.puntos.acumular(base, usuario.id, solicitud.desglose.puntosGanados, compra.id);
+        this.puntos.acumular(base, usuario.id, solicitud.desglose.puntosGanados, String(compra.id));
 
         if (solicitud.desglose.creditoAplicado > 0) {
-          this.credito.debitar(base, usuario.id, solicitud.desglose.creditoAplicado, compra.id);
+          this.credito.debitar(base, usuario.id, solicitud.desglose.creditoAplicado, String(compra.id));
         }
 
         if (solicitud.codigoCupon) {
@@ -206,7 +276,7 @@ export class CompraServicio {
         }
 
         // §9: el descuento de bienvenida se consume con la primera compra.
-        if (!usuario.primeraCompraUsada) {
+        if (usuario.flagPrimeraCompra) {
           this.auth.marcarPrimeraCompraUsada(usuario.id).subscribe();
         }
       }
@@ -263,5 +333,129 @@ export class CompraServicio {
       puedeCancelar,
       motivoBloqueoCancelacion: motivoBloqueo,
     };
+  }
+
+  private mapearVentaACcompra(fila: VentaCineFila): Compra {
+    return {
+      id: String(fila.id_venta),
+      idUsuario: fila.id_usuario === null ? null : String(fila.id_usuario),
+      fechaCompra: fila.fecha_compra,
+      // ventas_cine es cabecera; el detalle de items queda para la futura tabla detalle.
+      items: [],
+      desglose: {
+        subtotalEntradas: Number(fila.subtotal_entradas ?? 0),
+        subtotalCandy: Number(fila.subtotal_candy ?? 0),
+        subtotal: Number(fila.subtotal ?? 0),
+        descuento: Number(fila.descuento ?? 0),
+        motivoDescuento: fila.motivo_descuento ?? null,
+        creditoAplicado: Number(fila.credito_aplicado ?? 0),
+        aPagar: Number(fila.a_pagar ?? 0),
+        puntosGanados: Number(fila.puntos_ganados ?? 0),
+      },
+      estado: fila.estado,
+      idQr: fila.id_qr === null ? String(fila.id_venta) : String(fila.id_qr),
+      idFuncion: fila.id_funcion === null ? null : String(fila.id_funcion),
+    };
+  }
+
+  private async cancelarEnSupabase(
+    cliente: NonNullable<SupabaseServicio['cliente']>,
+    idCompra: string,
+  ): Promise<number> {
+    const idVenta = Number(idCompra);
+    if (!Number.isFinite(idVenta)) {
+      throw new Error('El identificador de compra no es valido.');
+    }
+
+    const ventaR = await cliente
+      .from('ventas_cine')
+      .select('*')
+      .eq('id_venta', idVenta)
+      .maybeSingle();
+
+    if (ventaR.error) throw new Error(ventaR.error.message);
+    const venta = ventaR.data as VentaCineFila | null;
+    if (!venta) throw new Error('No encontramos esa compra.');
+    if (venta.estado === 'cancelada') throw new Error('Esta compra ya estaba cancelada.');
+    if (venta.estado === 'usada') throw new Error('Esta compra ya fue utilizada.');
+
+    if (venta.id_funcion !== null) {
+      const base = await firstValueFrom(this.supabase.consultar((b) => b));
+      const funcion = base?.funciones.find((f) => f.id === String(venta.id_funcion));
+      if (funcion) {
+        const evaluacion = evaluarCancelacion(funcion.inicio);
+        if (!evaluacion.puede) throw new Error(evaluacion.motivo);
+      }
+    }
+
+    const cancelarR = await cliente
+      .from('ventas_cine')
+      .update({ estado: 'cancelada' })
+      .eq('id_venta', idVenta)
+      .select('id_venta')
+      .maybeSingle();
+    if (cancelarR.error) throw new Error(cancelarR.error.message);
+
+    const aDevolver = Number(venta.a_pagar ?? 0) + Number(venta.credito_aplicado ?? 0);
+    if (venta.id_usuario !== null && aDevolver > 0) {
+      await this.actualizarCreditoUsuarioYRegistro(cliente, venta.id_usuario, aDevolver, idVenta);
+    }
+
+    return aDevolver;
+  }
+
+  private async actualizarCreditoUsuarioYRegistro(
+    cliente: NonNullable<SupabaseServicio['cliente']>,
+    idUsuario: number,
+    creditoAcreditado: number,
+    idVenta: number,
+  ): Promise<void> {
+    const usuarioR = await cliente
+      .from('usuarios_cine')
+      .select('*')
+      .eq('id', idUsuario)
+      .maybeSingle();
+    if (usuarioR.error) throw new Error(usuarioR.error.message);
+
+    const filaUsuario = (usuarioR.data ?? {}) as Record<string, unknown>;
+    const creditoActual = Number(
+      filaUsuario['credito'] ?? filaUsuario['saldo_credito'] ?? filaUsuario['saldoCredito'] ?? 0,
+    );
+    const nuevoCredito = creditoActual + creditoAcreditado;
+
+    const updateCredito = async (payload: Record<string, unknown>) =>
+      cliente.from('usuarios_cine').update(payload).eq('id', idUsuario).select('id').maybeSingle();
+
+    let upR = await updateCredito({ credito: nuevoCredito });
+    if (upR.error?.code === 'PGRST204') {
+      upR = await updateCredito({ saldo_credito: nuevoCredito });
+    }
+    if (upR.error) throw new Error(upR.error.message);
+
+    const fecha = new Date().toISOString();
+    const insertarMovimiento = async (payload: Record<string, unknown>) =>
+      cliente.from('movimientos_credito').insert(payload).select('id').maybeSingle();
+
+    let mvR = await insertarMovimiento({
+      id_usuario: idUsuario,
+      tipo: 'alta-por-cancelacion',
+      monto: creditoAcreditado,
+      saldo_resultante: nuevoCredito,
+      fecha,
+      id_compra_origen: idVenta,
+    });
+
+    if (mvR.error?.code === 'PGRST204') {
+      mvR = await insertarMovimiento({
+        idUsuario: idUsuario,
+        tipo: 'alta-por-cancelacion',
+        monto: creditoAcreditado,
+        saldoResultante: nuevoCredito,
+        fecha,
+        idCompraOrigen: idVenta,
+      });
+    }
+
+    if (mvR.error) throw new Error(mvR.error.message);
   }
 }

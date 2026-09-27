@@ -2,7 +2,12 @@ import { Service, inject } from '@angular/core';
 import { jsPDF } from 'jspdf';
 import { Observable, map } from 'rxjs';
 
-import { PuntoGrafico, ReporteDiario } from '../../compartido/interfaces/reporte.interfaz';
+import {
+  PuntoGrafico,
+  ReporteDiario,
+  ResumenEstadosVenta,
+  VentaPorUsuario,
+} from '../../compartido/interfaces/reporte.interfaz';
 import { soloFecha, sumarDias } from '../../nucleo/dominio/fechas';
 import { BaseDatos, SupabaseServicio } from '../../nucleo/servicios/supabase.servicio';
 
@@ -68,6 +73,77 @@ export class ReporteServicio {
         ),
       ),
     );
+  }
+
+  /** Conteo de ventas por estado para el panel admin. */
+  resumenEstados(dias = 14): Observable<ResumenEstadosVenta> {
+    return this.supabase.consultar((base) => {
+      const compras = this.comprasEnPeriodo(base, dias);
+      const resumen: ResumenEstadosVenta = {
+        total: compras.length,
+        pagadas: 0,
+        usadas: 0,
+        canceladas: 0,
+        vendidas: 0,
+      };
+
+      for (const compra of compras) {
+        if (compra.estado === 'pagada') resumen.pagadas += 1;
+        if (compra.estado === 'usada') resumen.usadas += 1;
+        if (compra.estado === 'cancelada') resumen.canceladas += 1;
+      }
+
+      resumen.vendidas = resumen.pagadas + resumen.usadas;
+      return resumen;
+    });
+  }
+
+  /** Ventas por usuario para saber quién compró y cuánto se vendió. */
+  ventasPorUsuario(dias = 14): Observable<VentaPorUsuario[]> {
+    return this.supabase.consultar((base) => {
+      const compras = this.comprasEnPeriodo(base, dias);
+      const resumen = new Map<string, VentaPorUsuario>();
+
+      for (const compra of compras) {
+        const idUsuario = compra.idUsuario;
+        const clave = String(idUsuario ?? '__anonimo__');
+
+        const usuario =
+          idUsuario
+            ? (() => {
+                const encontrado = base.usuarios.find((u) => u.id === Number(idUsuario));
+                return encontrado ? `${encontrado.nombre} ${encontrado.apellido}` : String(idUsuario);
+              })()
+            : 'Cliente anónimo';
+
+        if (!resumen.has(clave)) {
+          resumen.set(clave, {
+            idUsuario: idUsuario ?? null,
+            usuario,
+            ventas: 0,
+            pagadas: 0,
+            usadas: 0,
+            canceladas: 0,
+            totalVendido: 0,
+          });
+        }
+
+        const fila = resumen.get(clave)!;
+        fila.ventas += 1;
+        if (compra.estado === 'pagada') fila.pagadas += 1;
+        if (compra.estado === 'usada') fila.usadas += 1;
+        if (compra.estado === 'cancelada') fila.canceladas += 1;
+
+        if (compra.estado !== 'cancelada') {
+          fila.totalVendido += compra.desglose.aPagar + compra.desglose.creditoAplicado;
+        }
+      }
+
+      return [...resumen.values()].sort((a, b) => {
+        if (b.totalVendido !== a.totalVendido) return b.totalVendido - a.totalVendido;
+        return b.ventas - a.ventas;
+      });
+    });
   }
 
   /** §20: películas más vistas por semana. */
@@ -212,6 +288,11 @@ export class ReporteServicio {
 
   private nombrePelicula(base: BaseDatos, idPelicula: string): string {
     return base.peliculas.find((p) => p.id === idPelicula)?.nombre ?? idPelicula;
+  }
+
+  private comprasEnPeriodo(base: BaseDatos, dias: number) {
+    const desde = sumarDias(new Date(), -dias).toISOString();
+    return base.compras.filter((compra) => compra.fechaCompra >= desde);
   }
 
   private aSpreadsheetMl(hojas: Hoja[]): string {

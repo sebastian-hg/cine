@@ -11,6 +11,10 @@
   margin-bottom: 18px;
 }
 
+.tarjetas--estados {
+  margin-bottom: 20px;
+}
+
 .tarjeta-dato {
   display: grid;
   gap: 3px;
@@ -30,6 +34,14 @@
     font-size: 12px;
     color: var(--texto-tenue);
   }
+}
+
+.tarjeta-dato--estado {
+  background: color-mix(in oklab, var(--superficie), white 18%);
+}
+
+.tabla-scroll--usuarios {
+  margin-bottom: 20px;
 }
 
 .sin-movimiento {

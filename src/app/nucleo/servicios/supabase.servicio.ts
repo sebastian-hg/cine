@@ -497,7 +497,7 @@ export class SupabaseServicio {
           return {
             id: String(registro['id'] ?? ''),
             idPelicula: String(registro['idPelicula'] ?? registro['id_pelicula'] ?? ''),
-            idUsuario: String(registro['idUsuario'] ?? registro['id_usuario'] ?? ''),
+            idUsuario: Number(registro['idUsuario'] ?? registro['id_usuario'] ?? 0),
             nombreUsuario: String(registro['nombreUsuario'] ?? registro['nombre_usuario'] ?? ''),
             estrellas: Number(registro['estrellas'] ?? 0),
             comentario: String(registro['comentario'] ?? ''),
@@ -510,8 +510,14 @@ export class SupabaseServicio {
 
         const usuarios = (usuariosR.data ?? []).map((fila) => {
           const filaRegistro = fila as Record<string, unknown>;
+          const flagPrimeraCompra = Boolean(
+            filaRegistro['flagPrimeraCompra'] ??
+              filaRegistro['flag_primera_compra'] ??
+              !(filaRegistro['primeraCompraUsada'] ?? filaRegistro['primera_compra_usada'] ?? false),
+          );
+
           return {
-            id: String(filaRegistro['id'] ?? ''),
+            id: Number(filaRegistro['id'] ?? 0),
             email: String(filaRegistro['email'] ?? ''),
             password: String(filaRegistro['password'] ?? ''),
             nombre: String(filaRegistro['nombre'] ?? ''),
@@ -519,6 +525,17 @@ export class SupabaseServicio {
             fechaNacimiento: String(
               filaRegistro['fechaNacimiento'] ?? filaRegistro['fecha_nacimiento'] ?? '',
             ),
+            edad: Number(filaRegistro['edad'] ?? 0),
+            activo: Boolean(filaRegistro['activo'] ?? true),
+            flagPrimeraCompra,
+            puntos: Number(
+              filaRegistro['puntos'] ?? filaRegistro['puntos_acumulados'] ?? 0,
+            ),
+            credito: Number(
+              filaRegistro['credito'] ?? filaRegistro['saldo_credito'] ?? 0,
+            ),
+            createdAt: String(filaRegistro['createdAt'] ?? filaRegistro['created_at'] ?? ''),
+            updatedAt: String(filaRegistro['updatedAt'] ?? filaRegistro['updated_at'] ?? ''),
             tipoSangre: String(filaRegistro['tipoSangre'] ?? filaRegistro['tipo_sangre'] ?? ''),
             colorOjos: String(filaRegistro['colorOjos'] ?? filaRegistro['color_ojos'] ?? ''),
             diasVacaciones: Number(
@@ -528,9 +545,7 @@ export class SupabaseServicio {
               filaRegistro['rol'] === 'empleado' || filaRegistro['rol'] === 'administrador'
                 ? (filaRegistro['rol'] as Usuario['rol'])
                 : 'cliente',
-            primeraCompraUsada: Boolean(
-              filaRegistro['primeraCompraUsada'] ?? filaRegistro['primera_compra_usada'] ?? false,
-            ),
+            primeraCompraUsada: !flagPrimeraCompra,
           } as UsuarioMock;
         });
 
@@ -709,6 +724,16 @@ export class SupabaseServicio {
     }));
 
     const funciones = [...semilla.funciones].sort((a, b) => a.inicio.localeCompare(b.inicio));
+    const comprasGeneradas = this.crearComprasMock(
+      funciones,
+      salas,
+      semilla.usuarios.usuarios,
+      semilla.candy.productos,
+      semilla.candy.combos,
+    );
+    const compras = comprasGeneradas;
+    const ocupacion = this.crearOcupacionMock(compras);
+    const codigosQr = this.crearCodigosQrMock(compras);
 
     return {
       generos: semilla.generos,
@@ -724,9 +749,9 @@ export class SupabaseServicio {
       usuarios: semilla.usuarios.usuarios,
       configuracion: semilla.configuracion.configuracion,
 
-      compras: [],
-      codigosQr: [],
-      ocupacion: new Map(),
+      compras,
+      codigosQr,
+      ocupacion,
       movimientosPuntos: [],
       movimientosCredito: [],
       canjes: [],
@@ -734,6 +759,270 @@ export class SupabaseServicio {
       registros: [],
       cuponesUsados: new Map(),
     };
+  }
+
+  private crearComprasMock(
+    funciones: Funcion[],
+    salas: Sala[],
+    usuarios: UsuarioMock[],
+    productos: Producto[],
+    combos: Combo[],
+  ): Compra[] {
+    const clientes = usuarios.filter((usuario) => usuario.rol === 'cliente');
+    const clienteA = clientes[0]?.id ?? null;
+    const clienteB = clientes[1]?.id ?? clienteA;
+    const funcionA = funciones[0] ?? null;
+    const funcionB = funciones[1] ?? funcionA;
+
+    const salaA = funcionA ? salas.find((sala) => sala.id === funcionA.idSala) : undefined;
+    const salaB = funcionB ? salas.find((sala) => sala.id === funcionB.idSala) : undefined;
+
+    const butacaA = salaA?.butacas[8] ?? salaA?.butacas[0];
+    const butacaB = salaB?.butacas[18] ?? salaB?.butacas[1];
+
+    const producto = productos[0];
+    const combo = combos[0];
+
+    const compraAItems = [
+      ...(funcionA && butacaA
+        ? [
+            {
+              tipo: 'entrada' as const,
+              idFuncion: funcionA.id,
+              idButaca: butacaA.id,
+              etiquetaButaca: `${butacaA.fila}${butacaA.numero}`,
+              esVip: butacaA.tipo === 'vip',
+              precioUnitario: 9200,
+              cantidad: 1 as const,
+            },
+          ]
+        : []),
+      ...(producto
+        ? [
+            {
+              tipo: 'producto' as const,
+              idProducto: producto.id,
+              nombre: producto.nombre,
+              precioUnitario: producto.precio,
+              cantidad: 2,
+            },
+          ]
+        : []),
+    ];
+
+    const compraBItems = [
+      ...(funcionB && butacaB
+        ? [
+            {
+              tipo: 'entrada' as const,
+              idFuncion: funcionB.id,
+              idButaca: butacaB.id,
+              etiquetaButaca: `${butacaB.fila}${butacaB.numero}`,
+              esVip: butacaB.tipo === 'vip',
+              precioUnitario: 9800,
+              cantidad: 1 as const,
+            },
+          ]
+        : []),
+      ...(combo
+        ? [
+            {
+              tipo: 'combo' as const,
+              idCombo: combo.id,
+              nombre: combo.nombre,
+              precioUnitario: combo.precioFijo,
+              cantidad: 1,
+            },
+          ]
+        : []),
+    ];
+
+    const compraAnonimaItems = [
+      ...(producto
+        ? [
+            {
+              tipo: 'producto' as const,
+              idProducto: producto.id,
+              nombre: producto.nombre,
+              precioUnitario: producto.precio,
+              cantidad: 1,
+            },
+          ]
+        : []),
+      ...(combo
+        ? [
+            {
+              tipo: 'combo' as const,
+              idCombo: combo.id,
+              nombre: combo.nombre,
+              precioUnitario: combo.precioFijo,
+              cantidad: 1,
+            },
+          ]
+        : []),
+    ];
+
+    const ahora = Date.now();
+    const compras: Compra[] = [
+      {
+        id: '1001',
+        idUsuario: clienteA,
+        fechaCompra: new Date(ahora - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        items: compraAItems,
+        desglose: {
+          subtotalEntradas: compraAItems
+            .filter((item) => item.tipo === 'entrada')
+            .reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          subtotalCandy: compraAItems
+            .filter((item) => item.tipo !== 'entrada')
+            .reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          subtotal: compraAItems.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          descuento: 1000,
+          motivoDescuento: 'Cupón mock',
+          creditoAplicado: 0,
+          aPagar: Math.max(
+            0,
+            compraAItems.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0) - 1000,
+          ),
+          puntosGanados: Math.max(
+            0,
+            Math.floor(
+              compraAItems.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0) - 1000,
+            ),
+          ),
+        },
+        estado: 'pagada',
+        idQr: '9001',
+        idFuncion: funcionA?.id ?? null,
+      },
+      {
+        id: '1002',
+        idUsuario: clienteB,
+        fechaCompra: new Date(ahora - 6 * 24 * 60 * 60 * 1000).toISOString(),
+        items: compraBItems,
+        desglose: {
+          subtotalEntradas: compraBItems
+            .filter((item) => item.tipo === 'entrada')
+            .reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          subtotalCandy: compraBItems
+            .filter((item) => item.tipo !== 'entrada')
+            .reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          subtotal: compraBItems.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          descuento: 0,
+          motivoDescuento: null,
+          creditoAplicado: 500,
+          aPagar: Math.max(
+            0,
+            compraBItems.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0) - 500,
+          ),
+          puntosGanados: Math.max(
+            0,
+            Math.floor(
+              compraBItems.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0) - 500,
+            ),
+          ),
+        },
+        estado: 'usada',
+        idQr: '9002',
+        idFuncion: funcionB?.id ?? null,
+      },
+      {
+        id: '1003',
+        idUsuario: null,
+        fechaCompra: new Date(ahora - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        items: compraAnonimaItems,
+        desglose: {
+          subtotalEntradas: 0,
+          subtotalCandy: compraAnonimaItems.reduce(
+            (suma, item) => suma + item.precioUnitario * item.cantidad,
+            0,
+          ),
+          subtotal: compraAnonimaItems.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          descuento: 0,
+          motivoDescuento: null,
+          creditoAplicado: 0,
+          aPagar: compraAnonimaItems.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          puntosGanados: 0,
+        },
+        estado: 'pagada',
+        idQr: '9003',
+        idFuncion: null,
+      },
+      {
+        id: '1004',
+        idUsuario: clienteA,
+        fechaCompra: new Date(ahora - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        items: compraAItems,
+        desglose: {
+          subtotalEntradas: compraAItems
+            .filter((item) => item.tipo === 'entrada')
+            .reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          subtotalCandy: compraAItems
+            .filter((item) => item.tipo !== 'entrada')
+            .reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          subtotal: compraAItems.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          descuento: 0,
+          motivoDescuento: null,
+          creditoAplicado: 0,
+          aPagar: compraAItems.reduce((suma, item) => suma + item.precioUnitario * item.cantidad, 0),
+          puntosGanados: 0,
+        },
+        estado: 'cancelada',
+        idQr: '9004',
+        idFuncion: funcionA?.id ?? null,
+      },
+    ];
+
+    return compras.filter((compra) => compra.items.length > 0);
+  }
+
+  private crearCodigosQrMock(compras: Compra[]): CodigoQr[] {
+    return compras.map((compra) => {
+      const tieneEntrada = compra.items.some((item) => item.tipo === 'entrada');
+      const tieneCandy = compra.items.some((item) => item.tipo === 'producto' || item.tipo === 'combo');
+
+      return {
+        id: String(compra.idQr),
+        idCompra: String(compra.id),
+        permisos: {
+          ...(tieneEntrada
+            ? {
+                entrada: {
+                  usado: compra.estado === 'usada',
+                  validadoPor: compra.estado === 'usada' ? 'empleado-mock-01' : null,
+                  validadoEn: compra.estado === 'usada' ? compra.fechaCompra : null,
+                },
+              }
+            : {}),
+          ...(tieneCandy
+            ? {
+                candy: {
+                  usado: false,
+                  validadoPor: null,
+                  validadoEn: null,
+                },
+              }
+            : {}),
+        },
+      };
+    });
+  }
+
+  private crearOcupacionMock(compras: Compra[]): Map<string, Map<string, EstadoButaca>> {
+    const ocupacion = new Map<string, Map<string, EstadoButaca>>();
+
+    for (const compra of compras) {
+      if (!compra.idFuncion || compra.estado === 'cancelada') continue;
+
+      const mapaFuncion = ocupacion.get(compra.idFuncion) ?? new Map<string, EstadoButaca>();
+      for (const item of compra.items) {
+        if (item.tipo !== 'entrada') continue;
+        mapaFuncion.set(item.idButaca, compra.estado === 'usada' ? 'ocupada' : 'reservada');
+      }
+      ocupacion.set(compra.idFuncion, mapaFuncion);
+    }
+
+    return ocupacion;
   }
 
   private normalizarRelacion(idOriginal: string, idsDisponibles: Set<string>, prefijo: string): string {

@@ -6,11 +6,11 @@ export type TipoMovimientoCredito = 'alta-por-cancelacion' | 'uso-en-compra';
  */
 export interface MovimientoCredito {
   id: string;
-  idUsuario: string;
+  idUsuario: number | string;
   tipo: TipoMovimientoCredito;
   /** Positivo al generarse, negativo al usarse. */
   monto: number;
   saldoResultante: number;
   fecha: string;
-  idCompraOrigen: string;
+  idCompraOrigen: number | string;
 }

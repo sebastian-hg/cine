@@ -1,5 +1,5 @@
 import { Service, inject } from '@angular/core';
-import { Observable, combineLatest, map, of, switchMap, throwError } from 'rxjs';
+import { Observable, combineLatest, from, map, mergeMap, of, switchMap, throwError } from 'rxjs';
 
 import { Usuario } from '../../../compartido/interfaces/usuario.interfaz';
 import { AutenticacionServicio } from '../../../nucleo/servicios/autenticacion.servicio';
@@ -42,6 +42,33 @@ export class PerfilServicio {
     return this.auth.usuarioActual$.pipe(
       switchMap((usuario) => {
         if (!usuario) return of({ puntos: 0, credito: 0, compras: 0 });
+
+        const cliente = this.supabase.cliente;
+        if (cliente) {
+          return from(
+            cliente.from('usuarios_cine').select('*').eq('id', Number(usuario.id)).maybeSingle(),
+          ).pipe(
+            mergeMap(({ data, error }) => {
+              if (error) return throwError(() => new Error(error.message));
+
+              const fila = (data ?? {}) as Record<string, unknown>;
+              const puntos = Number(
+                fila['puntos'] ?? fila['puntos_acumulados'] ?? fila['puntosAcumulados'] ?? 0,
+              );
+              const credito = Number(
+                fila['credito'] ?? fila['saldo_credito'] ?? fila['saldoCredito'] ?? 0,
+              );
+
+              return this.compras.deUsuario(usuario.id).pipe(
+                map((compras) => ({
+                  puntos,
+                  credito,
+                  compras: compras.filter((c) => c.estado !== 'cancelada').length,
+                })),
+              );
+            }),
+          );
+        }
 
         return combineLatest([
           this.puntos.saldo(usuario.id),

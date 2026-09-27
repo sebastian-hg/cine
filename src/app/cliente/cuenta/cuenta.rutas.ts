@@ -30,14 +30,6 @@ export const RutasCuenta: Routes = [
     title: 'Mi crédito · Cine',
   },
   {
-    path: 'mis-peliculas',
-    loadComponent: () =>
-      import('./componentes/mis-peliculas/mis-peliculas.componente').then(
-        (m) => m.MisPeliculasComponente,
-      ),
-    title: 'Mis películas · Cine',
-  },
-  {
     path: 'alertas',
     loadComponent: () =>
       import('./componentes/mis-alertas/mis-alertas.componente').then((m) => m.MisAlertasComponente),

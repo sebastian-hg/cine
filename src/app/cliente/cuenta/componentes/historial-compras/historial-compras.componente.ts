@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { BehaviorSubject, of, switchMap, take } from 'rxjs';
+import { BehaviorSubject, map, of, switchMap, take } from 'rxjs';
 
 import { CompraDetallada, CompraServicio } from '../../../../compartido/servicios/compra.servicio';
 import { AutenticacionServicio } from '../../../../nucleo/servicios/autenticacion.servicio';
@@ -38,6 +38,20 @@ export class HistorialComprasComponente {
   protected readonly compras$ = this.recargar.pipe(
     switchMap(() => this.auth.usuarioActual$),
     switchMap((usuario) => (usuario ? this.compras.deUsuario(usuario.id) : of([]))),
+  );
+
+  protected readonly resumenEstados$ = this.compras$.pipe(
+    map((compras) => {
+      const resumen = { total: compras.length, pagadas: 0, usadas: 0, canceladas: 0 };
+
+      for (const compra of compras) {
+        if (compra.estado === 'pagada') resumen.pagadas += 1;
+        if (compra.estado === 'usada') resumen.usadas += 1;
+        if (compra.estado === 'cancelada') resumen.canceladas += 1;
+      }
+
+      return resumen;
+    }),
   );
 
   protected readonly porCancelar = signal<CompraDetallada | null>(null);

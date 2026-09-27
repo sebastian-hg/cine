@@ -56,11 +56,12 @@ export class RegistroActividadServicio {
   }
 
   /** Validaciones hechas por un empleado, para su pantalla de historial. */
-  validacionesDe(idEmpleado: string): Observable<RegistroActividad[]> {
+  validacionesDe(idEmpleado: number | string): Observable<RegistroActividad[]> {
     return this.supabase.consultar((base) =>
       base.registros.filter(
         (r) =>
-          r.idUsuario === idEmpleado && (r.accion === 'validar-qr' || r.accion === 'validar-candy'),
+          String(r.idUsuario) === String(idEmpleado) &&
+          (r.accion === 'validar-qr' || r.accion === 'validar-candy'),
       ),
     );
   }

@@ -24,16 +24,19 @@ const CONFIG: Configuracion = {
 
 function usuario(parcial: Partial<Usuario> = {}): Usuario {
   return {
-    id: 'u1',
+    id: 1,
     email: 'test@cine.test',
     nombre: 'Lucía',
     apellido: 'Ferrari',
     fechaNacimiento: '1995-03-12',
-    tipoSangre: '0+',
-    colorOjos: 'Marrón',
-    diasVacaciones: 21,
+    edad: 31,
     rol: 'cliente',
-    primeraCompraUsada: true,
+    activo: true,
+    flagPrimeraCompra: false,
+    puntos: 0,
+    credito: 0,
+    createdAt: '2026-09-01T00:00:00.000Z',
+    updatedAt: '2026-09-01T00:00:00.000Z',
     ...parcial,
   };
 }
@@ -118,7 +121,7 @@ describe('calcularDesglose', () => {
   });
 
   it('aplica el 20% de primera compra a un usuario nuevo', () => {
-    const d = base({ items: [entrada(10000)], usuario: usuario({ primeraCompraUsada: false }) });
+    const d = base({ items: [entrada(10000)], usuario: usuario({ flagPrimeraCompra: true }) });
     expect(d.descuento).toBe(2000);
     expect(d.motivoDescuento).toContain('Primera compra');
     expect(d.aPagar).toBe(8000);
@@ -155,7 +158,7 @@ describe('calcularDesglose', () => {
     };
     const d = base({
       items: [entrada(10000)],
-      usuario: usuario({ primeraCompraUsada: false }),
+      usuario: usuario({ flagPrimeraCompra: true }),
       cupon,
     });
     // 30% del cupón gana al 20% de primera compra, y no se suman.
@@ -203,7 +206,7 @@ describe('calcularDesglose', () => {
   it('aplica el crédito después del descuento, no antes', () => {
     const d = base({
       items: [entrada(10000)],
-      usuario: usuario({ primeraCompraUsada: false }),
+      usuario: usuario({ flagPrimeraCompra: true }),
       creditoSolicitado: 5000,
       creditoDisponible: 5000,
     });
@@ -220,7 +223,7 @@ describe('calcularDesglose', () => {
         entrada(precioButaca(10000, 'normal', CONFIG)),
         { tipo: 'combo', idCombo: 'cb1', nombre: 'Combo Clásico', precioUnitario: 9900, cantidad: 1 },
       ],
-      usuario: usuario({ primeraCompraUsada: false }),
+      usuario: usuario({ flagPrimeraCompra: true }),
       creditoSolicitado: 4000,
       creditoDisponible: 4000,
     });
@@ -237,7 +240,7 @@ describe('calcularDesglose', () => {
   it('da puntos por el monto pagado, no por el subtotal (supuesto 2)', () => {
     const d = base({
       items: [entrada(10000)],
-      usuario: usuario({ primeraCompraUsada: false }),
+      usuario: usuario({ flagPrimeraCompra: true }),
     });
     expect(d.subtotal).toBe(10000);
     expect(d.puntosGanados).toBe(8000);

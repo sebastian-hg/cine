@@ -25,7 +25,7 @@ export interface Desglose {
 export interface Compra {
   id: string;
   /** `null` cuando la compra es de un cliente anónimo (§1). */
-  idUsuario: string | null;
+  idUsuario: number | string | null;
   fechaCompra: string;
   items: ItemCarrito[];
   desglose: Desglose;

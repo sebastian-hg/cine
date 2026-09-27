@@ -14,7 +14,7 @@ export interface RegistroActividad {
   id: string;
   /** Nombre legible: «Admin Juan», «Empleado Carlos». */
   usuario: string;
-  idUsuario: string;
+  idUsuario: number | string;
   accion: AccionRegistrada;
   /** ISO 8601; la vista lo separa en fecha y hora. */
   fechaHora: string;

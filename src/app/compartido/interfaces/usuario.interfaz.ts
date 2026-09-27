@@ -1,18 +1,25 @@
 export type RolUsuario = 'anonimo' | 'cliente' | 'empleado' | 'administrador';
 
-/** Datos solicitados en el registro (§8 de la consigna). */
+/** Modelo alineado a la tabla `usuarios_cine` de Supabase. */
 export interface Usuario {
-  id: string;
+  id: number;
   email: string;
   nombre: string;
   apellido: string;
   /** ISO `YYYY-MM-DD`. Base del cálculo de edad para la restricción de §7. */
   fechaNacimiento: string;
+  edad: number;
+  rol: RolUsuario;
+  activo: boolean;
+  /** `true` cuando todavía conserva el beneficio de primera compra. */
+  flagPrimeraCompra: boolean;
+  puntos: number;
+  credito: number;
   tipoSangre: string;
   colorOjos: string;
   diasVacaciones: number;
-  rol: RolUsuario;
-  /** Se pone en `true` al confirmar la primera compra; inhabilita el cupón de bienvenida. */
+  createdAt: string;
+  updatedAt: string;
   primeraCompraUsada: boolean;
 }
 

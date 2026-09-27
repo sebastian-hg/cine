@@ -48,7 +48,7 @@ export class CuponServicio {
         };
       }
 
-      if (cupon.tipo === 'primera-compra' && usuario?.primeraCompraUsada) {
+        if (cupon.tipo === 'primera-compra' && usuario && !usuario.flagPrimeraCompra) {
         return { valido: false as const, motivo: 'Este cupón es solo para la primera compra.' };
       }
 
@@ -65,7 +65,7 @@ export class CuponServicio {
 
       // §9: evitar la utilización repetida.
       if (usuario && cupon.usosPorUsuario > 0) {
-        const usados = base.cuponesUsados.get(usuario.id);
+        const usados = base.cuponesUsados.get(String(usuario.id));
         if (usados?.has(cupon.codigo)) {
           return { valido: false as const, motivo: 'Ya usaste este cupón.' };
         }
@@ -76,11 +76,12 @@ export class CuponServicio {
   }
 
   /** Marca el cupón como usado al confirmar la compra. */
-  registrarUso(codigo: string, idUsuario: string): Observable<void> {
+  registrarUso(codigo: string, idUsuario: number | string): Observable<void> {
     return this.supabase.transaccion((base) => {
-      const usados = base.cuponesUsados.get(idUsuario) ?? new Set<string>();
+      const clave = String(idUsuario);
+      const usados = base.cuponesUsados.get(clave) ?? new Set<string>();
       usados.add(codigo);
-      base.cuponesUsados.set(idUsuario, usados);
+      base.cuponesUsados.set(clave, usados);
     });
   }
 

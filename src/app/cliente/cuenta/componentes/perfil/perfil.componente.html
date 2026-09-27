@@ -25,73 +25,21 @@
           <span class="tarjeta-dato__valor">{{ resumen.compras }}</span>
           <span class="tarjeta-dato__etiqueta">Compras realizadas</span>
         </a>
-        <a routerLink="/cuenta/mis-peliculas" class="tarjeta-dato">
-          <span class="tarjeta-dato__valor" aria-hidden="true">🎬</span>
-          <span class="tarjeta-dato__etiqueta">Mis películas</span>
-        </a>
       </div>
     }
 
-    @if (!usuario.primeraCompraUsada) {
+    @if (usuario.flagPrimeraCompra) {
       <p class="bienvenida">
         Todavía tenés disponible tu <strong>20% de descuento de bienvenida</strong>. Se aplica solo
         en tu primera compra.
       </p>
     }
 
-    <section class="bloque">
-      <h2>Tus datos</h2>
-
-      <form [formGroup]="FormularioPerfil" (ngSubmit)="guardar()" novalidate>
-        <div class="rejilla-campos">
-          <div class="campo" [class.campo--invalido]="invalido('nombre')">
-            <label for="perfil-nombre">Nombre</label>
-            <input id="perfil-nombre" type="text" formControlName="nombre" />
-            @if (invalido('nombre')) {
-              <p class="mensaje-campo">Ingresá tu nombre.</p>
-            }
-          </div>
-
-          <div class="campo" [class.campo--invalido]="invalido('apellido')">
-            <label for="perfil-apellido">Apellido</label>
-            <input id="perfil-apellido" type="text" formControlName="apellido" />
-            @if (invalido('apellido')) {
-              <p class="mensaje-campo">Ingresá tu apellido.</p>
-            }
-          </div>
-
-          <div class="campo" [class.campo--invalido]="invalido('fechaNacimiento')">
-            <label for="perfil-nacimiento">Fecha de nacimiento</label>
-            <input
-              id="perfil-nacimiento"
-              type="date"
-              formControlName="fechaNacimiento"
-              [max]="maximaFecha"
-            />
-            @if (invalido('fechaNacimiento')) {
-              <p class="mensaje-campo">Ingresá tu fecha de nacimiento.</p>
-            }
-          </div>
-
-
-
-        </div>
-
-        <button type="submit" class="boton boton--primario" [disabled]="guardando()">
-          @if (guardando()) {
-            Guardando…
-          } @else {
-            Guardar cambios
-          }
-        </button>
-      </form>
-    </section>
 
     <nav class="accesos" aria-label="Secciones de tu cuenta">
       <a routerLink="/cuenta/compras">Historial de compras →</a>
       <a routerLink="/cuenta/puntos">Puntos y canjes →</a>
       <a routerLink="/cuenta/credito">Movimientos de crédito →</a>
-      <a routerLink="/cuenta/mis-peliculas">Mis películas →</a>
       <a routerLink="/cuenta/alertas">Mis alertas de estreno →</a>
     </nav>
   </div>

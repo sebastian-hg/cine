@@ -5,7 +5,7 @@
 export interface Resena {
   id: string;
   idPelicula: string;
-  idUsuario: string;
+  idUsuario: number;
   nombreUsuario: string;
   /** 1 a 5. */
   estrellas: number;

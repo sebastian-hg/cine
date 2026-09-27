@@ -9,7 +9,7 @@ export type ConceptoQr = 'entrada' | 'candy';
 export interface PermisoQr {
   usado: boolean;
   /** Id del empleado que lo validó. */
-  validadoPor: string | null;
+  validadoPor: number | string | null;
   validadoEn: string | null;
 }
 

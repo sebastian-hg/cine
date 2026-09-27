@@ -35,6 +35,57 @@
   cartelera para ver el movimiento reflejado acá.
 </p>
 
+@if (estados$ | async; as estados) {
+  <div class="tarjetas tarjetas--estados">
+    <div class="tarjeta-dato tarjeta-dato--estado">
+      <span class="tarjeta-dato__valor">{{ estados.vendidas }}</span>
+      <span class="tarjeta-dato__etiqueta">Vendidas (pagadas + usadas)</span>
+    </div>
+    <div class="tarjeta-dato tarjeta-dato--estado">
+      <span class="tarjeta-dato__valor">{{ estados.pagadas }}</span>
+      <span class="tarjeta-dato__etiqueta">Pagadas</span>
+    </div>
+    <div class="tarjeta-dato tarjeta-dato--estado">
+      <span class="tarjeta-dato__valor">{{ estados.usadas }}</span>
+      <span class="tarjeta-dato__etiqueta">Usadas</span>
+    </div>
+    <div class="tarjeta-dato tarjeta-dato--estado">
+      <span class="tarjeta-dato__valor">{{ estados.canceladas }}</span>
+      <span class="tarjeta-dato__etiqueta">Canceladas</span>
+    </div>
+  </div>
+}
+
+@if (ventasPorUsuario$ | async; as resumenUsuarios) {
+  <div class="tabla-scroll tabla-scroll--usuarios">
+    <table>
+      <caption class="solo-lectores">Ventas por usuario en los últimos 14 días</caption>
+      <thead>
+        <tr>
+          <th scope="col">Usuario</th>
+          <th scope="col" class="numerico">Ventas</th>
+          <th scope="col" class="numerico">Pagadas</th>
+          <th scope="col" class="numerico">Usadas</th>
+          <th scope="col" class="numerico">Canceladas</th>
+          <th scope="col" class="numerico">Total vendido</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (fila of resumenUsuarios; track fila.usuario) {
+          <tr>
+            <td>{{ fila.usuario }}</td>
+            <td class="numerico">{{ fila.ventas }}</td>
+            <td class="numerico">{{ fila.pagadas }}</td>
+            <td class="numerico">{{ fila.usadas }}</td>
+            <td class="numerico">{{ fila.canceladas }}</td>
+            <td class="numerico">{{ fila.totalVendido | pipeMonedaArs }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
 @if (diarios$ | async; as diarios) {
   <div class="tabla-scroll">
     <table>

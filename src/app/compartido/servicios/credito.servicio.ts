@@ -19,23 +19,34 @@ import { BaseDatos, SupabaseServicio } from '../../nucleo/servicios/supabase.ser
 export class CreditoServicio {
   private readonly supabase = inject(SupabaseServicio);
 
-  saldo(idUsuario: string): Observable<number> {
-    return this.supabase.consultar((base) => this.calcularSaldo(base, idUsuario));
+  saldo(idUsuario: number | string): Observable<number> {
+    return this.supabase.consultar((base) => {
+      const usuario = base.usuarios.find((u) => String(u.id) === String(idUsuario));
+      if (usuario) return usuario.credito;
+      return this.calcularSaldo(base, idUsuario);
+    });
   }
 
-  movimientos(idUsuario: string): Observable<MovimientoCredito[]> {
+  movimientos(idUsuario: number | string): Observable<MovimientoCredito[]> {
     return this.supabase.consultar((base) =>
       base.movimientosCredito
-        .filter((m) => m.idUsuario === idUsuario)
+        .filter((m) => String(m.idUsuario) === String(idUsuario))
         .sort((a, b) => b.fecha.localeCompare(a.fecha)),
     );
   }
 
   /** Alta de crédito por una cancelación. */
-  acreditar(base: BaseDatos, idUsuario: string, monto: number, idCompraOrigen: string): void {
+  acreditar(base: BaseDatos, idUsuario: number | string, monto: number, idCompraOrigen: string): void {
     if (monto <= 0) return;
 
-    const saldoResultante = this.calcularSaldo(base, idUsuario) + monto;
+    const usuario = base.usuarios.find((u) => String(u.id) === String(idUsuario));
+    const saldoActual = usuario ? usuario.credito : this.calcularSaldo(base, idUsuario);
+    const saldoResultante = saldoActual + monto;
+
+    if (usuario) {
+      usuario.credito = saldoResultante;
+    }
+
     base.movimientosCredito.push({
       id: this.supabase.nuevoId('mc'),
       idUsuario,
@@ -48,10 +59,17 @@ export class CreditoServicio {
   }
 
   /** Consumo de crédito en una compra. */
-  debitar(base: BaseDatos, idUsuario: string, monto: number, idCompraOrigen: string): void {
+  debitar(base: BaseDatos, idUsuario: number | string, monto: number, idCompraOrigen: string): void {
     if (monto <= 0) return;
 
-    const saldoResultante = this.calcularSaldo(base, idUsuario) - monto;
+    const usuario = base.usuarios.find((u) => String(u.id) === String(idUsuario));
+    const saldoActual = usuario ? usuario.credito : this.calcularSaldo(base, idUsuario);
+    const saldoResultante = saldoActual - monto;
+
+    if (usuario) {
+      usuario.credito = saldoResultante;
+    }
+
     base.movimientosCredito.push({
       id: this.supabase.nuevoId('mc'),
       idUsuario,
@@ -63,9 +81,9 @@ export class CreditoServicio {
     });
   }
 
-  private calcularSaldo(base: BaseDatos, idUsuario: string): number {
+  private calcularSaldo(base: BaseDatos, idUsuario: number | string): number {
     return base.movimientosCredito
-      .filter((m) => m.idUsuario === idUsuario)
+      .filter((m) => String(m.idUsuario) === String(idUsuario))
       .reduce((total, m) => total + m.monto, 0);
   }
 }

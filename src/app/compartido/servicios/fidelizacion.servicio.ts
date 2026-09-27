@@ -19,21 +19,27 @@ import { BaseDatos, SupabaseServicio } from '../../nucleo/servicios/supabase.ser
 export class FidelizacionServicio {
   private readonly supabase = inject(SupabaseServicio);
 
-  saldo(idUsuario: string): Observable<number> {
-    return this.supabase.consultar((base) => this.calcularSaldo(base, idUsuario));
+  saldo(idUsuario: number | string): Observable<number> {
+    return this.supabase.consultar((base) => {
+      const usuario = base.usuarios.find((u) => String(u.id) === String(idUsuario));
+      if (usuario) return usuario.puntos;
+      return this.calcularSaldo(base, idUsuario);
+    });
   }
 
-  movimientos(idUsuario: string): Observable<MovimientoPuntos[]> {
+  movimientos(idUsuario: number | string): Observable<MovimientoPuntos[]> {
     return this.supabase.consultar((base) =>
       base.movimientosPuntos
-        .filter((m) => m.idUsuario === idUsuario)
+        .filter((m) => String(m.idUsuario) === String(idUsuario))
         .sort((a, b) => b.fecha.localeCompare(a.fecha)),
     );
   }
 
-  canjes(idUsuario: string): Observable<Canje[]> {
+  canjes(idUsuario: number | string): Observable<Canje[]> {
     return this.supabase.consultar((base) =>
-      base.canjes.filter((c) => c.idUsuario === idUsuario).sort((a, b) => b.fecha.localeCompare(a.fecha)),
+      base.canjes
+        .filter((c) => String(c.idUsuario) === String(idUsuario))
+        .sort((a, b) => b.fecha.localeCompare(a.fecha)),
     );
   }
 
@@ -46,8 +52,13 @@ export class FidelizacionServicio {
   }
 
   /** Acumulación al confirmar una compra. */
-  acumular(base: BaseDatos, idUsuario: string, puntos: number, idCompraOrigen: string): void {
+  acumular(base: BaseDatos, idUsuario: number | string, puntos: number, idCompraOrigen: string): void {
     if (puntos <= 0) return;
+
+    const usuario = base.usuarios.find((u) => String(u.id) === String(idUsuario));
+    if (usuario) {
+      usuario.puntos += puntos;
+    }
 
     base.movimientosPuntos.push({
       id: this.supabase.nuevoId('mp'),
@@ -68,15 +79,22 @@ export class FidelizacionServicio {
    * quedar por debajo de lo acumulado si el usuario ya los canjeó; se permite
    * que quede en negativo antes que perder la trazabilidad del movimiento.
    */
-  revertir(base: BaseDatos, idUsuario: string, idCompraOrigen: string): void {
+  revertir(base: BaseDatos, idUsuario: number | string, idCompraOrigen: string): void {
     const otorgados = base.movimientosPuntos
       .filter(
         (m) =>
-          m.idUsuario === idUsuario && m.idCompraOrigen === idCompraOrigen && m.tipo === 'acumulacion',
+          String(m.idUsuario) === String(idUsuario) &&
+          m.idCompraOrigen === idCompraOrigen &&
+          m.tipo === 'acumulacion',
       )
       .reduce((total, m) => total + m.cantidad, 0);
 
     if (otorgados <= 0) return;
+
+    const usuario = base.usuarios.find((u) => String(u.id) === String(idUsuario));
+    if (usuario) {
+      usuario.puntos -= otorgados;
+    }
 
     base.movimientosPuntos.push({
       id: this.supabase.nuevoId('mp'),
@@ -91,7 +109,7 @@ export class FidelizacionServicio {
   }
 
   /** §15: el usuario canjea puntos por una recompensa. */
-  canjear(idUsuario: string, idRecompensa: string): Observable<Canje> {
+  canjear(idUsuario: number | string, idRecompensa: string): Observable<Canje> {
     return this.supabase.transaccionAsync((base) => {
       const recompensa = base.recompensas.find((r) => r.id === idRecompensa);
       if (!recompensa || !recompensa.activa) {
@@ -106,6 +124,11 @@ export class FidelizacionServicio {
               `Te faltan ${recompensa.puntosRequeridos - saldo} puntos para canjear «${recompensa.nombre}».`,
             ),
         );
+      }
+
+      const usuario = base.usuarios.find((u) => String(u.id) === String(idUsuario));
+      if (usuario) {
+        usuario.puntos = saldo - recompensa.puntosRequeridos;
       }
 
       base.movimientosPuntos.push({
@@ -140,9 +163,9 @@ export class FidelizacionServicio {
     });
   }
 
-  private calcularSaldo(base: BaseDatos, idUsuario: string): number {
+  private calcularSaldo(base: BaseDatos, idUsuario: number | string): number {
     return base.movimientosPuntos
-      .filter((m) => m.idUsuario === idUsuario)
+      .filter((m) => String(m.idUsuario) === String(idUsuario))
       .reduce((total, m) => total + m.cantidad, 0);
   }
 }

@@ -4,6 +4,20 @@ import { BehaviorSubject, Observable, from, map, mergeMap, throwError } from 'rx
 import { Credenciales, RolUsuario, Usuario } from '../../compartido/interfaces/usuario.interfaz';
 import { SupabaseServicio, UsuarioMock } from './supabase.servicio';
 
+type DatosRegistroUsuario = Omit<
+  UsuarioMock,
+  | 'id'
+  | 'rol'
+  | 'edad'
+  | 'activo'
+  | 'flagPrimeraCompra'
+  | 'puntos'
+  | 'credito'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'primeraCompraUsada'
+>;
+
 /** Clave del almacenamiento local donde se recuerda la sesión. */
 const CLAVE_SESION = 'cine.sesion';
 
@@ -69,7 +83,7 @@ export class AutenticacionServicio {
   }
 
   /** §8: alta de usuario con los siete campos del formulario de registro. */
-  registrar(datos: Omit<UsuarioMock, 'id' | 'rol' | 'primeraCompraUsada'>): Observable<Usuario> {
+  registrar(datos: DatosRegistroUsuario): Observable<Usuario> {
     const cliente = this.supabase.cliente;
     if (!cliente) return this.registrarMock(datos);
 
@@ -79,6 +93,11 @@ export class AutenticacionServicio {
       nombre: datos.nombre,
       apellido: datos.apellido,
       fechaNacimiento: datos.fechaNacimiento,
+      edad: this.edadDesdeFecha(datos.fechaNacimiento),
+      activo: true,
+      flagPrimeraCompra: true,
+      puntos: 0,
+      credito: 0,
       tipoSangre: datos.tipoSangre,
       colorOjos: datos.colorOjos,
       diasVacaciones: datos.diasVacaciones,
@@ -92,6 +111,11 @@ export class AutenticacionServicio {
       nombre: datos.nombre,
       apellido: datos.apellido,
       fecha_nacimiento: datos.fechaNacimiento,
+      edad: this.edadDesdeFecha(datos.fechaNacimiento),
+      activo: true,
+      flag_primera_compra: true,
+      puntos: 0,
+      credito: 0,
       tipo_sangre: datos.tipoSangre,
       color_ojos: datos.colorOjos,
       dias_vacaciones: datos.diasVacaciones,
@@ -134,12 +158,13 @@ export class AutenticacionServicio {
   }
 
   /** Marca la primera compra como usada; la llama `CompraServicio` al confirmar. */
-  marcarPrimeraCompraUsada(idUsuario: string): Observable<void> {
+  marcarPrimeraCompraUsada(idUsuario: number): Observable<void> {
     const cliente = this.supabase.cliente;
     if (!cliente) {
       return this.supabase.transaccion((base) => {
         const encontrado = base.usuarios.find((u) => u.id === idUsuario);
         if (encontrado) {
+          encontrado.flagPrimeraCompra = false;
           encontrado.primeraCompraUsada = true;
           if (this.usuario.value?.id === idUsuario) {
             this.establecerSesion(this.sinPassword(encontrado));
@@ -177,7 +202,7 @@ export class AutenticacionServicio {
     });
   }
 
-  private registrarMock(datos: Omit<UsuarioMock, 'id' | 'rol' | 'primeraCompraUsada'>): Observable<Usuario> {
+  private registrarMock(datos: DatosRegistroUsuario): Observable<Usuario> {
     return this.supabase.transaccionAsync((base) => {
       const yaExiste = base.usuarios.some(
         (u) => u.email.toLowerCase() === datos.email.trim().toLowerCase(),
@@ -189,7 +214,14 @@ export class AutenticacionServicio {
       const nuevo: UsuarioMock = {
         ...datos,
         email: datos.email.trim().toLowerCase(),
-        id: this.supabase.nuevoId('u'),
+        id: Date.now(),
+        edad: this.edadDesdeFecha(datos.fechaNacimiento),
+        activo: true,
+        flagPrimeraCompra: true,
+        puntos: 0,
+        credito: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         rol: 'cliente',
         primeraCompraUsada: false,
       };
@@ -202,12 +234,18 @@ export class AutenticacionServicio {
   }
 
   private filaAUsuarioMock(fila: Record<string, unknown>): UsuarioMock | null {
-    const id = String(fila['id'] ?? '');
+    const id = Number(fila['id'] ?? 0);
     const email = String(fila['email'] ?? '');
     const password = String(fila['password'] ?? '');
     if (!id || !email || !password) return null;
 
     const rol = this.normalizarRol(fila['rol']);
+    const flagPrimeraCompra = Boolean(
+      fila['flagPrimeraCompra'] ??
+        fila['flag_primera_compra'] ??
+        !(fila['primeraCompraUsada'] ?? fila['primera_compra_usada'] ?? false),
+    );
+
     return {
       id,
       email,
@@ -215,13 +253,18 @@ export class AutenticacionServicio {
       nombre: String(fila['nombre'] ?? ''),
       apellido: String(fila['apellido'] ?? ''),
       fechaNacimiento: String(fila['fechaNacimiento'] ?? fila['fecha_nacimiento'] ?? ''),
+      edad: Number(fila['edad'] ?? this.edadDesdeFecha(String(fila['fechaNacimiento'] ?? fila['fecha_nacimiento'] ?? ''))),
+      activo: Boolean(fila['activo'] ?? true),
+      flagPrimeraCompra,
+      puntos: Number(fila['puntos'] ?? fila['puntos_acumulados'] ?? 0),
+      credito: Number(fila['credito'] ?? fila['saldo_credito'] ?? 0),
+      createdAt: String(fila['createdAt'] ?? fila['created_at'] ?? new Date().toISOString()),
+      updatedAt: String(fila['updatedAt'] ?? fila['updated_at'] ?? new Date().toISOString()),
       tipoSangre: String(fila['tipoSangre'] ?? fila['tipo_sangre'] ?? ''),
       colorOjos: String(fila['colorOjos'] ?? fila['color_ojos'] ?? ''),
       diasVacaciones: Number(fila['diasVacaciones'] ?? fila['dias_vacaciones'] ?? 0),
       rol,
-      primeraCompraUsada: Boolean(
-        fila['primeraCompraUsada'] ?? fila['primera_compra_usada'] ?? false,
-      ),
+      primeraCompraUsada: !flagPrimeraCompra,
     };
   }
 
@@ -248,11 +291,11 @@ export class AutenticacionServicio {
 
   private async actualizarPrimeraCompraConFallback(
     cliente: NonNullable<SupabaseServicio['cliente']>,
-    idUsuario: string,
+    idUsuario: number,
   ): Promise<{ data: unknown; error: { code?: string; message: string } | null }> {
     const primerIntento = await cliente
       .from('usuarios_cine')
-      .update({ primeraCompraUsada: true })
+      .update({ flagPrimeraCompra: false, primeraCompraUsada: true })
       .eq('id', idUsuario)
       .select('*')
       .maybeSingle();
@@ -262,10 +305,21 @@ export class AutenticacionServicio {
 
     return cliente
       .from('usuarios_cine')
-      .update({ primera_compra_usada: true })
+      .update({ flag_primera_compra: false, primera_compra_usada: true })
       .eq('id', idUsuario)
       .select('*')
       .maybeSingle();
+  }
+
+  private edadDesdeFecha(fechaNacimiento: string): number {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    if (Number.isNaN(nacimiento.getTime())) return 0;
+
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const m = hoy.getMonth() - nacimiento.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
+    return Math.max(0, edad);
   }
 
   private sinPassword(usuario: UsuarioMock): Usuario {

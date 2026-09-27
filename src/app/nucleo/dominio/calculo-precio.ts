@@ -59,7 +59,7 @@ export function descuentosAplicables(
 ): DescuentoCandidato[] {
   const candidatos: DescuentoCandidato[] = [];
 
-  if (usuario && !usuario.primeraCompraUsada) {
+  if (usuario && usuario.flagPrimeraCompra) {
     candidatos.push({
       porcentaje: configuracion.porcentajePrimeraCompra,
       motivo: `Primera compra (${configuracion.porcentajePrimeraCompra}%)`,

@@ -20,6 +20,8 @@ export class ReportesComponente {
 
   protected readonly diarios$ = this.reportes.diarios();
   protected readonly totales$ = this.reportes.totales();
+  protected readonly estados$ = this.reportes.resumenEstados();
+  protected readonly ventasPorUsuario$ = this.reportes.ventasPorUsuario();
 
   protected exportarPdf(): void {
     this.diarios$.pipe(take(1)).subscribe((reportes) => {

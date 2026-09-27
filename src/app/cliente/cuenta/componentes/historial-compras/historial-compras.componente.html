@@ -12,6 +12,15 @@
     se genera crédito en tu cuenta, que podés usar en cualquier compra futura.
   </p>
 
+  @if (resumenEstados$ | async; as resumen) {
+    <p class="nota">
+      Estado de tus ventas: <strong>{{ resumen.total }}</strong> totales,
+      <strong>{{ resumen.pagadas }}</strong> pagadas,
+      <strong>{{ resumen.usadas }}</strong> usadas,
+      <strong>{{ resumen.canceladas }}</strong> canceladas.
+    </p>
+  }
+
   @if (compras$ | async; as compras) {
     @if (compras.length) {
       <div class="lista">

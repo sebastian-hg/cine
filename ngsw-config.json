@@ -21,26 +21,50 @@
           "/productos/**",
           "/combos/**",
           "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
-        ]
+        ],
+        "urls": ["https://ecprkkprpgucmxzkdlqw.supabase.co/storage/v1/object/public/**"]
       }
     }
   ],
   "dataGroups": [
     {
-      "name": "catalogo",
-      "urls": ["/mock/peliculas.json", "/mock/generos.json", "/mock/candy.json"],
+      "name": "catalogo-remoto",
+      "urls": [
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/peliculas*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/peliculas_cine*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/generos*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/generos_peliculas*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/peliculas_generos*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/peliculas_generos_cine*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/categorias_candy*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/productos_candy*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/combos_candy*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/combo_productos_candy*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/salas*"
+      ],
       "cacheConfig": {
         "strategy": "performance",
-        "maxSize": 40,
-        "maxAge": "1h"
+        "maxSize": 80,
+        "maxAge": "2h"
       }
     },
     {
-      "name": "volatil",
-      "urls": ["/mock/configuracion.json", "/mock/resenas.json"],
+      "name": "dinamico-remoto",
+      "urls": [
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/configuracion*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/resenas*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/funciones*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/butacas_funcion*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/compras*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/ventas_cine*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/usuarios_cine*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/cupones*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/recompensas*",
+        "https://ecprkkprpgucmxzkdlqw.supabase.co/rest/v1/movimientos_credito*"
+      ],
       "cacheConfig": {
         "strategy": "freshness",
-        "maxSize": 20,
+        "maxSize": 60,
         "maxAge": "5m",
         "timeout": "3s"
       }

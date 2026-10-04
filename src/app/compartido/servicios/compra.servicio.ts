@@ -633,13 +633,34 @@ export class CompraServicio {
       }
     }
 
-    const cancelarR = await cliente
-      .from('ventas_cine')
-      .update({ estado: 'cancelada' })
-      .eq('id_venta', idVenta)
-      .select('id_venta')
-      .maybeSingle();
-    if (cancelarR.error) throw new Error(cancelarR.error.message);
+    const eliminarVenta = () =>
+      cliente
+        .from('ventas_cine')
+        .delete()
+        .eq('id_venta', idVenta)
+        .eq('estado', venta.estado)
+        .select('id_venta')
+        .maybeSingle();
+
+    let eliminarR = await eliminarVenta();
+    if (eliminarR.error?.code === '23503') {
+      await this.liberarButacasFuncion(cliente, String(idVenta));
+      eliminarR = await eliminarVenta();
+    }
+    if (eliminarR.error) throw new Error(eliminarR.error.message);
+    if (!eliminarR.data) {
+      const ventaRestante = await cliente
+        .from('ventas_cine')
+        .select('estado')
+        .eq('id_venta', idVenta)
+        .maybeSingle();
+      if (ventaRestante.error) throw new Error(ventaRestante.error.message);
+      if (ventaRestante.data) {
+        throw new Error(
+          'Supabase no eliminó la venta. La compra sigue en la base; revisá la policy DELETE de ventas_cine.',
+        );
+      }
+    }
 
     await this.liberarButacasFuncion(cliente, String(idVenta));
 
@@ -679,6 +700,12 @@ export class CompraServicio {
     }
     if (upR.error) throw new Error(upR.error.message);
 
+    await firstValueFrom(
+      this.supabase.transaccion((base) => {
+        this.credito.acreditar(base, idUsuario, creditoAcreditado, String(idVenta));
+      }),
+    );
+
     const fecha = new Date().toISOString();
     const insertarMovimiento = async (payload: Record<string, unknown>) =>
       cliente.from('movimientos_credito').insert(payload).select('id').maybeSingle();
@@ -703,6 +730,7 @@ export class CompraServicio {
       });
     }
 
+    if (mvR.error?.code === 'PGRST205' || mvR.error?.code === '42P01') return;
     if (mvR.error) throw new Error(mvR.error.message);
   }
 }

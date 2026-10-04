@@ -5,12 +5,25 @@
       <option value="">Elegí una película…</option>
       @for (pelicula of peliculas(); track pelicula.id) {
         <option [value]="pelicula.id">
-          {{ pelicula.nombre }} ({{ pelicula.duracionMinutos }} min)
+          {{ pelicula.nombre }} ({{ pelicula.duracionMinutos }} min - {{ pelicula.clasificacion }})
         </option>
       }
     </select>
     @if (invalido('idPelicula')) {
       <p class="mensaje-campo">Elegí la película de la función.</p>
+    }
+  </div>
+
+  <div class="campo" [class.campo--invalido]="invalido('idSala')">
+    <label for="funcion-sala">Sala</label>
+    <select id="funcion-sala" formControlName="idSala">
+      <option value="">Elegí una sala…</option>
+      @for (sala of salas(); track sala.id) {
+        <option [value]="sala.id">{{ sala.nombre }}</option>
+      }
+    </select>
+    @if (invalido('idSala')) {
+      <p class="mensaje-campo">Elegí la sala de la función.</p>
     }
   </div>
 
@@ -36,11 +49,26 @@
   </div>
 
   <div class="rejilla-campos">
-    <div class="campo" [class.campo--invalido]="invalido('horario')">
+    <div class="campo" [class.campo--invalido]="invalido('horario') || horarioInvalido()">
       <label for="funcion-horario">Horario</label>
-      <input id="funcion-horario" type="time" formControlName="horario" />
+      <input
+        id="funcion-horario"
+        type="time"
+        formControlName="horario"
+        min="13:00"
+        [max]="esAtpSeleccionada() ? '17:00' : '01:00'"
+      />
       @if (invalido('horario')) {
         <p class="mensaje-campo">Usá el formato HH:mm.</p>
+      }
+      @if (horarioInvalido()) {
+        <p class="mensaje-campo">
+          @if (esAtpSeleccionada()) {
+            Las películas ATP solo pueden comenzar entre las 13:00 y las 17:00.
+          } @else {
+            Las funciones solo pueden comenzar entre las 13:00 y la 01:00.
+          }
+        </p>
       }
     </div>
 
@@ -74,9 +102,8 @@
   <div class="aviso-sala">
     <span class="aviso-sala__icono" aria-hidden="true">🏛️</span>
     <p>
-      <strong>La sala la asigna el sistema.</strong> Busca una libre contemplando la duración de la
-      película y dejando 30 minutos entre funciones. Si no hay ninguna disponible en ese horario, te
-      avisamos y no se crea la función.
+      <strong>Se verificará la sala elegida.</strong> La programación contempla la duración de la
+      película y deja 30 minutos entre funciones. Si hay un conflicto, esa función no se crea.
     </p>
   </div>
 

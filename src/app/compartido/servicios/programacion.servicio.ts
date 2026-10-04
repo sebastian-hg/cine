@@ -3,17 +3,16 @@ import { Observable, from, mergeMap, throwError } from 'rxjs';
 
 import { Funcion, ResultadoProgramacion, SolicitudFuncion } from '../interfaces/funcion.interfaz';
 import { combinarFechaHora, sumarMinutos } from '../../nucleo/dominio/fechas';
-import { asignarSala } from '../../nucleo/dominio/programacion-salas';
+import { asignarSala, permiteHorarioFuncion } from '../../nucleo/dominio/programacion-salas';
 import { BaseDatos, SupabaseServicio } from '../../nucleo/servicios/supabase.servicio';
 import { RegistroActividadServicio } from '../../nucleo/servicios/registro-actividad.servicio';
 
 /**
- * Programación de funciones con asignación automática de sala (§4).
+ * Programación de funciones en la sala elegida por administración (§4).
  *
  * El administrador define película, días, horario, modalidad, idioma y precio.
- * La sala la elige el sistema: dos funciones nunca pueden ocupar la misma sala a
- * la vez, se contempla la duración de la película y quedan 30 minutos de
- * separación entre funciones.
+ * Se valida que la sala elegida esté libre, contemplando la duración de la
+ * película y dejando 30 minutos de separación entre funciones.
  *
  * El algoritmo vive en `nucleo/dominio/programacion-salas.ts` como función pura,
  * que es lo que permite testearlo sin levantar Angular.
@@ -45,6 +44,29 @@ export class ProgramacionServicio {
         );
       }
 
+      if (!permiteHorarioFuncion(pelicula.clasificacion, solicitud.horario)) {
+        const motivo =
+          pelicula.clasificacion === 'ATP'
+            ? 'Las películas ATP solo pueden comenzar entre las 13:00 y las 17:00.'
+            : 'Las funciones solo pueden comenzar entre las 13:00 y la 01:00.';
+        return this.supabase.inmediato(
+          solicitud.fechas.map(() => ({
+            asignada: false as const,
+            motivo,
+          })),
+        );
+      }
+
+      const sala = base.salas.find((item) => item.id === solicitud.idSala);
+      if (!sala) {
+        return this.supabase.inmediato(
+          solicitud.fechas.map(() => ({
+            asignada: false as const,
+            motivo: 'La sala indicada no existe.',
+          })),
+        );
+      }
+
       const resultados: ResultadoProgramacion[] = [];
       const funcionesTrabajo = [...base.funciones];
       const funcionesNuevas: Funcion[] = [];
@@ -54,7 +76,7 @@ export class ProgramacionServicio {
 
         const asignacion = asignarSala(
           { inicio, duracionMinutos: pelicula.duracionMinutos },
-          base.salas,
+          [sala],
           funcionesTrabajo,
           (funcion) => this.duracionDe(funcion, base),
         );

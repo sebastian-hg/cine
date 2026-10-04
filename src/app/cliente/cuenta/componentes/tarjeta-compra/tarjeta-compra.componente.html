@@ -13,7 +13,13 @@
       [class.insignia--info]="compra().estado === 'usada'"
       [class.insignia--rojo]="compra().estado === 'cancelada'"
     >
-      {{ compra().estado }}
+      @if (compra().estado === 'cancelada') {
+        Cancelada
+      } @else if (compra().estado === 'pagada') {
+        Pagada
+      } @else {
+        Usada
+      }
     </span>
   </div>
 
@@ -42,9 +48,11 @@
     <span class="compra__total">{{ compra().desglose.aPagar | pipeMonedaArs }}</span>
 
     <div class="compra__acciones">
-      <a [routerLink]="['/compra/entrada', compra().id]" class="boton boton--fantasma boton--chico">
-        Ver entrada
-      </a>
+      @if (compra().estado !== 'cancelada') {
+        <a [routerLink]="['/compra/entrada', compra().id]" class="boton boton--fantasma boton--chico">
+          Ver entrada
+        </a>
+      }
 
       @if (compra().puedeCancelar) {
         <button
@@ -54,6 +62,8 @@
         >
           Cancelar
         </button>
+      } @else if (compra().estado === 'cancelada') {
+        <span class="compra__bloqueo">Cancelada</span>
       } @else if (compra().motivoBloqueoCancelacion; as motivo) {
         <span class="compra__bloqueo" [title]="motivo">{{ motivo }}</span>
       }

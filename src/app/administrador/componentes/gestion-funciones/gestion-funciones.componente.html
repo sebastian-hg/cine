@@ -10,6 +10,7 @@
     <h2>Programar nuevas funciones</h2>
     <app-formulario-funcion
       [peliculas]="peliculasCatalogo() ?? []"
+      [salas]="salasCatalogo() ?? []"
       [procesando]="procesando()"
       (funcionSolicitada)="programar($event)"
     />

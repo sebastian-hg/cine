@@ -5,9 +5,11 @@ import { BehaviorSubject, switchMap, take } from 'rxjs';
 
 import { ResultadoProgramacion, SolicitudFuncion } from '../../../compartido/interfaces/funcion.interfaz';
 import { Pelicula } from '../../../compartido/interfaces/pelicula.interfaz';
+import { Sala } from '../../../compartido/interfaces/sala.interfaz';
 import { FuncionDetallada, FuncionServicio } from '../../../compartido/servicios/funcion.servicio';
 import { PeliculaServicio } from '../../../compartido/servicios/pelicula.servicio';
 import { ProgramacionServicio } from '../../../compartido/servicios/programacion.servicio';
+import { SalaServicio } from '../../../compartido/servicios/sala.servicio';
 import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.servicio';
 import { PipeModalidad } from '../../../compartido/pipes/modalidad.pipe';
 import { PipeMonedaArs } from '../../../compartido/pipes/moneda-ars.pipe';
@@ -24,6 +26,7 @@ import { FormularioFuncionComponente } from '../formulario-funcion/formulario-fu
 export class GestionFuncionesComponente {
   private readonly funciones = inject(FuncionServicio);
   private readonly peliculas = inject(PeliculaServicio);
+  private readonly salas = inject(SalaServicio);
   private readonly programacion = inject(ProgramacionServicio);
   private readonly avisos = inject(NotificacionServicio);
 
@@ -34,6 +37,9 @@ export class GestionFuncionesComponente {
     { initialValue: [] },
   );
   protected readonly peliculasCatalogo = toSignal<Pelicula[], Pelicula[]>(this.peliculas.listar(), {
+    initialValue: [],
+  });
+  protected readonly salasCatalogo = toSignal<Sala[], Sala[]>(this.salas.listar(), {
     initialValue: [],
   });
 

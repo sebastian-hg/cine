@@ -142,6 +142,7 @@ export class CreditoServicio {
       });
     }
 
+    if (mvR.error?.code === 'PGRST205' || mvR.error?.code === '42P01') return;
     if (mvR.error) throw new Error(mvR.error.message);
   }
 }

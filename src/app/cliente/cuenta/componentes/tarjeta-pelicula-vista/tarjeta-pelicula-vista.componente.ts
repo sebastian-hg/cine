@@ -31,13 +31,13 @@ import { CalificacionEstrellasComponente } from '../../../../compartido/componen
         @if (peliculaVista().calificacionPropia; as estrellas) {
           <app-calificacion-estrellas [valor]="estrellas" [soloLectura]="true" />
         } @else {
-          <a
-            [routerLink]="['/pelicula', peliculaVista().idPelicula]"
+          <button
+            type="button"
             class="vista__calificar"
             (click)="calificar.emit(peliculaVista().idPelicula)"
           >
-            Calificala →
-          </a>
+            Dejar reseña →
+          </button>
         }
       </div>
     </article>
@@ -90,6 +90,11 @@ import { CalificacionEstrellasComponente } from '../../../../compartido/componen
         margin-top: auto;
         font-size: 13px;
         color: var(--ambar-fuerte);
+        background: transparent;
+        border: 0;
+        padding: 0;
+        text-align: left;
+        cursor: pointer;
       }
     }
   `,

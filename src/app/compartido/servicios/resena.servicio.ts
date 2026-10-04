@@ -1,5 +1,5 @@
 import { Service, inject } from '@angular/core';
-import { Observable, map, switchMap, throwError } from 'rxjs';
+import { Observable, from, map, switchMap, throwError } from 'rxjs';
 
 import { Resena, ResumenResenas } from '../interfaces/resena.interfaz';
 import { AutenticacionServicio } from '../../nucleo/servicios/autenticacion.servicio';
@@ -54,12 +54,14 @@ export class ResenaServicio {
 
   /** §14: solo habilitada si el usuario compró una función ya pasada. */
   puedeResenar(idPelicula: string): Observable<boolean> {
-    const usuario = this.auth.usuarioActual;
-    if (!usuario) return this.supabase.inmediato(false);
-
-    return this.compras
-      .compraQueHabilitaResena(usuario.id, idPelicula)
-      .pipe(map((idCompra) => idCompra !== null));
+    return this.auth.usuarioActual$.pipe(
+      switchMap((usuario) =>
+        usuario
+          ? this.compras.compraQueHabilitaResena(usuario.id, idPelicula)
+          : this.supabase.inmediato(null),
+      ),
+      map((idCompra) => idCompra !== null),
+    );
   }
 
   publicar(idPelicula: string, estrellas: number, comentario: string): Observable<Resena> {
@@ -76,32 +78,81 @@ export class ResenaServicio {
           );
         }
 
-        return this.supabase.transaccion((base) => {
-          const existente = base.resenas.find(
-            (r) => r.idPelicula === idPelicula && r.idUsuario === usuario.id,
-          );
+        const resena: Resena = {
+          id: this.supabase.nuevoId('re'),
+          idPelicula,
+          idUsuario: usuario.id,
+          nombreUsuario: `${usuario.nombre} ${usuario.apellido.charAt(0)}.`,
+          estrellas,
+          comentario,
+          fecha: new Date().toISOString(),
+          idCompraVerificada: idCompra,
+        };
+        const cliente = this.supabase.cliente;
 
-          if (existente) {
-            existente.estrellas = estrellas;
-            existente.comentario = comentario;
-            existente.fecha = new Date().toISOString();
-            return existente;
-          }
+        const guardar = cliente
+          ? from(this.guardarEnSupabase(cliente, resena))
+          : this.supabase.inmediato(resena);
 
-          const resena: Resena = {
-            id: this.supabase.nuevoId('re'),
-            idPelicula,
-            idUsuario: usuario.id,
-            nombreUsuario: `${usuario.nombre} ${usuario.apellido.charAt(0)}.`,
-            estrellas,
-            comentario,
-            fecha: new Date().toISOString(),
-            idCompraVerificada: idCompra,
-          };
-          base.resenas.push(resena);
-          return resena;
-        });
+        return guardar.pipe(switchMap((guardada) => this.actualizarBaseLocal(guardada)));
       }),
     );
+  }
+
+  private async guardarEnSupabase(
+    cliente: NonNullable<SupabaseServicio['cliente']>,
+    resena: Resena,
+  ): Promise<Resena> {
+    const idPelicula = this.idParaBase(resena.idPelicula);
+    const fila = {
+      id_pelicula: idPelicula,
+      id_usuario: resena.idUsuario,
+      nombre_usuario: resena.nombreUsuario,
+      estrellas: resena.estrellas,
+      comentario: resena.comentario,
+      fecha: resena.fecha,
+      id_compra_verificada: resena.idCompraVerificada,
+    };
+
+    const resultado = await cliente
+      .from('comentarios_peliculas')
+      .upsert(fila, { onConflict: 'id_compra_verificada' })
+      .select('*')
+      .single();
+    if (resultado.error) throw new Error(resultado.error.message);
+
+    const registro = resultado.data as Record<string, unknown>;
+    return {
+      ...resena,
+      id: String(registro['id'] ?? resena.id),
+      idPelicula: String(registro['idPelicula'] ?? registro['id_pelicula'] ?? resena.idPelicula),
+      idUsuario: Number(registro['idUsuario'] ?? registro['id_usuario'] ?? resena.idUsuario),
+      nombreUsuario: String(
+        registro['nombreUsuario'] ?? registro['nombre_usuario'] ?? resena.nombreUsuario,
+      ),
+      estrellas: Number(registro['estrellas'] ?? resena.estrellas),
+      comentario: String(registro['comentario'] ?? resena.comentario),
+      fecha: String(registro['fecha'] ?? registro['created_at'] ?? resena.fecha),
+      idCompraVerificada: String(
+        registro['idCompraVerificada'] ??
+          registro['id_compra_verificada'] ??
+          resena.idCompraVerificada,
+      ),
+    };
+  }
+
+  private actualizarBaseLocal(resena: Resena): Observable<Resena> {
+    return this.supabase.transaccion((base) => {
+      const indice = base.resenas.findIndex(
+        (item) => item.idCompraVerificada === resena.idCompraVerificada,
+      );
+      if (indice >= 0) base.resenas[indice] = resena;
+      else base.resenas.push(resena);
+      return resena;
+    });
+  }
+
+  private idParaBase(id: string): number | string {
+    return /^\d+$/.test(id) ? Number(id) : id;
   }
 }

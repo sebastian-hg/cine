@@ -4,8 +4,7 @@ export type Idioma = 'castellano' | 'subtitulada';
 /**
  * Una proyección concreta (§4).
  *
- * `idSala` lo asigna el sistema, nunca el administrador: ver
- * `ProgramacionServicio.asignarSala()`.
+ * `idSala` identifica la sala elegida al programar la función.
  */
 export interface Funcion {
   id: string;
@@ -23,9 +22,10 @@ export interface Funcion {
   precio: number;
 }
 
-/** Datos que el admin carga; la sala se resuelve después. */
+/** Datos que el administrador carga para programar una o más funciones. */
 export interface SolicitudFuncion {
   idPelicula: string;
+  idSala: string;
   /** Fechas ISO `YYYY-MM-DD`, una por cada día de la semana elegido. */
   fechas: string[];
   /** `HH:mm` */

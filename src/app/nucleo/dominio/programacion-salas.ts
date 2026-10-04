@@ -1,4 +1,5 @@
 import { Funcion } from '../../compartido/interfaces/funcion.interfaz';
+import { ClasificacionEdad } from '../../compartido/interfaces/pelicula.interfaz';
 import { Sala } from '../../compartido/interfaces/sala.interfaz';
 import { MINUTO_MS, sumarMinutos } from './fechas';
 
@@ -15,6 +16,24 @@ import { MINUTO_MS, sumarMinutos } from './fechas';
 
 /** Minutos que deben quedar libres entre dos funciones de una misma sala. */
 export const SEPARACION_MINUTOS = 30;
+export const HORA_APERTURA_CINE = '13:00';
+export const HORA_CIERRE_CINE = '01:00';
+export const HORA_LIMITE_ATP = '17:00';
+
+export function permiteHorarioFuncion(
+  clasificacion: ClasificacionEdad,
+  horario: string,
+): boolean {
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(horario)) return false;
+
+  const dentroDelHorarioDelCine = horario >= HORA_APERTURA_CINE || horario <= HORA_CIERRE_CINE;
+  if (!dentroDelHorarioDelCine) return false;
+
+  return (
+    clasificacion !== 'ATP' ||
+    (horario >= HORA_APERTURA_CINE && horario <= HORA_LIMITE_ATP)
+  );
+}
 
 interface Intervalo {
   inicio: number;

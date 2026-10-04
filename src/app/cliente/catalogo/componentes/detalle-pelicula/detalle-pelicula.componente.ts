@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, combineLatest, map, of, shareReplay, switchMap } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, map, of, shareReplay, switchMap } from 'rxjs';
 
 import { PeliculaConMetricas } from '../../../../compartido/interfaces/pelicula.interfaz';
 import { Resena, ResumenResenas } from '../../../../compartido/interfaces/resena.interfaz';
@@ -55,6 +55,7 @@ export class DetallePeliculaComponente {
   private readonly configuracion = inject(ConfiguracionServicio);
   private readonly auth = inject(AutenticacionServicio);
   private readonly avisos = inject(NotificacionServicio);
+  private readonly actualizarResenas = new BehaviorSubject<void>(undefined);
 
   private readonly idPelicula$ = this.ruta.paramMap.pipe(
     map((parametros) => parametros.get('id') ?? ''),
@@ -70,12 +71,12 @@ export class DetallePeliculaComponente {
     switchMap((id) => this.funcionesServicio.dePelicula(id)),
   );
 
-  private readonly resenas$ = this.idPelicula$.pipe(
-    switchMap((id) => this.resenasServicio.dePelicula(id)),
+  private readonly resenas$ = combineLatest([this.idPelicula$, this.actualizarResenas]).pipe(
+    switchMap(([id]) => this.resenasServicio.dePelicula(id)),
   );
 
-  private readonly resumen$ = this.idPelicula$.pipe(
-    switchMap((id) => this.resenasServicio.resumen(id)),
+  private readonly resumen$ = combineLatest([this.idPelicula$, this.actualizarResenas]).pipe(
+    switchMap(([id]) => this.resenasServicio.resumen(id)),
   );
 
   private readonly puedeResenar$ = this.idPelicula$.pipe(
@@ -153,8 +154,7 @@ export class DetallePeliculaComponente {
     this.resenasServicio.publicar(idPelicula, resena.estrellas, resena.comentario).subscribe({
       next: () => {
         this.avisos.mostrar('¡Gracias! Tu reseña ya está publicada.', 'exito');
-        // Reemplazar la URL por sí misma vuelve a disparar los flujos de la ruta.
-        void this.router.navigate(['/pelicula', idPelicula], { replaceUrl: true });
+        this.actualizarResenas.next();
       },
       error: (error: Error) => this.avisos.mostrar(error.message, 'error'),
     });

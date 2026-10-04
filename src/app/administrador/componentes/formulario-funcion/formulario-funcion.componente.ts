@@ -2,8 +2,10 @@ import { Component, ChangeDetectionStrategy, inject, input, output, signal } fro
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Pelicula } from '../../../compartido/interfaces/pelicula.interfaz';
+import { Sala } from '../../../compartido/interfaces/sala.interfaz';
 import { SolicitudFuncion } from '../../../compartido/interfaces/funcion.interfaz';
 import { soloFecha, sumarDias } from '../../../nucleo/dominio/fechas';
+import { permiteHorarioFuncion } from '../../../nucleo/dominio/programacion-salas';
 
 const DIAS_SEMANA = [
   { indice: 1, nombre: 'Lunes' },
@@ -18,9 +20,7 @@ const DIAS_SEMANA = [
 /**
  * Alta de funciones (§4).
  *
- * **No tiene campo de sala**: el administrador define película, días, horario,
- * modalidad, idioma y precio, y el sistema resuelve la sala. Es el requisito
- * central de §4 y se refleja en la interfaz, no solo en el servicio.
+ * El administrador define película, sala, días, horario, modalidad, idioma y precio.
  */
 @Component({
   selector: 'app-formulario-funcion',
@@ -31,6 +31,7 @@ const DIAS_SEMANA = [
 })
 export class FormularioFuncionComponente {
   readonly peliculas = input<Pelicula[]>([]);
+  readonly salas = input<Sala[]>([]);
   readonly procesando = input<boolean>(false);
 
   readonly funcionSolicitada = output<SolicitudFuncion>();
@@ -45,6 +46,7 @@ export class FormularioFuncionComponente {
   protected readonly FormularioFuncion = signal(
     this.fb.nonNullable.group({
       idPelicula: ['', [Validators.required]],
+      idSala: ['', [Validators.required]],
       horario: ['', [Validators.required, Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)]],
       modalidad: ['2D' as const, [Validators.required]],
       idioma: ['castellano' as const, [Validators.required]],
@@ -63,13 +65,36 @@ export class FormularioFuncionComponente {
     return this.diasElegidos().has(indice);
   }
 
-  protected invalido(campo: 'idPelicula' | 'horario' | 'modalidad' | 'idioma' | 'precio'): boolean {
+  protected invalido(
+    campo: 'idPelicula' | 'idSala' | 'horario' | 'modalidad' | 'idioma' | 'precio',
+  ): boolean {
     const control = this.FormularioFuncion().controls[campo];
     return control.invalid && control.touched;
   }
 
+  protected horarioInvalido(): boolean {
+    const valores = this.FormularioFuncion().getRawValue();
+    const pelicula = this.peliculas().find((item) => item.id === valores.idPelicula);
+    return (
+      pelicula !== undefined &&
+      valores.horario !== '' &&
+      !permiteHorarioFuncion(pelicula.clasificacion, valores.horario)
+    );
+  }
+
+  protected esAtpSeleccionada(): boolean {
+    const idPelicula = this.FormularioFuncion().controls.idPelicula.value;
+    return this.peliculas().some(
+      (pelicula) => pelicula.id === idPelicula && pelicula.clasificacion === 'ATP',
+    );
+  }
+
   protected enviar(): void {
-    if (this.FormularioFuncion().invalid || this.diasElegidos().size === 0) {
+    if (
+      this.FormularioFuncion().invalid ||
+      this.horarioInvalido() ||
+      this.diasElegidos().size === 0
+    ) {
       this.FormularioFuncion().markAllAsTouched();
       return;
     }

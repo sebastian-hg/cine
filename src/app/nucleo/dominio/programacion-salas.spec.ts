@@ -1,6 +1,6 @@
 import { Funcion } from '../../compartido/interfaces/funcion.interfaz';
 import { Sala } from '../../compartido/interfaces/sala.interfaz';
-import { asignarSala } from './programacion-salas';
+import { asignarSala, permiteHorarioFuncion } from './programacion-salas';
 
 /**
  * Verificación de la Fase 3 del plan.
@@ -30,6 +30,38 @@ function funcionDe18(idSala: string): Funcion {
 
 /** La película A dura 120 minutos. */
 const duracion = () => 120;
+
+describe('permiteHorarioFuncion', () => {
+  it('permite funciones ATP que comienzan exactamente a las 17:00', () => {
+    expect(permiteHorarioFuncion('ATP', '17:00')).toBe(true);
+  });
+
+  it('rechaza funciones ATP posteriores a las 17:00', () => {
+    expect(permiteHorarioFuncion('ATP', '17:01')).toBe(false);
+  });
+
+  it('rechaza una hora vacía para ATP', () => {
+    expect(permiteHorarioFuncion('ATP', '')).toBe(false);
+  });
+
+  it('permite funciones desde la apertura hasta la 01:00 cruzando medianoche', () => {
+    expect(permiteHorarioFuncion('+13', '13:00')).toBe(true);
+    expect(permiteHorarioFuncion('+13', '23:59')).toBe(true);
+    expect(permiteHorarioFuncion('+13', '00:30')).toBe(true);
+    expect(permiteHorarioFuncion('+13', '01:00')).toBe(true);
+  });
+
+  it('rechaza horarios anteriores a las 13:00 o posteriores a la 01:00', () => {
+    expect(permiteHorarioFuncion('+13', '12:59')).toBe(false);
+    expect(permiteHorarioFuncion('+13', '01:01')).toBe(false);
+  });
+
+  it('limita ATP al rango entre las 13:00 y las 17:00', () => {
+    expect(permiteHorarioFuncion('ATP', '13:00')).toBe(true);
+    expect(permiteHorarioFuncion('ATP', '12:59')).toBe(false);
+    expect(permiteHorarioFuncion('ATP', '00:30')).toBe(false);
+  });
+});
 
 describe('asignarSala', () => {
   describe('con una sola sala ocupada de 18:00 a 20:00', () => {

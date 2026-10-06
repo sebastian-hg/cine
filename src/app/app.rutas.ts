@@ -1,8 +1,10 @@
 import { Routes } from '@angular/router';
 
 import { GuardAutenticacion } from './nucleo/guards/autenticacion.guard';
+import { GuardNoAutenticado } from './nucleo/guards/no-autenticado.guard';
 import { GuardRol } from './nucleo/guards/rol.guard';
 import { GuardCompraActiva } from './cliente/compra/guards/compra-activa.guard';
+import { GuardRegistroSinGuardar } from './cliente/cuenta/guards/registro-sin-guardar.guard';
 
 /**
  * Rutas de la aplicación (§23: lazy loading, guards por rol).
@@ -41,12 +43,15 @@ export const RutasApp: Routes = [
   },
   {
     path: 'ingresar',
+    canActivate: [GuardNoAutenticado],
     loadComponent: () =>
       import('./cliente/cuenta/componentes/login/login.componente').then((m) => m.LoginComponente),
     title: 'Iniciar sesión · Cine',
   },
   {
     path: 'registrarse',
+    canActivate: [GuardNoAutenticado],
+    canDeactivate: [GuardRegistroSinGuardar],
     loadComponent: () =>
       import('./cliente/cuenta/componentes/registro/registro.componente').then(
         (m) => m.RegistroComponente,
@@ -56,12 +61,14 @@ export const RutasApp: Routes = [
   {
     path: 'empleado',
     canActivate: [GuardRol],
+    canActivateChild: [GuardRol],
     data: { roles: ['empleado'] },
     loadChildren: () => import('./empleado/empleado.rutas').then((m) => m.RutasEmpleado),
   },
   {
     path: 'administrador',
     canActivate: [GuardRol],
+    canActivateChild: [GuardRol],
     data: { roles: ['administrador'] },
     loadChildren: () =>
       import('./administrador/administrador.rutas').then((m) => m.RutasAdministrador),

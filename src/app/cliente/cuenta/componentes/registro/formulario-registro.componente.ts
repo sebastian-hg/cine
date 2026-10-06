@@ -43,6 +43,10 @@ export class FormularioRegistroComponente {
     return control.invalid && control.touched;
   }
 
+  tieneCambiosSinGuardar(): boolean {
+    return this.formulario().dirty;
+  }
+
   protected enviar(): void {
     if (this.formulario().invalid) {
       this.formulario().markAllAsTouched();

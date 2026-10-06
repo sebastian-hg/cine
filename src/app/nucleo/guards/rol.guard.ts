@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateChildFn, CanActivateFn, Router } from '@angular/router';
 
 import { RolUsuario } from '../../compartido/interfaces/usuario.interfaz';
 import { AutenticacionServicio } from '../servicios/autenticacion.servicio';
@@ -17,19 +17,22 @@ import { NotificacionServicio } from '../servicios/notificacion.servicio';
  * Esto es defensa en profundidad del lado del cliente. La autorización real la
  * hace RLS en Supabase: ocultar una ruta no protege los datos.
  */
-export const GuardRol: CanActivateFn = (ruta, estado) => {
+export const GuardRol: CanActivateFn & CanActivateChildFn = (ruta, estado) => {
   const auth = inject(AutenticacionServicio);
   const router = inject(Router);
   const avisos = inject(NotificacionServicio);
 
-  const permitidos = (ruta.data['roles'] as RolUsuario[] | undefined) ?? [];
+  const rutaConRoles = [...ruta.pathFromRoot]
+    .reverse()
+    .find((segmento) => Array.isArray(segmento.data['roles']));
+  const permitidos = rutaConRoles?.data['roles'] as RolUsuario[] | undefined;
   const usuario = auth.usuarioActual;
 
   if (!usuario) {
     return router.createUrlTree(['/ingresar'], { queryParams: { returnUrl: estado.url } });
   }
 
-  if (permitidos.includes(usuario.rol)) {
+  if (permitidos?.includes(usuario.rol)) {
     return true;
   }
 

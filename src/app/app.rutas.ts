@@ -53,14 +53,12 @@ export const RutasApp: Routes = [
   },
   {
     path: 'empleado',
-    canActivate: [GuardRol],
     canActivateChild: [GuardRol],
     data: { roles: ['empleado'] },
     loadChildren: () => import('./empleado/empleado.rutas').then((m) => m.RutasEmpleado),
   },
   {
     path: 'administrador',
-    canActivate: [GuardRol],
     canActivateChild: [GuardRol],
     data: { roles: ['administrador'] },
     loadChildren: () =>

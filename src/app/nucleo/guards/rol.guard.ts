@@ -5,18 +5,7 @@ import { RolUsuario } from '../../compartido/interfaces/usuario.interfaz';
 import { AutenticacionServicio } from '../servicios/autenticacion.servicio';
 import { NotificacionServicio } from '../servicios/notificacion.servicio';
 
-/**
- * Autorización por rol (§26 de la consigna).
- *
- * Un solo guard parametrizado por `data.roles` en lugar de uno por rol: tres
- * guards idénticos no aportarían nada y agregar un cuarto rol obligaría a
- * escribir otro archivo.
- *
- *     { path: 'administrador', canActivate: [GuardRol], data: { roles: ['administrador'] } }
- *
- * Esto es defensa en profundidad del lado del cliente. La autorización real la
- * hace RLS en Supabase: ocultar una ruta no protege los datos.
- */
+
 export const GuardRol: CanActivateFn & CanActivateChildFn = (ruta, estado) => {
   const auth = inject(AutenticacionServicio);
   const router = inject(Router);

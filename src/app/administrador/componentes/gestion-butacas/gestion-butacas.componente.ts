@@ -11,13 +11,13 @@ import {
   tipoDeFila,
 } from '../../../nucleo/dominio/generador-butacas';
 
-/**
- * Vista del mapa de butacas generado (§5).
- *
- * Es de solo lectura a propósito: la distribución la define el generador, no se
- * edita butaca por butaca. Lo editable es el recargo VIP, que vive en la
- * pantalla de descuentos.
- */
+
+
+
+
+
+
+
 @Component({
   selector: 'app-gestion-butacas',
   imports: [],

@@ -18,14 +18,14 @@ import { FormularioCuponComponente } from '../formulario-cupon/formulario-cupon.
 import { FormularioPagoComponente } from '../formulario-pago/formulario-pago.componente';
 import { ResumenTotalesComponente } from '../resumen-totales/resumen-totales.componente';
 
-/**
- * Confirmación de compra (§9, §12, §15, §19).
- *
- * Orquesta cupón, crédito, pago y generación del QR. El orden importa: primero
- * se cobra, y recién después `CompraServicio` intenta reservar las butacas. Si
- * la reserva falla por concurrencia, se avisa y se vuelve al mapa sin dejar la
- * compra a medias.
- */
+
+
+
+
+
+
+
+
 @Component({
   selector: 'app-checkout',
   imports: [
@@ -123,7 +123,6 @@ export class CheckoutComponente {
         error: (error: Error) => {
           this.procesando.set(false);
 
-          // §6: si otro usuario se quedó con la butaca, se vuelve al mapa.
           if (error instanceof ButacaNoDisponibleError) {
             this.avisos.mostrar(error.message, 'error');
             const idFuncion = this.carrito.idFuncion;

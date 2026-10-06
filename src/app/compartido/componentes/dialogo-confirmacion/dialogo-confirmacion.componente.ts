@@ -1,11 +1,11 @@
 import { Component, ChangeDetectionStrategy, ElementRef, AfterViewInit, input, output, viewChild } from '@angular/core';
 
-/**
- * Confirmación para operaciones importantes (§22).
- *
- * Se usa antes de cancelar una compra, canjear puntos y cualquier borrado del
- * panel admin. Atrapa el foco y se cierra con Escape.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-dialogo-confirmacion',
   changeDetection: ChangeDetectionStrategy.OnPush,

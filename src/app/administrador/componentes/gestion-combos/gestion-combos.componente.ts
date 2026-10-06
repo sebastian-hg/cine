@@ -11,7 +11,7 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
 import { PipeMonedaArs } from '../../../compartido/pipes/moneda-ars.pipe';
 import { FormularioComboComponente } from '../formulario-combo/formulario-combo.componente';
 
-/** CRUD de combos (§11). */
+ 
 @Component({
   selector: 'app-gestion-combos',
   imports: [FormularioComboComponente, PipeMonedaArs],

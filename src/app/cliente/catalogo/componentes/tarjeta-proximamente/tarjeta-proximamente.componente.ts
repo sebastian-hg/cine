@@ -6,7 +6,7 @@ import { PeliculaConMetricas } from '../../../../compartido/interfaces/pelicula.
 import { InsigniaClasificacionComponente } from '../../../../compartido/componentes/insignia-clasificacion/insignia-clasificacion.componente';
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 
-/** §17: película de la sección Próximamente, con el botón «Avisarme». */
+ 
 @Component({
   selector: 'app-tarjeta-proximamente',
   imports: [RouterLink, DatePipe, InsigniaClasificacionComponente, PipeMonedaArs],

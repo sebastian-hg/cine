@@ -11,14 +11,14 @@ interface FilaMapa {
   derecha: ButacaFuncion[];
 }
 
-/**
- * Mapa de la sala (§6 de la consigna).
- *
- * En móvil el mapa es el problema difícil: 532 butacas no entran en 390 px.
- * La solución es un contenedor con desplazamiento horizontal y un ancho mínimo
- * que mantiene las butacas tocables, más el resumen textual de la selección
- * que muestra el contenedor padre.
- */
+
+
+
+
+
+
+
+
 @Component({
   selector: 'app-mapa-butacas',
   imports: [ButacaComponente, ReferenciaButacasComponente],
@@ -32,7 +32,7 @@ export class MapaButacasComponente {
 
   readonly butacaAlternada = output<ButacaFuncion>();
 
-  /** Agrupa por fila y sector, en el orden en que se dibujan. */
+   
   protected readonly filas = computed<FilaMapa[]>(() => {
     const porFila = new Map<string, FilaMapa>();
 

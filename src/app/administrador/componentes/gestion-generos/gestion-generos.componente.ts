@@ -8,7 +8,7 @@ import { GeneroServicio } from '../../../compartido/servicios/genero.servicio';
 import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.servicio';
 import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-actividad.servicio';
 
-/** CRUD de géneros (§1). */
+ 
 @Component({
   selector: 'app-gestion-generos',
   imports: [ReactiveFormsModule],

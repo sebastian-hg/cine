@@ -17,11 +17,11 @@ const DIAS_SEMANA = [
   { indice: 0, nombre: 'Domingo' },
 ];
 
-/**
- * Alta de funciones (§4).
- *
- * El administrador define película, sala, días, horario, modalidad, idioma y precio.
- */
+
+
+
+
+
 @Component({
   selector: 'app-formulario-funcion',
   imports: [ReactiveFormsModule],
@@ -40,7 +40,7 @@ export class FormularioFuncionComponente {
 
   protected readonly diasSemana = signal(DIAS_SEMANA);
   protected readonly diasElegidos = signal<Set<number>>(new Set());
-  /** Cuántas semanas hacia adelante se programa la grilla. */
+   
   protected readonly semanas = signal(2);
 
   protected readonly FormularioFuncion = signal(
@@ -105,7 +105,7 @@ export class FormularioFuncionComponente {
     });
   }
 
-  /** Convierte los días de la semana elegidos en fechas concretas. */
+   
   private proximasFechas(): string[] {
     const elegidos = this.diasElegidos();
     const fechas: string[] = [];

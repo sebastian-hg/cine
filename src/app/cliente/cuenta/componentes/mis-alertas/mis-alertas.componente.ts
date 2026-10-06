@@ -8,7 +8,7 @@ import { PeliculaServicio } from '../../../../compartido/servicios/pelicula.serv
 import { NotificacionServicio } from '../../../../nucleo/servicios/notificacion.servicio';
 import { AlertaServicio } from '../../servicios/alerta.servicio';
 
-/** §17: alertas de estreno a las que el usuario se suscribió. */
+ 
 @Component({
   selector: 'app-mis-alertas',
   imports: [DatePipe, RouterLink],
@@ -105,7 +105,7 @@ export class MisAlertasComponente {
 
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
-  /** Cruza la alerta con los datos de la película para poder mostrarla. */
+   
   protected readonly alertas = toSignal(
     this.recargar.pipe(
       switchMap(() => combineLatest([this.alertasServicio.propias(), this.peliculas.listar()])),

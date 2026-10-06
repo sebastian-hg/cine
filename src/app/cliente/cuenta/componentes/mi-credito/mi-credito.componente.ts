@@ -9,7 +9,7 @@ import { AutenticacionServicio } from '../../../../nucleo/servicios/autenticacio
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 import { MovimientoCredito } from '../../../../compartido/interfaces/credito.interfaz';
 
-/** Crédito por cancelaciones (§19). */
+ 
 @Component({
   selector: 'app-mi-credito',
   imports: [DatePipe, RouterLink, PipeMonedaArs],

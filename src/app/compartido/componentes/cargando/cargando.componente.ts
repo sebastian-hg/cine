@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 
-/** Estado de carga (§22). Anuncia el cambio a lectores de pantalla. */
+ 
 @Component({
   selector: 'app-cargando',
   changeDetection: ChangeDetectionStrategy.OnPush,

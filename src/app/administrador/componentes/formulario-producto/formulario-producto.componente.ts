@@ -18,7 +18,7 @@ const IMAGENES = [
   'productos/papas.svg',
 ];
 
-/** Alta de productos del Candy Bar (§10). */
+ 
 @Component({
   selector: 'app-formulario-producto',
   imports: [ReactiveFormsModule],

@@ -9,12 +9,12 @@ export interface ResenaEnviada {
   comentario: string;
 }
 
-/**
- * Formulario de reseña (§14).
- *
- * Solo se muestra si `puedeCalificar` es `true`; el contenedor lo resuelve
- * comprobando que exista una compra de una función ya pasada.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-formulario-resena',
   imports: [ReactiveFormsModule, CalificacionEstrellasComponente],

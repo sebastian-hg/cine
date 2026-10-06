@@ -3,12 +3,12 @@ import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { Desglose } from '../../../../compartido/interfaces/compra.interfaz';
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 
-/**
- * Desglose de la compra.
- *
- * Muestra las líneas por separado y no solo el total: si el descuento o el
- * crédito salen mal, se ve dónde.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-resumen-totales',
   imports: [PipeMonedaArs],

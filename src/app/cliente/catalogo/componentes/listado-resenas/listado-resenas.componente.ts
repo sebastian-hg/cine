@@ -4,7 +4,7 @@ import { DatePipe } from '@angular/common';
 import { Resena, ResumenResenas } from '../../../../compartido/interfaces/resena.interfaz';
 import { PipeEstrellas } from '../../../../compartido/pipes/estrellas.pipe';
 
-/** §14: reseñas y promedio de estrellas. */
+ 
 @Component({
   selector: 'app-listado-resenas',
   imports: [DatePipe, PipeEstrellas],

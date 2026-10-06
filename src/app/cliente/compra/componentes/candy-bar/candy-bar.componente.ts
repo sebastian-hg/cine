@@ -14,13 +14,13 @@ import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 import { CarritoServicio } from '../../servicios/carrito.servicio';
 import { TarjetaProductoComponente } from '../tarjeta-producto/tarjeta-producto.componente';
 
-/**
- * Candy Bar (§10 y §11).
- *
- * Es una ruta pública: se puede comprar candy sin entradas. Cuando se llega
- * desde la selección de butacas, el botón de continuar lleva al checkout con
- * las entradas ya cargadas.
- */
+
+
+
+
+
+
+
 @Component({
   selector: 'app-candy-bar',
   imports: [RouterLink, CargandoComponente, TarjetaProductoComponente, PipeMonedaArs],
@@ -47,7 +47,7 @@ export class CandyBarComponente {
     initialValue: [],
   });
 
-  /** Cuántas unidades de cada producto hay ya en el carrito. */
+   
   protected readonly cantidades = toSignal(
     this.items$.pipe(
       map((items) => {

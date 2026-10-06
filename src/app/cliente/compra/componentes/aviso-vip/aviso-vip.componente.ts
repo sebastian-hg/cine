@@ -2,12 +2,12 @@ import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 
-/**
- * §5: «Informar claramente al usuario que está comprando una butaca VIP».
- *
- * No es decorativo: es un requisito explícito de la consigna, así que el aviso
- * dice cuántas VIP hay y cuánto suman de más.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-aviso-vip',
   imports: [PipeMonedaArs],

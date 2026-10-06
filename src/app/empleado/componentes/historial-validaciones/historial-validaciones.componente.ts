@@ -7,7 +7,7 @@ import { of, switchMap } from 'rxjs';
 import { AutenticacionServicio } from '../../../nucleo/servicios/autenticacion.servicio';
 import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-actividad.servicio';
 
-/** §21: cada validación queda registrada en el log. */
+ 
 @Component({
   selector: 'app-historial-validaciones',
   imports: [DatePipe, RouterLink],

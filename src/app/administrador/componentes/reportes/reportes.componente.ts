@@ -7,7 +7,7 @@ import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.ser
 import { PipeMonedaArs } from '../../../compartido/pipes/moneda-ars.pipe';
 import { ReporteServicio } from '../../servicios/reporte.servicio';
 
-/** Reportes de facturación con exportación a PDF y Excel (§20). */
+ 
 @Component({
   selector: 'app-reportes',
   imports: [DatePipe, PipeMonedaArs],
@@ -54,7 +54,7 @@ export class ReportesComponente {
       });
   }
 
-  /** `2026-09-20` → `Date`, para el pipe de fecha. */
+   
   protected aFecha(dia: string): Date {
     return new Date(`${dia}T00:00:00`);
   }

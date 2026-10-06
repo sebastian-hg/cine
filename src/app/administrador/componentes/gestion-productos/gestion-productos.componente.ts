@@ -9,7 +9,7 @@ import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-ac
 import { PipeMonedaArs } from '../../../compartido/pipes/moneda-ars.pipe';
 import { FormularioProductoComponente } from '../formulario-producto/formulario-producto.componente';
 
-/** CRUD de productos del Candy Bar (§10). */
+ 
 @Component({
   selector: 'app-gestion-productos',
   imports: [FormularioProductoComponente, PipeMonedaArs],

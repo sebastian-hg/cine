@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 import { PeliculaConMetricas } from '../../../../compartido/interfaces/pelicula.interfaz';
 import { TarjetaPeliculaComponente } from '../tarjeta-pelicula/tarjeta-pelicula.componente';
 
-/** §3: las 3 más vendidas, destacadas arriba de todo en la página principal. */
+ 
 @Component({
   selector: 'app-mas-vendidas',
   imports: [TarjetaPeliculaComponente],

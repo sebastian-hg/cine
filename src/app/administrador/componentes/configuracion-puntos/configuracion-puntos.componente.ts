@@ -8,7 +8,7 @@ import { FidelizacionServicio } from '../../../compartido/servicios/fidelizacion
 import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.servicio';
 import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-actividad.servicio';
 
-/** Configuración de recompensas (§15). */
+ 
 @Component({
   selector: 'app-configuracion-puntos',
   imports: [ReactiveFormsModule],

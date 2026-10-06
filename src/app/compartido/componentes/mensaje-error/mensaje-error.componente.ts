@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 
-/** Estado de error (§22: mensajes claros y accionables). */
+ 
 @Component({
   selector: 'app-mensaje-error',
   changeDetection: ChangeDetectionStrategy.OnPush,

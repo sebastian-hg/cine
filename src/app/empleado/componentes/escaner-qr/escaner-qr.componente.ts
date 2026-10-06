@@ -4,13 +4,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { CodigoQr } from '../../../compartido/interfaces/qr.interfaz';
 import { QrServicio } from '../../../compartido/servicios/qr.servicio';
 
-/**
- * Lector de QR (§12) — MOCKEADO.
- *
- * TODO: contra una cámara real esto sería `BarcodeDetector` o una librería de
- * lectura sobre `getUserMedia`. Acá se simula listando las compras existentes
- * para poder probar el flujo completo sin imprimir un QR.
- */
+
+
+
+
+
+
+
 @Component({
   selector: 'app-escaner-qr',
   imports: [],

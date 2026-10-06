@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-/** Leyenda del mapa. Explica forma e icono, no solo color. */
+ 
 @Component({
   selector: 'app-referencia-butacas',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -2,8 +2,8 @@
   display: grid;
   gap: 16px;
 
-  /* En pantallas chicas el mapa se desplaza en vez de comprimir las butacas
-     hasta volverlas intocables. */
+  
+
   &__desplazable {
     overflow-x: auto;
     padding-bottom: 10px;

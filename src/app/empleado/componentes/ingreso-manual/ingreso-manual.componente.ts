@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-/** §12: «Ingresar código manualmente si falla el lector». */
+ 
 @Component({
   selector: 'app-ingreso-manual',
   imports: [ReactiveFormsModule],

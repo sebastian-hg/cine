@@ -17,7 +17,7 @@ import { CodigoQrComponente } from '../../../compra/componentes/codigo-qr/codigo
 import { CatalogoRecompensasComponente } from '../catalogo-recompensas/catalogo-recompensas.componente';
 import { HistorialCanjesComponente } from '../historial-canjes/historial-canjes.componente';
 
-/** Puntos, recompensas y canjes (§15). */
+ 
 @Component({
   selector: 'app-mis-puntos',
   imports: [

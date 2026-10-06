@@ -6,7 +6,7 @@ import { InsigniaClasificacionComponente } from '../../../../compartido/componen
 import { PipeDuracion } from '../../../../compartido/pipes/duracion.pipe';
 import { PipeEstrellas } from '../../../../compartido/pipes/estrellas.pipe';
 
-/** Tarjeta de cartelera. Recibe la película y emite la navegación al detalle. */
+ 
 @Component({
   selector: 'app-tarjeta-pelicula',
   imports: [RouterLink, InsigniaClasificacionComponente, PipeDuracion, PipeEstrellas],

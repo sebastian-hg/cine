@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, effect, inject, input, signal } fro
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import QRCode from 'qrcode';
 
-/** Dibuja el QR de una compra (§12). */
+ 
 @Component({
   selector: 'app-codigo-qr',
   changeDetection: ChangeDetectionStrategy.OnPush,

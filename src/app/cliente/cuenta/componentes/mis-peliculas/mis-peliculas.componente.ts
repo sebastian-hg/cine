@@ -9,12 +9,12 @@ import { FormularioResenaComponente, ResenaEnviada } from '../../../catalogo/com
 import { PeliculaVista, PerfilServicio } from '../../servicios/perfil.servicio';
 import { TarjetaPeliculaVistaComponente } from '../tarjeta-pelicula-vista/tarjeta-pelicula-vista.componente';
 
-/**
- * Mis películas (§18).
- *
- * «Debe ser un historial visual, no solamente una tabla»: es una galería de
- * pósters con la fecha de la función y la calificación propia.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-mis-peliculas',
   imports: [RouterLink, TarjetaPeliculaVistaComponente, FormularioResenaComponente],

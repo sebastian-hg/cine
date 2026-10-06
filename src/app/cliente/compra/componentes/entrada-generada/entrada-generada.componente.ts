@@ -19,12 +19,12 @@ import { EdadServicio } from '../../servicios/edad.servicio';
 import { PdfServicio } from '../../servicios/pdf.servicio';
 import { CodigoQrComponente } from '../codigo-qr/codigo-qr.componente';
 
-/**
- * Entrada generada tras la compra (§12 y §13).
- *
- * Muestra el QR y permite descargar el PDF. Un mismo código habilita la entrada
- * a la sala y el retiro del Candy Bar, cada uno validable una sola vez.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-entrada-generada',
   imports: [
@@ -64,7 +64,7 @@ export class EntradaGeneradaComponente {
     switchMap((funcion) => (funcion ? this.peliculas.obtener(funcion.idPelicula) : of(null))),
   );
 
-  /** Productos y combos de la compra, para el bloque de retiro del Candy Bar. */
+   
   private readonly itemsCandy$ = this.compra$.pipe(
     map((compra) => compra?.items.filter((i) => i.tipo !== 'entrada') ?? []),
   );

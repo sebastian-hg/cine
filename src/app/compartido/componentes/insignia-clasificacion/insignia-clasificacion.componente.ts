@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy, computed, input } from '@angular/co
 import { ClasificacionEdad } from '../../interfaces/pelicula.interfaz';
 import { PipeClasificacion } from '../../pipes/clasificacion.pipe';
 
-/** Clasificación por edad. El texto completo va en `title` y para lectores. */
+ 
 @Component({
   selector: 'app-insignia-clasificacion',
   imports: [PipeClasificacion],

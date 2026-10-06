@@ -5,7 +5,7 @@ import { Genero } from '../../../compartido/interfaces/genero.interfaz';
 import { Pelicula } from '../../../compartido/interfaces/pelicula.interfaz';
 import { soloFecha } from '../../../nucleo/dominio/fechas';
 
-/** Alta de película con los 11 campos de §2. */
+ 
 @Component({
   selector: 'app-formulario-pelicula',
   imports: [ReactiveFormsModule],
@@ -35,7 +35,7 @@ export class FormularioPeliculaComponente {
     }),
   );
 
-  /** Géneros elegidos; al menos uno (§3 admite varios). */
+   
   protected readonly elegidos = signal<Set<string>>(new Set());
 
   protected alternarGenero(id: string): void {

@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 
-/** Control de cantidad con tope por stock. */
+ 
 @Component({
   selector: 'app-selector-cantidad',
   changeDetection: ChangeDetectionStrategy.OnPush,

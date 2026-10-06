@@ -15,7 +15,7 @@ import { PipeModalidad } from '../../../compartido/pipes/modalidad.pipe';
 import { PipeMonedaArs } from '../../../compartido/pipes/moneda-ars.pipe';
 import { FormularioFuncionComponente } from '../formulario-funcion/formulario-funcion.componente';
 
-/** Gestión de funciones con asignación automática de sala (§4). */
+ 
 @Component({
   selector: 'app-gestion-funciones',
   imports: [DatePipe, FormularioFuncionComponente, PipeModalidad, PipeMonedaArs],

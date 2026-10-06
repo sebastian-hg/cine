@@ -5,12 +5,12 @@ import { DirectivaSoloNumeros } from '../../../../compartido/directivas/solo-num
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 import { DatosPago } from '../../servicios/pago.servicio';
 
-/**
- * Datos de pago (§26: proteger las operaciones de pago) — MOCKEADO.
- *
- * Contra un proveedor real este formulario lo reemplaza el SDK del proveedor:
- * el número de tarjeta nunca debería pasar por nuestro código.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-formulario-pago',
   imports: [ReactiveFormsModule, DirectivaSoloNumeros, PipeMonedaArs],

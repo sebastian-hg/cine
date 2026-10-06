@@ -11,7 +11,7 @@ import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.ser
 import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-actividad.servicio';
 import { PipeMonedaArs } from '../../../compartido/pipes/moneda-ars.pipe';
 
-/** Preventa película por película (§16). */
+ 
 @Component({
   selector: 'app-configuracion-preventa',
   imports: [DatePipe, PipeMonedaArs],

@@ -8,12 +8,12 @@ import { Configuracion } from '../../../compartido/interfaces/cupon.interfaz';
 import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.servicio';
 import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-actividad.servicio';
 
-/**
- * Descuentos configurables (§9).
- *
- * El porcentaje de primera compra arranca en 20 y el de mayores de 50 lo define
- * el administrador. Los descuentos no se acumulan: se aplica el mayor.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-configuracion-descuentos',
   imports: [ReactiveFormsModule],

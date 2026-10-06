@@ -2,12 +2,12 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 
 import { ResultadoValidacion } from '../../../compartido/interfaces/qr.interfaz';
 
-/**
- * Resultado de una validación.
- *
- * Verde o rojo a pantalla completa: el empleado lo mira de reojo con una fila
- * de gente esperando, así que el veredicto tiene que leerse de un vistazo.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-resultado-validacion',
   changeDetection: ChangeDetectionStrategy.OnPush,

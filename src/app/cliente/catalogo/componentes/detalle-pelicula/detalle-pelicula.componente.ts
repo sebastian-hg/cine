@@ -22,13 +22,13 @@ import { FormularioResenaComponente, ResenaEnviada } from '../formulario-resena/
 import { ListadoFuncionesComponente } from '../listado-funciones/listado-funciones.componente';
 import { ListadoResenasComponente } from '../listado-resenas/listado-resenas.componente';
 
-/**
- * Detalle de película (§2 de la consigna).
- *
- * Muestra los doce datos que pide la sección: póster, nombre, sinopsis,
- * duración, géneros, clasificación, idioma y modalidad (de cada función),
- * puntuación promedio, reseñas, funciones disponibles e información de preventa.
- */
+
+
+
+
+
+
+
 @Component({
   selector: 'app-detalle-pelicula',
   imports: [
@@ -83,7 +83,7 @@ export class DetallePeliculaComponente {
     switchMap((id) => this.resenasServicio.puedeResenar(id)),
   );
 
-  /** Modalidades e idiomas realmente disponibles, que es lo que pide §2. */
+   
   private readonly modalidades$ = this.funciones$.pipe(
     map((funciones) => [...new Set(funciones.map((f) => f.modalidad))].sort()),
   );
@@ -98,7 +98,7 @@ export class DetallePeliculaComponente {
     ),
   );
 
-  /** §16: estado de preventa de esta película. */
+   
   private readonly preventa$ = combineLatest([this.pelicula$, this.configuracion.obtener()]).pipe(
     map(([pelicula, config]) =>
       pelicula ? estadoPreventa(pelicula, config.diasAnticipacionPreventa) : null,

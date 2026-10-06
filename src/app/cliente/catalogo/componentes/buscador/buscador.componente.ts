@@ -4,10 +4,10 @@ import { DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
-/** Espera antes de emitir, para no filtrar en cada tecla. */
+ 
 const ESPERA_MS = 300;
 
-/** Buscador de cartelera. Emite el texto ya con rebote aplicado. */
+ 
 @Component({
   selector: 'app-buscador',
   imports: [ReactiveFormsModule],

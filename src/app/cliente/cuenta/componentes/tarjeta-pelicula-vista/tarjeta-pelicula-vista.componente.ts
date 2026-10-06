@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { PeliculaVista } from '../../servicios/perfil.servicio';
 import { CalificacionEstrellasComponente } from '../../../../compartido/componentes/calificacion-estrellas/calificacion-estrellas.componente';
 
-/** §18: una película vista, con póster, fecha y calificación propia. */
+ 
 @Component({
   selector: 'app-tarjeta-pelicula-vista',
   imports: [DatePipe, RouterLink, CalificacionEstrellasComponente],

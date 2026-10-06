@@ -7,7 +7,7 @@ import { CandyServicio } from '../../../compartido/servicios/candy.servicio';
 import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.servicio';
 import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-actividad.servicio';
 
-/** CRUD de categorías del Candy Bar (§10). */
+ 
 @Component({
   selector: 'app-gestion-categorias',
   imports: [ReactiveFormsModule],

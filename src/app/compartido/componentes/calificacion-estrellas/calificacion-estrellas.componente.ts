@@ -1,11 +1,11 @@
 import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
 
-/**
- * Calificación de 1 a 5 estrellas (§14).
- *
- * Interactivo y accesible: cada estrella es un botón con `aria-label`, y el
- * grupo se recorre con tabulador. La versión de solo lectura usa el pipe.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-calificacion-estrellas',
   changeDetection: ChangeDetectionStrategy.OnPush,

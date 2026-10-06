@@ -5,13 +5,13 @@ import { ClasificacionEdad } from '../../../../compartido/interfaces/pelicula.in
 import { EDAD_MINIMA } from '../../../../nucleo/dominio/restriccion-edad';
 import { soloFecha } from '../../../../nucleo/dominio/fechas';
 
-/**
- * Verificación de edad para visitantes anónimos (§7).
- *
- * No hay identidad que consultar, así que es una declaración jurada. Es la
- * única estrategia honesta sin registro; la entrada en PDF lleva impresa la
- * advertencia de que puede pedirse documento en la puerta.
- */
+
+
+
+
+
+
+
 @Component({
   selector: 'app-verificacion-edad',
   imports: [ReactiveFormsModule],
@@ -28,7 +28,7 @@ export class VerificacionEdadComponente implements AfterViewInit {
   private readonly fb = inject(FormBuilder);
   private readonly campoFecha = viewChild<ElementRef<HTMLInputElement>>('campoFecha');
 
-  /** No se puede declarar una fecha futura. */
+   
   protected readonly maximo = soloFecha(new Date());
 
   protected readonly FormularioEdad = signal(
@@ -38,7 +38,7 @@ export class VerificacionEdadComponente implements AfterViewInit {
   );
 
   ngAfterViewInit(): void {
-    // El modal atrapa el foco: al abrirse, el primer campo lo recibe.
+     
     this.campoFecha()?.nativeElement.focus();
   }
 

@@ -4,7 +4,7 @@ import { Producto } from '../../../../compartido/interfaces/producto.interfaz';
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 import { SelectorCantidadComponente } from '../selector-cantidad/selector-cantidad.componente';
 
-/** Producto del Candy Bar (§10). Sin stock, no se puede agregar. */
+ 
 @Component({
   selector: 'app-tarjeta-producto',
   imports: [PipeMonedaArs, SelectorCantidadComponente],

@@ -2,12 +2,12 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 
-/**
- * Uso del crédito de cancelaciones (§19).
- *
- * El crédito puede combinarse con otros medios de pago, así que es un
- * interruptor y no un pago excluyente.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-aplicar-credito',
   imports: [PipeMonedaArs],

@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 import { PeliculaConMetricas } from '../../../../compartido/interfaces/pelicula.interfaz';
 import { TarjetaPeliculaComponente } from '../tarjeta-pelicula/tarjeta-pelicula.componente';
 
-/** Rejilla de películas. Solo presenta; el filtrado lo hace el servicio. */
+ 
 @Component({
   selector: 'app-cartelera',
   imports: [TarjetaPeliculaComponente],

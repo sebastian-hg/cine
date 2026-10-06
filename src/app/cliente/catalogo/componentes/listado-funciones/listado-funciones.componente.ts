@@ -5,13 +5,13 @@ import { FuncionDetallada } from '../../../../compartido/servicios/funcion.servi
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 import { SelectorFechaComponente } from '../../../../compartido/componentes/selector-fecha/selector-fecha.componente';
 
-/**
- * Funciones agrupadas por día (§2, §4).
- *
- * El selector de fecha es una fila de botones y no un `<input type="date">`:
- * §22 pide un selector de fecha fácil de usar, y acá las fechas disponibles son
- * pocas y conocidas.
- */
+
+
+
+
+
+
+
 @Component({
   selector: 'app-listado-funciones',
   imports: [DatePipe, PipeMonedaArs, SelectorFechaComponente],
@@ -26,7 +26,7 @@ export class ListadoFuncionesComponente {
 
   private readonly diaElegido = signal<string | null>(null);
 
-  /** Días con funciones, en orden. */
+   
   protected readonly dias = computed(() => {
     const unicos = new Set(
       this.funciones()

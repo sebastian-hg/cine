@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Cupon } from '../../../compartido/interfaces/cupon.interfaz';
 
-/** Alta de cupones (§9). */
+ 
 @Component({
   selector: 'app-formulario-cupon-admin',
   imports: [ReactiveFormsModule],

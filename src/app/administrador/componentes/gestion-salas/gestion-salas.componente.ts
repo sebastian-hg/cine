@@ -7,7 +7,7 @@ import { SalaServicio } from '../../../compartido/servicios/sala.servicio';
 import { NotificacionServicio } from '../../../nucleo/servicios/notificacion.servicio';
 import { RegistroActividadServicio } from '../../../nucleo/servicios/registro-actividad.servicio';
 
-/** Gestión de salas (§5). Al crear una, sus butacas se generan solas. */
+ 
 @Component({
   selector: 'app-gestion-salas',
   imports: [ReactiveFormsModule],

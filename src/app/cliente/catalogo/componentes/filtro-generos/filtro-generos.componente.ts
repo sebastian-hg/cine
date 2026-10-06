@@ -2,13 +2,13 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 
 import { Genero } from '../../../../compartido/interfaces/genero.interfaz';
 
-/**
- * Filtro por géneros (§3: una película puede tener varios).
- *
- * Multiselección: alcanza con que la película tenga uno de los elegidos.
- * Se usa `aria-pressed` en vez de checkboxes escondidos para que los botones
- * comuniquen su estado a los lectores de pantalla.
- */
+
+
+
+
+
+
+
 @Component({
   selector: 'app-filtro-generos',
   changeDetection: ChangeDetectionStrategy.OnPush,

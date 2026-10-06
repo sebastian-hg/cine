@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 import { Combo } from '../../../../compartido/interfaces/combo.interfaz';
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 
-/** §3 y §11: combos destacados en la página principal. */
+ 
 @Component({
   selector: 'app-combos-destacados',
   imports: [PipeMonedaArs],

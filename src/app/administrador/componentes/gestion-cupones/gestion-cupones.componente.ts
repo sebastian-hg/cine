@@ -14,7 +14,7 @@ const ETIQUETA_TIPO: Record<Cupon['tipo'], string> = {
   'primera-compra': 'Primera compra',
 };
 
-/** CRUD de cupones (§9). */
+ 
 @Component({
   selector: 'app-gestion-cupones',
   imports: [FormularioCuponAdminComponente],

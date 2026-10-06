@@ -6,7 +6,7 @@ import { Producto } from '../../../compartido/interfaces/producto.interfaz';
 
 const IMAGENES = ['combos/clasico.svg', 'combos/pareja.svg', 'combos/dulce.svg', 'combos/salado.svg'];
 
-/** Alta de combos (§11): productos incluidos, entrada opcional y precio fijo. */
+ 
 @Component({
   selector: 'app-formulario-combo',
   imports: [ReactiveFormsModule],

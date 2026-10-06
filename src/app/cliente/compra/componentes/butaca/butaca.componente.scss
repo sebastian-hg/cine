@@ -35,7 +35,7 @@
   }
 }
 
-/* Forma propia por tipo: no alcanza con el color (§22). */
+ 
 .butaca.es-accesible {
   background: var(--butaca-accesible);
   border-color: color-mix(in srgb, var(--butaca-accesible) 70%, #fff);
@@ -94,7 +94,7 @@
   cursor: not-allowed;
   transform: none;
 
-  /* Cruz diagonal: distingue la butaca ocupada sin depender del color. */
+   
   &::after {
     content: '';
     position: absolute;

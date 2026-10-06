@@ -10,12 +10,12 @@ import { DialogoConfirmacionComponente } from '../../../../compartido/componente
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 import { TarjetaCompraComponente } from '../tarjeta-compra/tarjeta-compra.componente';
 
-/**
- * Historial de compras con cancelación (§19).
- *
- * La cancelación pide confirmación: §22 exige confirmaciones para operaciones
- * importantes, y esta no tiene vuelta atrás.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-historial-compras',
   imports: [

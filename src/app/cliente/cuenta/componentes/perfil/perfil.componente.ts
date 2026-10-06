@@ -10,7 +10,7 @@ import { NotificacionServicio } from '../../../../nucleo/servicios/notificacion.
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 import { PerfilServicio, ResumenCuenta } from '../../servicios/perfil.servicio';
 
-/** Perfil del usuario (§8): datos editables y resumen de la cuenta. */
+ 
 @Component({
   selector: 'app-perfil',
   imports: [ReactiveFormsModule, RouterLink, PipeMonedaArs],

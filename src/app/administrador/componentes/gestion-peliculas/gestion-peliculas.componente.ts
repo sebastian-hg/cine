@@ -12,7 +12,7 @@ import { PipeDuracion } from '../../../compartido/pipes/duracion.pipe';
 import { PipeMonedaArs } from '../../../compartido/pipes/moneda-ars.pipe';
 import { FormularioPeliculaComponente } from '../formulario-pelicula/formulario-pelicula.componente';
 
-/** CRUD de películas (§2). */
+ 
 @Component({
   selector: 'app-gestion-peliculas',
   imports: [DatePipe, FormularioPeliculaComponente, PipeDuracion, PipeMonedaArs],

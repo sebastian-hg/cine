@@ -16,13 +16,13 @@ import { CombosDestacadosComponente } from '../combos-destacados/combos-destacad
 import { FiltroGenerosComponente } from '../filtro-generos/filtro-generos.componente';
 import { MasVendidasComponente } from '../mas-vendidas/mas-vendidas.componente';
 
-/**
- * Página principal (§3 de la consigna).
- *
- * Contenedor: inyecta los servicios y reparte los datos a los componentes de
- * presentación por `@Input()`. Las 3 más vendidas van primero, después la
- * cartelera con buscador y filtro, y al final los combos destacados.
- */
+
+
+
+
+
+
+
 @Component({
   selector: 'app-inicio',
   imports: [
@@ -46,7 +46,7 @@ export class InicioComponente {
   private readonly avisos = inject(NotificacionServicio);
   private readonly router = inject(Router);
 
-  /** Valor por defecto para el pipe async: las plantillas no pueden usar `new`. */
+   
   protected readonly sinGeneros = signal(new Map<string, string>());
 
   protected readonly masVendidas = toSignal(this.peliculas.masVendidas(), {
@@ -68,7 +68,7 @@ export class InicioComponente {
     initialValue: [],
   });
 
-  /** `true` cuando hay búsqueda o filtro activos: oculta el podio de más vendidas. */
+   
   protected readonly hayFiltro = toSignal(
     combineLatest([
     this.peliculas.texto$,

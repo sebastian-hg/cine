@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { Aviso, NotificacionServicio } from '../../../nucleo/servicios/notificacion.servicio';
 
-/** Avisos efímeros. `aria-live` para que los anuncien los lectores de pantalla. */
+ 
 @Component({
   selector: 'app-avisos',
   imports: [],

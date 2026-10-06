@@ -10,14 +10,14 @@ const NOMBRE_TIPO: Record<ButacaFuncion['tipo'], string> = {
   vip: 'VIP',
 };
 
-/**
- * Una butaca del mapa (§6).
- *
- * Es un `button` de verdad para que el mapa se recorra con teclado, con
- * `aria-label` completo y `aria-pressed` para la selección. El tipo se
- * distingue por forma e icono además de por color: §22 pide buena
- * accesibilidad, y el color solo dejaría afuera a quien no lo distingue.
- */
+
+
+
+
+
+
+
+
 @Component({
   selector: 'app-butaca',
   imports: [DirectivaResaltarVip],
@@ -53,7 +53,7 @@ export class ButacaComponente {
 
   protected readonly ocupada = computed(() => this.butaca().estado !== 'libre');
 
-  /** Etiqueta hablada: fila, número, tipo, estado y precio. */
+   
   protected readonly descripcion = computed(() => {
     const b = this.butaca();
     const estado = this.ocupada() ? 'ocupada' : this.seleccionada() ? 'seleccionada' : 'libre';

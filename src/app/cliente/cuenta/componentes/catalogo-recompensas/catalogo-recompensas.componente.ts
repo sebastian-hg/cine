@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 
 import { Recompensa } from '../../../../compartido/interfaces/puntos.interfaz';
 
-/** §15: recompensas configurables por el administrador. */
+ 
 @Component({
   selector: 'app-catalogo-recompensas',
   changeDetection: ChangeDetectionStrategy.OnPush,

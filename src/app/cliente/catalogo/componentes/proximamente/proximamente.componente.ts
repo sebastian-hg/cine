@@ -11,12 +11,12 @@ import { AlertaServicio } from '../../../cuenta/servicios/alerta.servicio';
 import { CargandoComponente } from '../../../../compartido/componentes/cargando/cargando.componente';
 import { TarjetaProximamenteComponente } from '../tarjeta-proximamente/tarjeta-proximamente.componente';
 
-/**
- * Sección Próximamente (§17 de la consigna).
- *
- * Lista las películas que todavía no se estrenaron con su estado de preventa, y
- * permite suscribirse al aviso de habilitación de venta.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-proximamente',
   imports: [CargandoComponente, TarjetaProximamenteComponente],
@@ -31,7 +31,7 @@ export class ProximamenteComponente {
   private readonly auth = inject(AutenticacionServicio);
   private readonly avisos = inject(NotificacionServicio);
 
-  /** Se empuja tras cada alta o baja para releer las suscripciones. */
+   
   private readonly recargar = new BehaviorSubject<void>(undefined);
 
   protected readonly autenticado = toSignal(this.auth.estaAutenticado$, {

@@ -10,12 +10,12 @@ interface EntradaMenu {
   grupo: string;
 }
 
-/**
- * Layout del panel de administración (§22: interfaces diferenciadas por rol).
- *
- * Tablas densas y navegación lateral, en contraste con el catálogo visual del
- * cliente y la pantalla de un solo propósito del empleado.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-panel-administrador',
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
@@ -51,7 +51,7 @@ export class PanelAdministradorComponente {
     { grupo: 'Promociones', ruta: 'preventa', etiqueta: 'Preventa' },
   ];
 
-  /** Agrupa el menú conservando el orden de declaración. */
+   
   protected get grupos(): { nombre: string; entradas: EntradaMenu[] }[] {
     const porGrupo = new Map<string, EntradaMenu[]>();
     for (const entrada of this.menu) {

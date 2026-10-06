@@ -8,12 +8,12 @@ import {
   DatosFormularioRegistro,
 } from './formulario-registro.componente';
 
-/**
- * Registro de usuario (§8 de la consigna).
- *
- * El formulario coincide con los campos reales de la tabla `usuarios_cine`.
- * No se envían datos extra que la DB no tiene.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-registro',
   imports: [FormularioRegistroComponente],

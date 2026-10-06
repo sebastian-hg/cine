@@ -21,14 +21,14 @@ import { AvisoVipComponente } from '../aviso-vip/aviso-vip.componente';
 import { MapaButacasComponente } from '../mapa-butacas/mapa-butacas.componente';
 import { VerificacionEdadComponente } from '../verificacion-edad/verificacion-edad.componente';
 
-/**
- * Selección de butacas (§6 y §7).
- *
- * Las butacas llegan por el stream de `TiempoRealServicio`, así que si otro
- * usuario ocupa una mientras miramos, el mapa se actualiza solo. La reserva
- * definitiva se hace al confirmar la compra, no acá: reservar al seleccionar
- * dejaría butacas bloqueadas por gente que nunca termina de comprar.
- */
+
+
+
+
+
+
+
+
 @Component({
   selector: 'app-seleccion-butacas',
   imports: [
@@ -72,7 +72,7 @@ export class SeleccionButacasComponente {
     initialValue: null,
   });
 
-  /** Stream en vivo: refleja lo que compran otros usuarios (§6). */
+   
   protected readonly butacas = toSignal(this.tiempoReal.butacas$(this.idFuncion), {
     initialValue: [] as ButacaFuncion[],
   });
@@ -91,7 +91,7 @@ export class SeleccionButacasComponente {
     () => this.elegidas().filter((b) => b.tipo === 'vip').length,
   );
 
-  /** Cuánto se paga de más por las VIP, para el aviso de §5. */
+   
   protected readonly recargoVip = computed(() => {
     const multiplicador = this.config()?.multiplicadorVip ?? 1;
     if (multiplicador <= 1) return 0;
@@ -111,11 +111,11 @@ export class SeleccionButacasComponente {
     () => this.butacas().filter((b) => b.estado === 'libre').length,
   );
 
-  /** §7: el modal de declaración de edad, solo si hace falta. */
+   
   protected readonly pideEdad = signal(false);
   protected readonly clasificacionPendiente = signal<'ATP' | '+13' | '+18'>('ATP');
 
-  /** Aviso de acompañante para menores en funciones +13. */
+   
   protected readonly avisoEdad = toSignal(
     this.pelicula$.pipe(
       map((pelicula) => {
@@ -152,7 +152,7 @@ export class SeleccionButacasComponente {
   protected continuar(clasificacion: 'ATP' | '+13' | '+18', idPelicula: string): void {
     if (this.elegidas().length === 0) return;
 
-    // §7: al visitante anónimo se le pide la edad antes de seguir.
+     
     if (this.edad.necesitaDeclaracion(clasificacion)) {
       this.clasificacionPendiente.set(clasificacion);
       this.pideEdad.set(true);

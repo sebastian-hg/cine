@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 
 import { Canje } from '../../../../compartido/interfaces/puntos.interfaz';
 
-/** §15: historial de canjes. */
+ 
 @Component({
   selector: 'app-historial-canjes',
   imports: [DatePipe],

@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { CompraDetallada } from '../../../../compartido/servicios/compra.servicio';
 import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 
-/** Una compra del historial, con su acción de cancelar (§19). */
+ 
 @Component({
   selector: 'app-tarjeta-compra',
   imports: [DatePipe, RouterLink, PipeMonedaArs],

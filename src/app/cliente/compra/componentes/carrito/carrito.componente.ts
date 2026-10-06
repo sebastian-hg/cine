@@ -9,7 +9,7 @@ import { PrecioServicio } from '../../servicios/precio.servicio';
 import { ResumenTotalesComponente } from '../resumen-totales/resumen-totales.componente';
 import { SelectorCantidadComponente } from '../selector-cantidad/selector-cantidad.componente';
 
-/** Carrito con entradas, productos y combos juntos (§10). */
+ 
 @Component({
   selector: 'app-carrito',
   imports: [RouterLink, ResumenTotalesComponente, SelectorCantidadComponente, PipeMonedaArs],
@@ -47,7 +47,7 @@ export class CarritoComponente {
     void this.router.navigate(['/compra/checkout']);
   }
 
-  /** Clave estable para `track`: el tipo más su identificador propio. */
+   
   protected clave(item: ItemCarrito): string {
     switch (item.tipo) {
       case 'entrada':

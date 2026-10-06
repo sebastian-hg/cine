@@ -1,13 +1,13 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 
-/**
- * Selector de fecha (§22: «selector de fecha fácil de utilizar»).
- *
- * Una fila de días reales en vez de un `<input type="date">`: cuando las fechas
- * disponibles son pocas y conocidas —los días con función—, mostrarlas es más
- * rápido que hacer abrir un calendario y adivinar cuáles tienen algo.
- */
+
+
+
+
+
+
+
 @Component({
   selector: 'app-selector-fecha',
   imports: [DatePipe],
@@ -88,14 +88,14 @@ import { DatePipe } from '@angular/common';
   `,
 })
 export class SelectorFechaComponente {
-  /** Fechas ISO `YYYY-MM-DD` que tienen algo disponible. */
+   
   readonly fechasHabilitadas = input<string[]>([]);
   readonly seleccionada = input<string | null>(null);
   readonly etiqueta = input<string>('Elegí el día');
 
   readonly fechaElegida = output<string>();
 
-  /** `2026-09-21` → `Date` local, para que el pipe lo formatee. */
+   
   protected aFecha(dia: string): Date {
     return new Date(`${dia}T00:00:00`);
   }

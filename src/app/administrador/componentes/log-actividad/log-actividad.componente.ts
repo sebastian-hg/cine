@@ -19,7 +19,7 @@ const ETIQUETA_ACCION: Record<AccionRegistrada, string> = {
   'cambio-configuracion': 'Cambio de configuración',
 };
 
-/** Log de actividad (§21), filtrable por usuario, acción y fechas. */
+ 
 @Component({
   selector: 'app-log-actividad',
   imports: [DatePipe, ReactiveFormsModule],

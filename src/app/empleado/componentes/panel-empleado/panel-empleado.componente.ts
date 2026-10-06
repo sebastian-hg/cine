@@ -8,13 +8,13 @@ import { EscanerQrComponente } from '../escaner-qr/escaner-qr.componente';
 import { IngresoManualComponente } from '../ingreso-manual/ingreso-manual.componente';
 import { ResultadoValidacionComponente } from '../resultado-validacion/resultado-validacion.componente';
 
-/**
- * Pantalla de validación del empleado (§12).
- *
- * El empleado elige primero qué está validando —el ingreso a la sala o el
- * retiro del Candy Bar— y después escanea. Son permisos independientes del
- * mismo código: validar uno no consume el otro.
- */
+
+
+
+
+
+
+
 @Component({
   selector: 'app-panel-empleado',
   imports: [RouterLink, EscanerQrComponente, IngresoManualComponente, ResultadoValidacionComponente],

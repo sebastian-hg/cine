@@ -6,7 +6,7 @@ import { AutenticacionServicio } from '../../../../nucleo/servicios/autenticacio
 import { NotificacionServicio } from '../../../../nucleo/servicios/notificacion.servicio';
 import { FormularioLoginComponente, CuentaDemo } from './formulario-login.componente';
 
-/** Cuentas de prueba, para no tener que adivinarlas al revisar la demo. */
+ 
 const CUENTAS_DEMO: readonly CuentaDemo[] = [
   { email: 'cliente@cine.test', rol: 'Cliente sin compras (20% de bienvenida)' },
   { email: 'mayor@cine.test', rol: 'Cliente mayor de 50' },
@@ -15,7 +15,7 @@ const CUENTAS_DEMO: readonly CuentaDemo[] = [
   { email: 'admin@cine.test', rol: 'Administrador' },
 ];
 
-/** Inicio de sesión (§8). Vuelve a `returnUrl` si el guard lo dejó ahí. */
+ 
 @Component({
   selector: 'app-login',
   imports: [FormularioLoginComponente],
@@ -50,7 +50,6 @@ export class LoginComponente {
     });
   }
 
-  /** Cada rol aterriza donde le sirve (§22: interfaces diferenciadas). */
   private inicioSegun(rol: string): string {
     if (rol === 'administrador') return '/administrador';
     if (rol === 'empleado') return '/empleado';

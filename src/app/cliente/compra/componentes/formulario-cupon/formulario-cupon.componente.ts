@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Cupon } from '../../../../compartido/interfaces/cupon.interfaz';
 
-/** Aplicación de cupones (§9). El contenedor valida contra `CuponServicio`. */
+ 
 @Component({
   selector: 'app-formulario-cupon',
   imports: [ReactiveFormsModule],

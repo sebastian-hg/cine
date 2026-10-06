@@ -9,12 +9,12 @@ import { AutenticacionServicio } from './nucleo/servicios/autenticacion.servicio
 import { CargaServicio } from './nucleo/servicios/carga.servicio';
 import { CarritoServicio } from './cliente/compra/servicios/carrito.servicio';
 
-/**
- * Cascarón de la aplicación: encabezado, contenido enrutado, pie y avisos.
- *
- * Es el único componente que inyecta autenticación y carrito para pasárselos al
- * encabezado por `@Input()`; así el encabezado se puede probar aislado.
- */
+
+
+
+
+
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, EncabezadoComponente, PieComponente, AvisosComponente],

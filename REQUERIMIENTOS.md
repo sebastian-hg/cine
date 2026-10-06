@@ -1,12 +1,5 @@
 # Requerimientos del sistema de cine
 
-Este documento reúne los requerimientos comunicados para el sistema y contrasta su cobertura con el código del proyecto.
-
-- `✓` indica que se encontró una implementación de la función o regla en el código. No implica que esté lista para producción.
-- Los requisitos sin `✓` están incompletos, no se encontraron implementados o solo se cubren parcialmente; se indica el motivo cuando corresponde.
-
-La revisión fue estática, sobre el código fuente. No se hizo una prueba integral de cada flujo en un entorno desplegado.
-
 ## 1. Catálogo y funciones
 
 - ✓ Mostrar en la página principal las películas disponibles y permitir al administrador elegir qué películas se publican.

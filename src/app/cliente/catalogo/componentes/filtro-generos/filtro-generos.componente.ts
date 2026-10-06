@@ -70,11 +70,11 @@ import { Genero } from '../../../../compartido/interfaces/genero.interfaz';
     .ficha--activa {
       background: var(--ambar);
       border-color: var(--ambar);
-      color: #17120c;
+      color: var(--texto-en-acento);
 
       &:hover {
         background: var(--ambar-fuerte);
-        color: #17120c;
+        color: var(--texto-en-acento);
       }
     }
   `,

@@ -75,10 +75,10 @@ import { DatePipe } from '@angular/common';
       &--activo {
         background: var(--ambar);
         border-color: var(--ambar);
-        color: #17120c;
+        color: var(--texto-en-acento);
 
         .dia__numero {
-          color: #17120c;
+          color: var(--texto-en-acento);
         }
         &:hover {
           background: var(--ambar-fuerte);

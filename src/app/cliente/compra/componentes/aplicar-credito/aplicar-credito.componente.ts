@@ -102,7 +102,7 @@ import { PipeMonedaArs } from '../../../../compartido/pipes/moneda-ars.pipe';
 
         &::after {
           transform: translateX(18px);
-          background: #17120c;
+          background: var(--texto-en-acento);
         }
       }
 

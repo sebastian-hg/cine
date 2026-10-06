@@ -1,52 +1,46 @@
-/* ───────────────────────────────────────────────────────────────────────────
-   Sistema de diseño (§22: diseño visual propio, no una plantilla genérica).
-
-   Paleta de sala de cine: fondo oscuro cálido, acento ámbar y rojo butaca.
-   Los componentes no definen colores literales: todo sale de estos tokens.
-   ─────────────────────────────────────────────────────────────────────────── */
+/* Paleta inspirada en la bandera argentina: celeste, blanco y sol amarillo. */
 
 :root {
-  /* Superficies */
-  --fondo: #12100e;
-  --fondo-2: #1a1714;
-  --superficie: #201c18;
-  --superficie-2: #292420;
-  --superficie-3: #332c27;
+  --fondo: #eaf5fb;
+  --fondo-2: #f5faff;
+  --superficie: #ffffff;
+  --superficie-2: #f0f8fc;
+  --superficie-3: #dfeff8;
 
-  /* Texto */
-  --texto: #f5f0e8;
-  --texto-suave: #b5a99a;
-  --texto-tenue: #857a6d;
+  --texto: #17384d;
+  --texto-suave: #45677d;
+  --texto-tenue: #6e8799;
+  --texto-en-acento: #173449;
 
-  /* Bordes */
-  --borde: #322b25;
-  --borde-fuerte: #4a4038;
+  --borde: #d2e4ee;
+  --borde-fuerte: #a9c9dc;
 
-  /* Acentos */
-  --ambar: #e0a03c;
-  --ambar-fuerte: #f0b95e;
-  --ambar-tenue: rgba(224, 160, 60, 0.14);
+  --celeste: #74acdf;
+  --celeste-fuerte: #438bc3;
+  --celeste-tenue: rgba(116, 172, 223, 0.18);
+  --bandera-blanca: #ffffff;
+  --ambar: #f4c542;
+  --ambar-fuerte: #876000;
+  --ambar-tenue: rgba(244, 197, 66, 0.2);
   --rojo: #c8452a;
   --rojo-fuerte: #e35f42;
   --rojo-tenue: rgba(200, 69, 42, 0.16);
 
-  /* Estados */
-  --ok: #4fae74;
-  --ok-tenue: rgba(79, 174, 116, 0.15);
-  --error: #e05a4a;
-  --error-tenue: rgba(224, 90, 74, 0.15);
-  --aviso: #d9a441;
-  --aviso-tenue: rgba(217, 164, 65, 0.14);
-  --info: #5b9dd9;
-  --info-tenue: rgba(91, 157, 217, 0.14);
+  --ok: #28744e;
+  --ok-tenue: rgba(40, 116, 78, 0.12);
+  --error: #b9382d;
+  --error-tenue: rgba(185, 56, 45, 0.12);
+  --aviso: #8b6500;
+  --aviso-tenue: rgba(244, 197, 66, 0.2);
+  --info: var(--celeste-fuerte);
+  --info-tenue: var(--celeste-tenue);
 
-  /* Butacas (§6: se distinguen por forma e icono, no solo por color) */
-  --butaca-libre: #3c352e;
-  --butaca-libre-borde: #554b42;
+  --butaca-libre: #e5f1f7;
+  --butaca-libre-borde: #a9c9dc;
   --butaca-elegida: var(--ambar);
-  --butaca-ocupada: #24201c;
-  --butaca-accesible: #3f6a86;
-  --butaca-vip: #7a4030;
+  --butaca-ocupada: #cddce5;
+  --butaca-accesible: var(--celeste);
+  --butaca-vip: #d6a92c;
 
   /* Tipografía */
   --sans: ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -62,41 +56,55 @@
   --ancho-max: 1180px;
   --alto-encabezado: 64px;
 
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-/* Tema claro para quien lo prefiera en el sistema. Un cine se ve mejor oscuro,
-   así que el claro es cálido y no un blanco plano. */
-@media (prefers-color-scheme: light) {
-  :root:not([data-tema='oscuro']) {
-    --fondo: #faf7f2;
-    --fondo-2: #f3ece2;
-    --superficie: #ffffff;
-    --superficie-2: #f6f1e9;
-    --superficie-3: #ece4d8;
-    --texto: #1c1815;
-    --texto-suave: #5f554a;
-    --texto-tenue: #8a7d6f;
-    --borde: #e4dbcd;
-    --borde-fuerte: #cdc0ad;
-    --ambar: #a9741a;
-    --ambar-fuerte: #8c5f12;
-    --ambar-tenue: rgba(169, 116, 26, 0.12);
-    --rojo: #b03a1f;
-    --rojo-fuerte: #8f2c15;
-    --rojo-tenue: rgba(176, 58, 31, 0.1);
-    --ok: #2f7a4d;
-    --error: #b23a2b;
-    --aviso: #8a6113;
-    --info: #2e6a9e;
-    --butaca-libre: #ddd3c4;
-    --butaca-libre-borde: #c2b5a2;
-    --butaca-ocupada: #ebe5db;
-    --butaca-accesible: #7fa9c4;
-    --butaca-vip: #d19a88;
-    --sombra: 0 1px 2px rgba(60, 45, 30, 0.08), 0 10px 30px rgba(60, 45, 30, 0.08);
-    --sombra-suave: 0 1px 3px rgba(60, 45, 30, 0.08);
-    color-scheme: light;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='claro']) {
+    --fondo: #122c40;
+    --fondo-2: #17384f;
+    --superficie: #1d435c;
+    --superficie-2: #24516c;
+    --superficie-3: #2d617e;
+
+    --texto: #f4faff;
+    --texto-suave: #c0d8e7;
+    --texto-tenue: #91b0c3;
+    --texto-en-acento: #173449;
+
+    --borde: #315a73;
+    --borde-fuerte: #4a7892;
+
+    --celeste: #87c4e9;
+    --celeste-fuerte: #a9dcf8;
+    --celeste-tenue: rgba(135, 196, 233, 0.18);
+    --bandera-blanca: #ffffff;
+    --ambar: #f4c542;
+    --ambar-fuerte: #ffdc72;
+    --ambar-tenue: rgba(244, 197, 66, 0.2);
+    --rojo: #d85749;
+    --rojo-fuerte: #f17a69;
+    --rojo-tenue: rgba(216, 87, 73, 0.18);
+
+    --ok: #74cf9b;
+    --ok-tenue: rgba(116, 207, 155, 0.15);
+    --error: #ff8978;
+    --error-tenue: rgba(255, 137, 120, 0.16);
+    --aviso: #ffdc72;
+    --aviso-tenue: rgba(244, 197, 66, 0.18);
+    --info: var(--celeste-fuerte);
+    --info-tenue: var(--celeste-tenue);
+
+    --butaca-libre: #2a536b;
+    --butaca-libre-borde: #507990;
+    --butaca-elegida: var(--ambar);
+    --butaca-ocupada: #1a3b52;
+    --butaca-accesible: var(--celeste);
+    --butaca-vip: #b38a25;
+
+    --sombra: 0 1px 2px rgba(4, 20, 32, 0.35), 0 10px 30px rgba(4, 20, 32, 0.25);
+    --sombra-suave: 0 1px 3px rgba(4, 20, 32, 0.25);
+    color-scheme: dark;
   }
 }
 

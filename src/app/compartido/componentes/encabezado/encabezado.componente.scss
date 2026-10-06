@@ -5,6 +5,18 @@
   background: color-mix(in srgb, var(--fondo) 92%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--borde);
+
+  &::after {
+    content: '';
+    display: block;
+    height: 4px;
+    background: linear-gradient(
+      90deg,
+      var(--celeste) 0 39%,
+      var(--bandera-blanca) 39% 61%,
+      var(--celeste) 61% 100%
+    );
+  }
 }
 
 .barra {
@@ -27,8 +39,9 @@
   flex-shrink: 0;
 
   &__icono {
-    color: var(--rojo-fuerte);
+    color: var(--ambar-fuerte);
     font-size: 22px;
+    line-height: 1;
   }
 }
 
@@ -57,8 +70,8 @@
       color: var(--texto);
     }
     &.activo {
-      color: var(--ambar-fuerte);
-      background: var(--ambar-tenue);
+      color: var(--celeste-fuerte);
+      background: var(--celeste-tenue);
     }
   }
 
@@ -126,7 +139,7 @@
     height: 26px;
     border-radius: 999px;
     background: var(--ambar);
-    color: #17120c;
+    color: var(--texto-en-acento);
     font-weight: 700;
   }
 }

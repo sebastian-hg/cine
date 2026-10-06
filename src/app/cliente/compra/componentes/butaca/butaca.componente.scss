@@ -73,7 +73,7 @@
 .butaca--elegida.es-accesible {
   background: var(--ambar);
   border-color: var(--ambar-fuerte);
-  color: #17120c;
+  color: var(--texto-en-acento);
   transform: translateY(-1px);
 
   .butaca__numero {
@@ -81,7 +81,7 @@
     font-weight: 700;
   }
   .butaca__icono {
-    color: #17120c;
+    color: var(--texto-en-acento);
   }
 }
 

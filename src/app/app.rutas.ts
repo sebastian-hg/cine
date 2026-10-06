@@ -3,7 +3,6 @@ import { Routes } from '@angular/router';
 import { GuardAutenticacion } from './nucleo/guards/autenticacion.guard';
 import { GuardNoAutenticado } from './nucleo/guards/no-autenticado.guard';
 import { GuardRol } from './nucleo/guards/rol.guard';
-import { GuardCompraActiva } from './cliente/compra/guards/compra-activa.guard';
 import { GuardRegistroSinGuardar } from './cliente/cuenta/guards/registro-sin-guardar.guard';
 
 

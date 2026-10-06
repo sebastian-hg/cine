@@ -6,13 +6,7 @@ import { GuardRol } from './nucleo/guards/rol.guard';
 import { GuardCompraActiva } from './cliente/compra/guards/compra-activa.guard';
 import { GuardRegistroSinGuardar } from './cliente/cuenta/guards/registro-sin-guardar.guard';
 
-/**
- * Rutas de la aplicación (§23: lazy loading, guards por rol).
- *
- * Solo el catálogo público entra en el bundle inicial. `ingresar` y
- * `registrarse` quedan fuera de `cuenta/`: adentro, `GuardAutenticacion`
- * impediría llegar a ellas.
- */
+
 export const RutasApp: Routes = [
   {
     path: '',

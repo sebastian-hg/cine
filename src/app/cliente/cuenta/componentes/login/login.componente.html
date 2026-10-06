@@ -1,63 +1,6 @@
-<div class="contenedor seccion acceso">
-  <div class="acceso__formulario">
-    <p class="etiqueta-seccion">Tu cuenta</p>
-    <h1>Iniciar sesión</h1>
-    <p class="acceso__bajada">
-      Ingresá para usar tu crédito, sumar puntos y ver tus películas.
-    </p>
-
-    <form [formGroup]="formularioLogin()" (ngSubmit)="enviar()" novalidate>
-      <div class="campo" [class.campo--invalido]="invalido('email')">
-        <label for="login-email">Email</label>
-        <input id="login-email" type="email" formControlName="email" autocomplete="email" />
-        @if (invalido('email')) {
-          <p class="mensaje-campo">Ingresá un email válido.</p>
-        }
-      </div>
-
-      <div class="campo" [class.campo--invalido]="invalido('password')">
-        <label for="login-password">Contraseña</label>
-        <input
-          id="login-password"
-          type="password"
-          formControlName="password"
-          autocomplete="current-password"
-        />
-        @if (invalido('password')) {
-          <p class="mensaje-campo">Ingresá tu contraseña.</p>
-        }
-      </div>
-
-      @if (error()) {
-        <p class="acceso__error" role="alert">{{ error() }}</p>
-      }
-
-      <button type="submit" class="boton boton--primario boton--bloque" [disabled]="enviando()">
-        @if (enviando()) {
-          Ingresando…
-        } @else {
-          Ingresar
-        }
-      </button>
-    </form>
-
-    <p class="acceso__alternativa">
-      ¿No tenés cuenta? <a routerLink="/registrarse">Creá una</a>
-    </p>
-  </div>
-
-  <aside class="acceso__demo">
-    <h2>Cuentas de prueba</h2>
-    <p class="acceso__demo-nota">Todas usan la contraseña <code>cine1234</code>.</p>
-    <ul>
-      @for (cuenta of cuentasDemo(); track cuenta.email) {
-        <li>
-          <button type="button" (click)="usarCuenta(cuenta.email)">
-            <span class="acceso__demo-email">{{ cuenta.email }}</span>
-            <span class="acceso__demo-rol">{{ cuenta.rol }}</span>
-          </button>
-        </li>
-      }
-    </ul>
-  </aside>
-</div>
+<app-formulario-login
+  [cuentas]="cuentasDemo"
+  [error]="error()"
+  [enviando]="enviando()"
+  (credencialesEnviadas)="enviar($event)"
+></app-formulario-login>
